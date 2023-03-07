@@ -1,14 +1,14 @@
 const ResetPassword = () => {
 	return (
 		<main className=" flex lg:justify-center lg:items-center min-h-screen w-full bg-indigo-50 lg:p-20">
-			<div className="mx-auto bg-white p-6 lg:rounded-xl w-full max-w-[500px] h-full">
+			<div className="mx-auto bg-white p-6 lg:rounded-xl w-full sm:max-w-[500px] my-auto h-screen sm:h-full">
 				<main className="flex flex-col">
 					<header className="flex flex-col items-center mb-10">
 						<img
 							className="w-[150px] h-[92px] mx-auto"
 							alt="intilink-logo"
 							loading="lazy"
-							src="src/assets/images/img-logo.png"
+							src="assets/images/img-logo.png"
 						/>
 						<h2 className="mb-2 mt-4 text-lg font-bold text-black">
 							Password Baru
