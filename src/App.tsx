@@ -1,8 +1,8 @@
 import { FC } from "react";
-import { ResetPassword } from "./pages";
+import { Login } from "./pages";
 
 const App: FC = () => {
-  return <ResetPassword />;
+  return <Login />;
 };
 
 export default App;
