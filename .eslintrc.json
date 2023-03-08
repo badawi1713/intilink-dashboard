@@ -31,7 +31,8 @@
     // Configuring third-party plugins
     "plugins": [
         "react",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "react-hooks"
     ],
     // Resolve imports
     "settings": {
@@ -45,20 +46,7 @@
         }
     },
     "rules": {
-        "linebreak-style": "off",
         // Configure prettier
-        "prettier/prettier": [
-            "error",
-            {
-                "printWidth": 80,
-                "endOfLine": "lf",
-                "singleQuote": true,
-                "tabWidth": 2,
-                "indentStyle": "space",
-                "useTabs": true,
-                "trailingComma": "es5"
-            }
-        ],
         // Disallow the `any` type.
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/ban-types": [
@@ -74,5 +62,11 @@
         // Enforce the use of the shorthand syntax.
         "object-shorthand": "error",
         "no-console": "warn"
-    }
+    },
+    "prettier/prettier": [
+        "error",
+        {
+            "endOfLine": "auto"
+        }
+    ]
 }

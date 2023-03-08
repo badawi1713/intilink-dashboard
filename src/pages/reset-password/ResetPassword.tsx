@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const ResetPassword = () => {
 	return (
 		<main className=" flex lg:justify-center lg:items-center min-h-screen w-full bg-indigo-50 lg:p-20">
@@ -19,7 +21,7 @@ const ResetPassword = () => {
 					</header>
 
 					<form>
-                    <div className="flex flex-col gap-3 mb-7">
+						<div className="flex flex-col gap-3 mb-7">
 							<label className="text-sm font-semibold">Password</label>
 							<input
 								className="w-full rounded-md px-3 py-2 border-2 border-gray-600"
@@ -40,9 +42,11 @@ const ResetPassword = () => {
 						</button>
 					</form>
 
-					<a className="mt-8 mx-auto text-green-600 cursor-pointer">
-						Login
-					</a>
+					<section className="text-center p-8 md:p-0 md:mt-8">
+						<Link to="/" className="text-green-600 cursor-pointer">
+							Login
+						</Link>
+					</section>
 				</main>
 			</div>
 		</main>

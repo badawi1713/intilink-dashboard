@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 
 const ForgotPassword = () => {
 	return (
@@ -15,7 +16,7 @@ const ForgotPassword = () => {
 							Lupa Password
 						</h2>
 						<p className="text-center text-gray-500 text-sm">
-              Masukkan email/no.whatsapp yang  <br/> terhubung dengan akun, supaya sistem <br/> mengirim instruksi password baru.
+							Masukkan email/no.whatsapp yang  <br /> terhubung dengan akun, supaya sistem <br /> mengirim instruksi password baru.
 						</p>
 					</header>
 
@@ -31,6 +32,11 @@ const ForgotPassword = () => {
 							Kirim
 						</button>
 					</form>
+					<section className="text-center p-8 md:p-0 md:mt-8">
+						<Link to='/' className="text-green-600 cursor-pointer">
+							Kembali
+						</Link>
+					</section>
 				</main>
 			</div>
 		</main>
