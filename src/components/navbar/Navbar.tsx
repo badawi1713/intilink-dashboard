@@ -65,7 +65,7 @@ const menuList = [
 ]
 
 
-const Navbar = ({ setOpenAside }) => {
+const Navbar = ({ setOpenAside }: any) => {
     const dispatch = useAppDispatch()
 
     const [childrenMenu, setChildrenMenu] = useState([]);

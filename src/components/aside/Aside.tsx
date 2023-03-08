@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-const Aside = ({ openAside, setOpenAside }) => {
+const Aside = ({ openAside, setOpenAside }: any) => {
 
 
 

@@ -1,12 +1,12 @@
+import axios from 'axios';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
-import './index.css';
-import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import store from './store';
-import axios from 'axios';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
 import { getAccessToken } from './helpers/utils/accessToken';
+import './index.css';
+import store from './store';
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FC, useEffect, useRef } from "react";
+import { FC, useRef } from "react";
 import { Route, Routes } from 'react-router-dom';
 import { Layout, SplashScreen } from './components';
 import { useAppDispatch } from "./hooks/useAppDispatch";
