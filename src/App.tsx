@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { FC, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 import { Route, Routes } from 'react-router-dom';
+import { Layout, SplashScreen } from './components';
 import { useAppDispatch } from "./hooks/useAppDispatch";
 import { useAppSelector } from "./hooks/useAppSelector";
-import { ForgotPassword, Home, Login, ResetPassword } from "./pages";
+import { ForgotPassword, Home, Login, Page404, ResetPassword } from "./pages";
 import { userLogoutAction } from './store/actions/auth-action';
 
 const App: FC = () => {
@@ -11,6 +12,8 @@ const App: FC = () => {
   const dispatch = useAppDispatch();
   const { loading, user } = useAppSelector((state) => state.authReducer);
   const isMounted = useRef<boolean>(true);
+
+  console.log(loading)
 
   axios.interceptors.response.use(
     (response) => response,
@@ -27,13 +30,16 @@ const App: FC = () => {
   );
 
   if (loading) {
-    return <div>Loading</div>
+    return <SplashScreen />
   }
 
   if (user) {
     return (
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="*" element={<Page404 />} />
+        </Route>
       </Routes>
     )
   }
@@ -43,7 +49,7 @@ const App: FC = () => {
       <Route path="/" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-
+      <Route path="*" element={<Page404 />} />
     </Routes>
   )
 

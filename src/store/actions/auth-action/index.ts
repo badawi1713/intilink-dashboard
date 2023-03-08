@@ -46,7 +46,10 @@ const loginUserAction = (payload: { id: string, password: string }) => async (di
 
 const userLogoutAction = () => async (dispatch: AuthDispatchType) => {
     updateAccessToken('');
-    dispatch({ type: REDUCER_TYPES.SET_AUTH_REDUCER, payload: { user: null } });
+    dispatch({ type: REDUCER_TYPES.SET_AUTH_REDUCER, payload: { user: null, loading: true } });
+    setTimeout(() => {
+        dispatch({ type: REDUCER_TYPES.SET_AUTH_REDUCER, payload: { loading: false } });
+    }, 2000)
 };
 
 export {
