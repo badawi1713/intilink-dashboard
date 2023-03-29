@@ -171,8 +171,6 @@ const Navbar = ({ setOpenAside }: any) => {
                         <div className="py-1" role="none">
                             <button onClick={() => {
                                 dispatch(userLogoutAction());
-                                // setShowProfileMenu(false)
-                                console.log('hello')
                             }} className="text-red-700 block px-4 py-2 text-sm" role="menuitem" tabIndex={-1} id="menu-item-2">Keluar</button>
                         </div>
 

@@ -2,15 +2,11 @@ import { useRef } from 'react';
 
 const Aside = ({ openAside, setOpenAside }: any) => {
 
-
-
     const asideRef = useRef(null)
 
     const handleClickOutside = () => {
-        // Your custom logic here
         setOpenAside(false);
     }
-
 
     return (
         <>

@@ -13,8 +13,6 @@ const App: FC = () => {
   const { loading, user } = useAppSelector((state) => state.authReducer);
   const isMounted = useRef<boolean>(true);
 
-  console.log(loading)
-
   axios.interceptors.response.use(
     (response) => response,
     (error) => new Promise((resolve, reject) => {
