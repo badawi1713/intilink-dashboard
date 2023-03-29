@@ -16,8 +16,8 @@ const store = configureStore({
     reducer,
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-            immutableCheck: true,
-            serializableCheck: true,
+            immutableCheck: false,
+            serializableCheck: false,
         }).concat(middlewares),
 });
 

@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 import { Layout, SplashScreen } from './components';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { useAppSelector } from './hooks/useAppSelector';
-import { ForgotPassword, Home, Login, Page404, ResetPassword } from './pages';
+import { ForgotPassword, Home, Login, MasterMenu, Page404, ResetPassword } from './pages';
 import { userLogoutAction } from './store/actions/auth-action';
 
 const App: FC = () => {
@@ -36,6 +36,7 @@ const App: FC = () => {
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
+                    <Route path='/master/menu' element={<MasterMenu />} />
                     <Route path="*" element={<Page404 />} />
                 </Route>
             </Routes>
