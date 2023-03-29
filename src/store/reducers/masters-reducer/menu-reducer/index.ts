@@ -9,7 +9,12 @@ const initialState: InitialMasterMenuState = {
     sortBy: 'deleted',
     sortType: 'asc',
     search: '',
-    loading: false,
+    menuList: [],
+    loadingList: true,
+    loadingPost: false,
+    loadingDelete: false,
+    loadingDetail: false,
+    loading: true,
     error: null,
 };
 

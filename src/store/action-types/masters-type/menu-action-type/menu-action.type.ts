@@ -6,6 +6,11 @@ export type InitialMasterMenuState = {
     sortBy?: string,
     sortType?: 'asc' | 'desc',
     search?: string,
+    menuList?: any[],
+    loadingList?: boolean,
+    loadingPost?: boolean,
+    loadingDetail?: boolean,
+    loadingDelete?: boolean,
     loading?: boolean;
     error?: null | string;
 };
