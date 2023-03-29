@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { HiMenu } from 'react-icons/hi';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useOnClickOutside } from 'usehooks-ts';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { userLogoutAction } from '../../store/actions/auth-action';
@@ -68,6 +68,7 @@ const menuList = [
 
 const Navbar = ({ setOpenAside }: any) => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const [childrenMenu, setChildrenMenu] = useState([]);
     const [subChildrenMenu, setSubChildrenMenu] = useState([]);
@@ -77,8 +78,12 @@ const Navbar = ({ setOpenAside }: any) => {
     const profileMenuRef = useRef(null);
 
     const handleClickOutside = () => {
-        // Your custom logic here
         setShowProfileMenu(false);
+    };
+
+    const handleLogout = () => {
+        dispatch(userLogoutAction());
+        navigate('/');
     };
 
     useOnClickOutside(profileMenuRef, handleClickOutside);
@@ -234,9 +239,7 @@ const Navbar = ({ setOpenAside }: any) => {
                             </div>
                             <div className="py-1" role="none">
                                 <button
-                                    onClick={() => {
-                                        dispatch(userLogoutAction());
-                                    }}
+                                    onClick={handleLogout}
                                     className="text-red-700 block px-4 py-2 text-sm"
                                     role="menuitem"
                                     tabIndex={-1}

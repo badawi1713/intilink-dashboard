@@ -16,7 +16,7 @@ const getMasterMenuData = () => {
     return async (dispatch: MasterMenuDispatchType, getState: () => RootState) => {
 
         const { masterMenuReducer } = getState()
-        const { page, limit, sortType, sortBy } = masterMenuReducer;
+        const { page, limit, sortType, sortBy, search } = masterMenuReducer;
 
         dispatch({
             type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
@@ -27,7 +27,7 @@ const getMasterMenuData = () => {
         });
 
         try {
-            const response = await axios.get(`/v1/api/dashboard/menu?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}`)
+            const response = await axios.get(`/v1/api/dashboard/menu?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`)
             
             const total = +response?.data?.data?.totalElements || 0;
             const data = response?.data?.data?.content || [];

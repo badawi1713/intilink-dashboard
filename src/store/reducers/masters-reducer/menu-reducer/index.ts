@@ -6,7 +6,7 @@ const initialState: InitialMasterMenuState = {
     limit: 5,
     page: 0,
     total: 0,
-    sortBy: 'id',
+    sortBy: 'deleted',
     sortType: 'asc',
     search: '',
     loading: false,

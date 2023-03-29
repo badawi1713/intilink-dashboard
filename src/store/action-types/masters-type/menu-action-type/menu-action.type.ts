@@ -4,7 +4,7 @@ export type InitialMasterMenuState = {
     limit?: number,
     total?: number,
     sortBy?: string,
-    sortType?: string,
+    sortType?: 'asc' | 'desc',
     search?: string,
     loading?: boolean;
     error?: null | string;

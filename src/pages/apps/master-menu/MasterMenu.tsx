@@ -1,3 +1,8 @@
+import { Delete, Edit } from '@mui/icons-material';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { IconButton, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -6,6 +11,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
@@ -13,27 +20,7 @@ import {
     changeMasterMenuReducer,
     getMasterMenuData,
 } from 'src/store/actions/masters-action/menu-action';
-
-interface Column {
-    id: 'id' | 'title' | 'icon' | 'link' | 'deleted' | 'parent_id' | 'created_who' | 'updated_who';
-    label: string;
-    minWidth?: number;
-    align?: 'right' | 'center' | 'left';
-    format?: (value: number) => string;
-}
-
-const columns: readonly Column[] = [
-    { id: 'id', label: 'ID', align: 'center' },
-    { id: 'title', label: 'Title', align: 'left' },
-    { id: 'icon', label: 'Icon', align: 'left' },
-    { id: 'link', label: 'Link', align: 'left' },
-    { id: 'deleted', label: 'Available', align: 'center' },
-    { id: 'parent_id', label: 'Parent ID', align: 'center' },
-    { id: 'created_who', label: 'Created Who', align: 'left' },
-    { id: 'updated_who', label: 'Updated Who', align: 'left' },
-    { id: 'id', label: 'Action', align: 'center' },
-];
-
+import { useDebounce } from 'usehooks-ts';
 interface Data {
     id: number;
     title: string;
@@ -58,31 +45,139 @@ function createData(
     return { id, title, icon, link, deleted, parent_id, created_who, updated_who };
 }
 
+function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
+    if (b[orderBy] < a[orderBy]) {
+        return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+        return 1;
+    }
+    return 0;
+}
+
+type Order = 'asc' | 'desc';
+
+// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
+// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
+// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
+// with exampleArray.slice().sort(exampleComparator)
+
+interface HeadCell {
+    disablePadding: boolean;
+    id: keyof Data;
+    label: string;
+    align?: 'left' | 'right' | 'center';
+    disableSort: boolean;
+}
+
+const headCells: readonly HeadCell[] = [
+    {
+        id: 'id',
+        disablePadding: true,
+        label: 'ID',
+        align: 'center',
+        disableSort: false,
+    },
+    {
+        id: 'title',
+        disablePadding: false,
+        label: 'Title',
+        disableSort: false,
+    },
+    {
+        id: 'link',
+        disablePadding: false,
+        label: 'Link',
+        disableSort: false,
+    },
+    {
+        id: 'icon',
+        disablePadding: false,
+        label: 'Icon',
+        disableSort: false,
+    },
+    {
+        id: 'deleted',
+        disablePadding: false,
+        label: 'Available',
+        align: 'center',
+        disableSort: false,
+    },
+    {
+        id: 'created_who',
+        disablePadding: false,
+        label: 'Created By',
+        disableSort: false,
+    },
+    {
+        id: 'updated_who',
+        disablePadding: false,
+        label: 'Updated By',
+        disableSort: false,
+    },
+    {
+        id: 'id',
+        disablePadding: false,
+        label: 'Action',
+        align: 'center',
+        disableSort: true,
+    },
+];
+
+interface EnhancedTableProps {
+    onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
+    order: Order;
+    orderBy: string;
+}
+
+function EnhancedTableHead(props: EnhancedTableProps) {
+    const { order, orderBy, onRequestSort } = props;
+    const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+        onRequestSort(event, newOrderBy);
+    };
+
+    return (
+        <TableHead>
+            <TableRow>
+                {headCells.map((headCell) => (
+                    <TableCell
+                        key={headCell.label}
+                        align={headCell.align || 'left'}
+                        sortDirection={orderBy === headCell.id ? order : false}
+                    >
+                        {!headCell.disableSort ? (
+                            <TableSortLabel
+                                active={orderBy === headCell.id}
+                                direction={orderBy === headCell.id ? order : 'asc'}
+                                onClick={createSortHandler(headCell.id)}
+                            >
+                                {headCell.label}
+                                {!headCell.disableSort && orderBy === headCell.id ? (
+                                    <Box component="span" sx={visuallyHidden}>
+                                        {order === 'desc'
+                                            ? 'sorted descending'
+                                            : 'sorted ascending'}
+                                    </Box>
+                                ) : null}
+                            </TableSortLabel>
+                        ) : (
+                            headCell.label
+                        )}
+                    </TableCell>
+                ))}
+            </TableRow>
+        </TableHead>
+    );
+}
+
 const MasterMenu = () => {
     const dispatch = useAppDispatch();
-    const { data, loading, error, total, limit, page } = useAppSelector(
+    const { data, page, sortBy, sortType, limit, total, search } = useAppSelector(
         (state) => state.masterMenuReducer
     );
     const isMount = useRef<boolean>(true);
 
-    const handleChangePage = (event: unknown, newPage: number) => {
-        dispatch(
-            changeMasterMenuReducer({
-                page: newPage,
-            })
-        );
-        dispatch(getMasterMenuData());
-    };
-
-    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(
-            changeMasterMenuReducer({
-                page: 0,
-                limit: +event.target.value,
-            })
-        );
-        dispatch(getMasterMenuData());
-    };
+    const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
     const handleGetData = useCallback(async () => {
         dispatch(getMasterMenuData());
@@ -94,6 +189,17 @@ const MasterMenu = () => {
             isMount.current = false;
         }
     }, [handleGetData]);
+
+    useEffect(
+        () => {
+            if (debouncedSearchTerm) {
+                dispatch(getMasterMenuData());
+            } else {
+                dispatch(getMasterMenuData());
+            }
+        },
+        [debouncedSearchTerm] // Only call effect if debounced search term changes
+    );
 
     const rows = data?.map((row: Data) =>
         createData(
@@ -108,14 +214,60 @@ const MasterMenu = () => {
         )
     );
 
+    const handleRequestSort = React.useCallback(
+        (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
+            const isAsc = sortBy === newOrderBy && sortType === 'asc';
+            const toggledOrder = isAsc ? 'desc' : 'asc';
+
+            dispatch(
+                changeMasterMenuReducer({
+                    sortBy: newOrderBy,
+                    sortType: toggledOrder,
+                })
+            );
+            dispatch(getMasterMenuData());
+        },
+
+        [sortType, sortBy, dispatch]
+    );
+
+    const handleChangePage = React.useCallback(
+        (event: unknown, newPage: number) => {
+            dispatch(
+                changeMasterMenuReducer({
+                    page: newPage,
+                })
+            );
+            dispatch(getMasterMenuData());
+        },
+        [dispatch]
+    );
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(
+            changeMasterMenuReducer({
+                page: 0,
+                limit: +event.target.value,
+            })
+        );
+        dispatch(getMasterMenuData());
+    };
+
     return (
         <>
             <section className="p-4 bg-gray-200 w-full rounded-md">
                 <div className="flex flex-col xl:flex-row gap-4">
                     <input
                         className="rounded-md px-3 py-2 border-2 border-gray-600 w-full"
-                        type="text"
+                        type="search"
                         placeholder="Cari nama menu"
+                        onChange={(e: React.FormEvent<HTMLInputElement>) =>
+                            dispatch(
+                                changeMasterMenuReducer({
+                                    search: (e.target as HTMLInputElement).value,
+                                })
+                            )
+                        }
                     />
                 </div>
             </section>
@@ -130,58 +282,87 @@ const MasterMenu = () => {
                     </button>
                 </div>
                 <section>
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                        <TableContainer sx={{ maxHeight: 440 }}>
-                            <Table stickyHeader aria-label="sticky table">
-                                <TableHead>
-                                    <TableRow>
-                                        {columns.map((column) => (
-                                            <TableCell
-                                                key={column.id}
-                                                align={column.align}
-                                                style={{ minWidth: column.minWidth }}
-                                            >
-                                                {column.label}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
+                    <Paper sx={{ width: '100%' }}>
+                        <TableContainer>
+                            <Table
+                                sx={{ minWidth: 750 }}
+                                aria-labelledby="tableTitle"
+                                size={'medium'}
+                            >
+                                <EnhancedTableHead
+                                    order={sortType || 'asc'}
+                                    orderBy={sortBy || 'deleted'}
+                                    onRequestSort={handleRequestSort}
+                                />
                                 <TableBody>
-                                    {rows?.map((row) => {
+                                    {rows?.map((row, index) => {
+                                        const labelId = `enhanced-table-checkbox-${index}`;
+
                                         return (
-                                            <TableRow
-                                                hover
-                                                role="checkbox"
-                                                tabIndex={-1}
-                                                key={row.id}
-                                            >
-                                                {columns.map((column) => {
-                                                    const value = row[column.id];
-                                                    return (
-                                                        <TableCell
-                                                            key={column.id}
-                                                            align={column.align}
-                                                        >
-                                                            {column?.label === 'Action' ? (
-                                                                <div className="flex items-center gap-4">
-                                                                    <button>🗑️</button>
-                                                                    <button>✏️</button>
-                                                                </div>
-                                                            ) : column.format &&
-                                                              typeof value === 'number' ? (
-                                                                column.format(value)
-                                                            ) : column.id === 'deleted' ? (
-                                                                !value ? (
-                                                                    '✅'
-                                                                ) : (
-                                                                    '❌'
-                                                                )
-                                                            ) : (
-                                                                value || '-'
-                                                            )}
-                                                        </TableCell>
-                                                    );
-                                                })}
+                                            <TableRow hover tabIndex={-1} key={row.id}>
+                                                <TableCell
+                                                    align="center"
+                                                    component="th"
+                                                    id={labelId}
+                                                    scope="row"
+                                                >
+                                                    {row.id}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {row.title || '-'}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {row.link || '-'}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {row.icon || '-'}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {!row.deleted ? (
+                                                        <CheckCircleIcon
+                                                            titleAccess="Tersedia"
+                                                            fontSize="small"
+                                                            color="success"
+                                                        />
+                                                    ) : (
+                                                        <CancelIcon
+                                                            titleAccess="Dihapus"
+                                                            fontSize="small"
+                                                            color="error"
+                                                        />
+                                                    )}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {row.created_who || '-'}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {row.updated_who || '-'}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <section className="flex items-center gap-2">
+                                                        <Tooltip title="Hapus">
+                                                            <span>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    aria-label="delete"
+                                                                    color="error"
+                                                                >
+                                                                    <Delete />
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                        <Tooltip title="Edit">
+                                                            <span>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    aria-label="edit"
+                                                                >
+                                                                    <Edit />
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                    </section>
+                                                </TableCell>
                                             </TableRow>
                                         );
                                     })}
@@ -189,10 +370,10 @@ const MasterMenu = () => {
                             </Table>
                         </TableContainer>
                         <TablePagination
-                            rowsPerPageOptions={[5, 10, 25, 100]}
+                            rowsPerPageOptions={[5, 10, 25, 50, 100]}
                             component="div"
                             count={total || 0}
-                            rowsPerPage={limit || 10}
+                            rowsPerPage={limit || 5}
                             page={page || 0}
                             onPageChange={handleChangePage}
                             onRowsPerPageChange={handleChangeRowsPerPage}
