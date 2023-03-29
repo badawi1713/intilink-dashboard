@@ -1,4 +1,4 @@
-import { InitialAuthState, AuthAction } from '../../action-types/auth-action-type/auth-action.type';
+import { AuthAction, InitialAuthState } from '../../action-types/auth-action-type/auth-action.type';
 import * as REDUCER_TYPES from '../../types';
 
 const initialState: InitialAuthState = {

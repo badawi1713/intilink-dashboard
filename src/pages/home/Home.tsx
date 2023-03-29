@@ -1,22 +1,29 @@
-
 const Home = () => {
     return (
         <>
-            <section className='p-4 bg-gray-200 w-full rounded-md'>
+            <section className="p-4 bg-gray-200 w-full rounded-md">
                 <div className="flex flex-col xl:flex-row gap-4">
                     <input
                         className="rounded-md px-3 py-2 border-2 border-gray-600 w-full xl:max-w-[160px]"
-                        type='date'
+                        type="date"
                     />
-                    <select className="rounded-md px-3 py-2 border-2 border-gray-600 w-full xl:max-w-[160px]" name="status" id="status">
-                        <option value="" >Status</option>
+                    <select
+                        className="rounded-md px-3 py-2 border-2 border-gray-600 w-full xl:max-w-[160px]"
+                        name="status"
+                        id="status"
+                    >
+                        <option value="">Status</option>
                         <option value="all">Semua</option>
                         <option value="online">Online</option>
                         <option value="offline">Offline</option>
                     </select>
-                    <select className="rounded-md px-3 py-2 border-2 border-gray-600 w-full xl:max-w-[160px]" name="category" id="category">
-                        <option value="" >Kategori</option>
-                        <option value="1" >Produk</option>
+                    <select
+                        className="rounded-md px-3 py-2 border-2 border-gray-600 w-full xl:max-w-[160px]"
+                        name="category"
+                        id="category"
+                    >
+                        <option value="">Kategori</option>
+                        <option value="1">Produk</option>
                     </select>
                 </div>
             </section>
@@ -31,8 +38,8 @@ const Home = () => {
                     </button>
                 </div>
             </main>
-        </ >
-    )
-}
+        </>
+    );
+};
 
-export default Home
+export default Home;

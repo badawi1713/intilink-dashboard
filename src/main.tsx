@@ -10,18 +10,21 @@ import store from './store';
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
-axios.interceptors.request.use((request) => {
-	const token = getAccessToken();
-	request.headers.Authorization = `Bearer ${token}`;
-	return request;
-}, (error) => Promise.reject(error));
+axios.interceptors.request.use(
+    (request) => {
+        const token = getAccessToken();
+        request.headers.Authorization = `Bearer ${token}`;
+        return request;
+    },
+    (error) => Promise.reject(error)
+);
 
 createRoot(document.getElementById('root') as HTMLElement).render(
-	<React.StrictMode>
-		<BrowserRouter>
-			<Provider store={store}>
-				<App />
-			</Provider>
-		</BrowserRouter>
-	</React.StrictMode>
+    <React.StrictMode>
+        <BrowserRouter>
+            <Provider store={store}>
+                <App />
+            </Provider>
+        </BrowserRouter>
+    </React.StrictMode>
 );

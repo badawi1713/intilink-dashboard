@@ -13,7 +13,7 @@ const createReducer = () => (state: any, action: never) => {
 const reducer = createReducer();
 
 const store = configureStore({
-    reducer: reducer,
+    reducer,
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             immutableCheck: true,

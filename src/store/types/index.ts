@@ -1,5 +1,3 @@
 const SET_AUTH_REDUCER = 'SET_AUTH_REDUCER';
 
-export {
-    SET_AUTH_REDUCER
-};
+export { SET_AUTH_REDUCER };
