@@ -542,7 +542,7 @@ const MasterMenu = () => {
                                     aria-label="delete"
                                     color="error"
                                   >
-                                    <Delete />
+                                    <Delete fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
@@ -574,7 +574,7 @@ const MasterMenu = () => {
                                     size="small"
                                     aria-label="edit"
                                   >
-                                    <Edit />
+                                    <Edit fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
