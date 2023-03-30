@@ -3,7 +3,13 @@ import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { Autocomplete, IconButton, TextField, Tooltip } from '@mui/material';
+import {
+  Autocomplete,
+  IconButton,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -23,6 +29,8 @@ import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { Confirmation, ErrorView, Loading } from 'src/components';
+import EmptyTableView from 'src/components/empty-table-view';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
 import {
@@ -238,14 +246,31 @@ type FormType = {
 
 const MasterMenu = () => {
   const dispatch = useAppDispatch();
-  const { data, page, sortBy, sortType, limit, total, search, menuList } =
-    useAppSelector((state) => state.masterMenuReducer);
+  const {
+    data,
+    page,
+    sortBy,
+    sortType,
+    limit,
+    total,
+    search,
+    menuList,
+    loadingPost,
+    loadingDelete,
+    loading,
+    error,
+  } = useAppSelector((state) => state.masterMenuReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
+  const [openDeleteConfirmation, setOpenDeleteConfirmation] =
+    useState<boolean>(false);
+  const [openEditConfirmation, setOpenEditConfirmation] =
+    useState<boolean>(false);
   const [editForm, setEditForm] = useState<boolean>(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
@@ -280,6 +305,10 @@ const MasterMenu = () => {
     });
   };
 
+  const handleEditConfirmation = handleSubmit(() => {
+    setOpenEditConfirmation(true);
+  });
+
   const onSubmit = handleSubmit(async (data) => {
     const payload = {
       title: data.title,
@@ -292,6 +321,8 @@ const MasterMenu = () => {
       response = await dispatch(editMenuData(data?.id, payload));
       if (response) {
         handleClose();
+        setOpenEditConfirmation(false);
+        setSelectedId(null);
         dispatch(getMasterMenuData());
       }
     } else {
@@ -384,9 +415,13 @@ const MasterMenu = () => {
     return option;
   };
 
-  const handleDeleteMenu = (id: number) => {
-    dispatch(deleteMenuData(id));
-    dispatch(getMasterMenuData());
+  const handleDeleteData = async (id: number) => {
+    const response = await dispatch(deleteMenuData(id));
+    if (response) {
+      dispatch(getMasterMenuData());
+      setOpenDeleteConfirmation(false);
+      setSelectedId(null);
+    }
   };
 
   return (
@@ -396,7 +431,7 @@ const MasterMenu = () => {
           <input
             className="rounded-md px-3 py-2 border-2 border-gray-600 w-full"
             type="search"
-            placeholder="Cari nama menu"
+            placeholder="Cari data..."
             onChange={(e: React.FormEvent<HTMLInputElement>) =>
               dispatch(
                 changeMasterMenuReducer({
@@ -411,130 +446,157 @@ const MasterMenu = () => {
       <main className="flex flex-col gap-6">
         <div className="flex justify-between gap-4 items-center">
           <div>
-            <h3 className="font-bold text-xl">Master Menu</h3>
-            <h6 className="text-lg">Manajemen daftar menu</h6>
+            <Typography fontWeight={'bold'} variant="h6">
+              Master Menu
+            </Typography>
+            <Typography variant="body1">Manajemen daftar menu</Typography>
           </div>
-          <button
+          <Button
+            color="success"
+            size="small"
+            variant="contained"
             onClick={handleClickOpen}
-            className="w-auto bg-blue-600 border-2 border-blue-600 px-3 py-2 rounded-md text-white text-center text-sm font-semibold"
           >
             Tambah Data
-          </button>
+          </Button>
         </div>
         <section>
-          <Paper sx={{ width: '100%' }}>
-            <TableContainer>
-              <Table
-                sx={{ minWidth: 750 }}
-                aria-labelledby="tableTitle"
-                size={'medium'}
-              >
-                <EnhancedTableHead
-                  order={sortType || 'asc'}
-                  orderBy={sortBy || 'deleted'}
-                  onRequestSort={handleRequestSort}
-                />
-                <TableBody>
-                  {rows?.map((row, index) => {
-                    const labelId = `enhanced-table-checkbox-${index}`;
-
-                    return (
-                      <TableRow hover tabIndex={-1} key={row.id}>
-                        <TableCell
-                          align="center"
-                          component="th"
-                          id={labelId}
-                          scope="row"
-                        >
-                          {row.id}
-                        </TableCell>
-                        <TableCell align="left">{row.title || '-'}</TableCell>
-                        <TableCell align="left">{row.link || '-'}</TableCell>
-                        <TableCell align="left">{row.icon || '-'}</TableCell>
-                        <TableCell align="center">
-                          {!row.deleted ? (
-                            <CheckCircleIcon
-                              titleAccess="Tersedia"
-                              fontSize="small"
-                              color="success"
-                            />
-                          ) : (
-                            <CancelIcon
-                              titleAccess="Dihapus"
-                              fontSize="small"
-                              color="error"
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell align="left">
-                          {row.created_who || '-'}
-                        </TableCell>
-                        <TableCell align="left">
-                          {row.updated_who || '-'}
-                        </TableCell>
-                        <TableCell align="center">
-                          <section className="flex items-center gap-2">
-                            <Tooltip title="Hapus">
-                              <span>
-                                <IconButton
-                                  onClick={() => handleDeleteMenu(row.id)}
-                                  size="small"
-                                  aria-label="delete"
-                                  color="error"
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                            <Tooltip title="Edit">
-                              <span>
-                                <IconButton
-                                  onClick={async () => {
-                                    const response = await dispatch(
-                                      getMenuDetailData(row.id)
-                                    );
-                                    if (Object.keys(response).length > 0) {
-                                      setEditForm(true);
-                                      const selectedParentMenu =
-                                        menuList?.find(
-                                          (menu) =>
-                                            menu?.id === response?.parent_id
-                                        ) || null;
-                                      reset({
-                                        id: response?.id,
-                                        title: response?.title,
-                                        parent_id: selectedParentMenu,
-                                        icon: response?.icon,
-                                        link: response?.link,
-                                      });
-                                      handleClickOpen();
-                                    }
-                                  }}
-                                  size="small"
-                                  aria-label="edit"
-                                >
-                                  <Edit />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                          </section>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, 50, 100]}
-              component="div"
-              count={total || 0}
-              rowsPerPage={limit || 5}
-              page={page || 0}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
+          {loading ? (
+            <Loading />
+          ) : error ? (
+            <ErrorView
+              message={error || ''}
+              handleRetry={() => {
+                dispatch(
+                  changeMasterMenuReducer({
+                    page: 0,
+                    sortBy: 'deleted',
+                  })
+                );
+                dispatch(getMasterMenuData());
+              }}
             />
-          </Paper>
+          ) : rows?.length === 0 ? (
+            <EmptyTableView />
+          ) : (
+            <Paper sx={{ width: '100%' }}>
+              <TableContainer>
+                <Table
+                  sx={{ minWidth: 750 }}
+                  aria-labelledby="tableTitle"
+                  size={'medium'}
+                >
+                  <EnhancedTableHead
+                    order={sortType || 'asc'}
+                    orderBy={sortBy || 'deleted'}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableBody>
+                    {rows?.map((row, index) => {
+                      const labelId = `enhanced-table-checkbox-${index}`;
+
+                      return (
+                        <TableRow hover tabIndex={-1} key={row.id}>
+                          <TableCell
+                            align="center"
+                            component="th"
+                            id={labelId}
+                            scope="row"
+                          >
+                            {row.id}
+                          </TableCell>
+                          <TableCell align="left">{row.title || '-'}</TableCell>
+                          <TableCell align="left">{row.link || '-'}</TableCell>
+                          <TableCell align="left">{row.icon || '-'}</TableCell>
+                          <TableCell align="center">
+                            {!row.deleted ? (
+                              <CheckCircleIcon
+                                titleAccess="Tersedia"
+                                fontSize="small"
+                                color="success"
+                              />
+                            ) : (
+                              <CancelIcon
+                                titleAccess="Dihapus"
+                                fontSize="small"
+                                color="error"
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell align="left">
+                            {row.created_who || '-'}
+                          </TableCell>
+                          <TableCell align="left">
+                            {row.updated_who || '-'}
+                          </TableCell>
+                          <TableCell align="center">
+                            <section className="flex items-center gap-2">
+                              <Tooltip title="Hapus">
+                                <span>
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedId(row.id);
+                                      setOpenDeleteConfirmation(true);
+                                    }}
+                                    size="small"
+                                    aria-label="delete"
+                                    color="error"
+                                  >
+                                    <Delete />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                              <Tooltip title="Edit">
+                                <span>
+                                  <IconButton
+                                    onClick={async () => {
+                                      const response = await dispatch(
+                                        getMenuDetailData(row.id)
+                                      );
+                                      if (Object.keys(response).length > 0) {
+                                        setSelectedId(response?.id);
+                                        setEditForm(true);
+                                        const selectedParentMenu =
+                                          menuList?.find(
+                                            (menu) =>
+                                              menu?.id === response?.parent_id
+                                          ) || null;
+                                        reset({
+                                          id: response?.id,
+                                          title: response?.title,
+                                          parent_id: selectedParentMenu,
+                                          icon: response?.icon,
+                                          link: response?.link,
+                                        });
+                                        handleClickOpen();
+                                      }
+                                    }}
+                                    size="small"
+                                    aria-label="edit"
+                                  >
+                                    <Edit />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </section>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                component="div"
+                count={total || 0}
+                rowsPerPage={limit || 5}
+                page={page || 0}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Paper>
+          )}
         </section>
       </main>
       {openFormDialog && (
@@ -642,12 +704,56 @@ const MasterMenu = () => {
             </section>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}>Batal</Button>
-            <Button variant="contained" onClick={onSubmit}>
+            <Button
+              disabled={loadingPost}
+              color="inherit"
+              onClick={handleClose}
+            >
+              Batal
+            </Button>
+            <Button
+              disabled={loadingPost}
+              variant="contained"
+              onClick={() => {
+                if (editForm) {
+                  handleEditConfirmation();
+                } else {
+                  onSubmit();
+                }
+              }}
+            >
               Simpan
             </Button>
           </DialogActions>
         </BootstrapDialog>
+      )}
+      {openDeleteConfirmation && (
+        <Confirmation
+          open={openDeleteConfirmation}
+          title={'Hapus data menu?'}
+          content={`Konfirmasi untuk menghapus data menu dengan id ${selectedId}.`}
+          cancelActionHandler={() => setOpenDeleteConfirmation(false)}
+          confirmActionHandler={() => handleDeleteData(selectedId || 0)}
+          loading={loadingDelete || false}
+          loadingText={'Menghapus'}
+          confirmActionText={'Hapus'}
+          cancelActionText={'Batal'}
+          type="error"
+        />
+      )}
+      {openEditConfirmation && (
+        <Confirmation
+          open={openEditConfirmation}
+          title={'Ubah data menu?'}
+          content={`Konfirmasi untuk mengubah data menu dengan id ${selectedId}.`}
+          cancelActionHandler={() => setOpenEditConfirmation(false)}
+          confirmActionHandler={onSubmit}
+          loading={loadingPost || false}
+          loadingText={'Mengubah'}
+          confirmActionText={'OK'}
+          cancelActionText={'Batal'}
+          type="primary"
+        />
       )}
     </>
   );
