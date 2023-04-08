@@ -5,26 +5,28 @@ import Aside from '../aside';
 import Navbar from '../navbar';
 
 const Layout = () => {
-    const { width } = useWindowSize();
-    const [openAside, setOpenAside] = useState<boolean>(true);
+  const { width } = useWindowSize();
+  const [openAside, setOpenAside] = useState<boolean>(true);
 
-    useLayoutEffect(() => {
-        if (width < 1280) {
-            setOpenAside(false);
-        } else {
-            setOpenAside(true);
-        }
-    }, [width]);
+  useLayoutEffect(() => {
+    if (width < 1280) {
+      setOpenAside(false);
+    } else {
+      setOpenAside(true);
+    }
+  }, [width]);
 
-    return (
-        <div className="min-h-screen flex relative overflow-x-hidden">
-            <Aside setOpenAside={setOpenAside} openAside={openAside} />
-            <div className="p-5 bg-slate-100 w-full flex flex-col gap-6">
-                <Navbar setOpenAside={setOpenAside} />
-                <Outlet />
-            </div>
-        </div>
-    );
+  return (
+    <div className="min-h-screen grid grid-cols-1 xl:grid-cols-12 relative overflow-x-hidden">
+      <div className="col-span-none xl:col-span-3 2xl:col-span-2">
+        <Aside setOpenAside={setOpenAside} openAside={openAside} />
+      </div>
+      <div className="p-5 bg-slate-100 w-full flex flex-col gap-6 col-span-1 xl:col-span-9 2xl:col-span-10">
+        <Navbar setOpenAside={setOpenAside} />
+        <Outlet />
+      </div>
+    </div>
+  );
 };
 
 export default Layout;
