@@ -596,7 +596,6 @@ const ProductGroup = () => {
       </main>
       {openFormDialog && (
         <BootstrapDialog
-          onClose={handleClose}
           aria-labelledby="customized-dialog-title"
           open={openFormDialog}
           maxWidth="md"

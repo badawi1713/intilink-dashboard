@@ -4,13 +4,15 @@ import masterProductCategoryReducer from './masters-reducer/product-category-red
 import masterProductGroupReducer from './masters-reducer/product-group-reducer';
 
 import toastMessageReducer from '../slices/toast-message-slice';
+import depositReducer from '../slices/transaction-slice/deposit-slice';
 
 const reducers = {
-    authReducer,
-    masterMenuReducer,
-    masterProductCategoryReducer,
-    masterProductGroupReducer,
-    toastMessageReducer
+  authReducer,
+  masterMenuReducer,
+  masterProductCategoryReducer,
+  masterProductGroupReducer,
+  toastMessageReducer,
+  depositReducer,
 };
 
 export default reducers;

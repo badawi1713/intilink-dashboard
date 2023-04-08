@@ -15,6 +15,7 @@ import {
 import ProductCategory from './pages/apps/master-ppob/pages/product-category';
 import ProductGroup from './pages/apps/master-ppob/pages/product-group';
 import SubProductGroup from './pages/apps/master-ppob/pages/product-group/pages/sub-product-group';
+import { Deposit } from './pages/apps/transaction';
 import {
   getAccessTokenAction,
   userLogoutAction,
@@ -68,6 +69,10 @@ const App: FC = () => {
               <Route index element={<ProductGroup />} />
               <Route path="sub-product-group" element={<SubProductGroup />} />
             </Route>
+          </Route>
+          <Route path="transaction">
+            <Route index element={<Navigate to="deposit" replace />} />
+            <Route path="deposit" element={<Deposit />} />
           </Route>
           <Route path="*" element={<Page404 />} />
         </Route>
