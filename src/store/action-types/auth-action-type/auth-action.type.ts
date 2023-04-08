@@ -1,6 +1,7 @@
 export type InitialAuthState = {
     user?: any;
     loading?: boolean;
+    preload?: boolean;
     error?: null | string;
 };
 

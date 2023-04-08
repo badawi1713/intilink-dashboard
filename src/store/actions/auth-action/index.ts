@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { AppThunk } from 'src/store';
+import { showMessage } from 'src/store/slices/toast-message-slice';
 import { updateAccessToken } from '../../../helpers/utils/accessToken';
 import {
     AuthDispatchType,
@@ -16,7 +18,7 @@ const changeAuthReducer = (payload: InitialAuthState) => {
 };
 
 const loginUserAction =
-    (payload: { id: string; password: string }) => async (dispatch: AuthDispatchType) => {
+    (payload: { id: string; password: string }): AppThunk => async (dispatch) => {
         dispatch({
             type: REDUCER_TYPES.SET_AUTH_REDUCER,
             payload: {
@@ -35,8 +37,8 @@ const loginUserAction =
                 },
             });
             return true;
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            dispatch(showMessage({message: error?.response?.data?.message  || error?.response?.message || error?.message || 'Maaf, sedang terjadi gangguan.', variant: 'error'}))
             return false;
         } finally {
             dispatch({
@@ -56,5 +58,35 @@ const userLogoutAction = () => async (dispatch: AuthDispatchType) => {
     }, 2000);
 };
 
-export { changeAuthReducer, loginUserAction, userLogoutAction };
+const getAccessTokenAction = (): AppThunk => async (dispatch) => {
+        dispatch({
+            type: REDUCER_TYPES.SET_AUTH_REDUCER,
+            payload: {
+                preload: true,
+            },
+        });
+        try {
+            const response = await axios.get('/v1/api/dashboard-access-token');
+            dispatch({
+                type: REDUCER_TYPES.SET_AUTH_REDUCER,
+                payload: {
+                    user: response?.data?.data,
+                },
+            });
+        } catch (error: any) {
+            dispatch(showMessage({message: error?.response?.data?.message  || error?.response?.message || error?.message || 'Maaf, sedang terjadi gangguan.', variant: 'error'}))
+        } finally {
+            setTimeout(() => {
+                dispatch({
+                    type: REDUCER_TYPES.SET_AUTH_REDUCER,
+                    payload: {
+                        preload: false,
+                    },
+                });
+            }, 1000)
+        }
+    };
+
+
+export { changeAuthReducer, getAccessTokenAction, loginUserAction, userLogoutAction };
 

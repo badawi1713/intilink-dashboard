@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { HiMenu } from 'react-icons/hi';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useAppSelector } from 'src/hooks/useAppSelector';
 import { useOnClickOutside } from 'usehooks-ts';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { userLogoutAction } from '../../store/actions/auth-action';
@@ -18,57 +19,11 @@ type MenuType = {
     | any;
 };
 
-const menuList = [
-  {
-    id: 'dashboard',
-    title: 'Dashboard',
-    url: '/',
-  },
-  {
-    id: 7,
-    title: 'Master User',
-    url: '/master/user',
-  },
-  {
-    id: 15,
-    title: 'Master Menu',
-    url: '/master/menu',
-  },
-  {
-    id: 16,
-    title: 'Master News',
-    url: '/master/news',
-  },
-  {
-    id: 21,
-    title: 'Master PPOB',
-    url: '/master/ppob',
-    children: [
-      {
-        id: 5,
-        title: 'Product Category',
-        url: '/master/ppob/product-category',
-        children: [],
-      },
-      {
-        id: 6,
-        title: 'Product Group',
-        url: '/master/ppob/product-group',
-        children: [
-          //   {
-          //     id: 8,
-          //     title: 'Sub Product Group',
-          //     url: '/master/ppob/product-group/sub-product-group',
-          //   },
-        ],
-      },
-    ],
-  },
-];
-
 const Navbar = ({ setOpenAside }: any) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const { user } = useAppSelector((state) => state.authReducer);
 
   const [childrenMenu, setChildrenMenu] = useState([]);
   const [subChildrenMenu, setSubChildrenMenu] = useState([]);
@@ -92,7 +47,7 @@ const Navbar = ({ setOpenAside }: any) => {
     <header className="flex flex-col-reverse xl:flex-row items-start">
       <nav className="flex flex-col gap-5 items-start flex-1">
         <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[90%] flex-shrink xl:max-w-2xl snap-x snap-mandatory">
-          {menuList?.map((menu: MenuType, index) => {
+          {user?.dashboardMenu?.map((menu: MenuType) => {
             return (
               <NavLink
                 to={menu?.url || ''}
@@ -206,7 +161,7 @@ const Navbar = ({ setOpenAside }: any) => {
               className="w-12 h-12 bg-slate-500 rounded-full aspect-square"
             />
             <div>
-              <h5 className="font-semibold text-left">Admin Operator</h5>
+              <h5 className="font-semibold text-left">{user?.nama}</h5>
               <p className="font-medium text-green-500 text-left">Online</p>
             </div>
           </button>

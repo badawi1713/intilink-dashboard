@@ -4,6 +4,7 @@ import * as REDUCER_TYPES from '../../types';
 const initialState: InitialAuthState = {
     user: null,
     loading: false,
+    preload: true,
     error: null,
 };
 

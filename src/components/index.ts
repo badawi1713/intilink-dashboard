@@ -4,3 +4,5 @@ export { default as Layout } from './layout';
 export { default as Loading } from './loading';
 export { default as Navbar } from './navbar';
 export { default as SplashScreen } from './splash-screen';
+export { default as Toast } from './toast';
+
