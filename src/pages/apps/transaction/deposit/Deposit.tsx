@@ -28,6 +28,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
+import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
 import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
@@ -472,13 +473,13 @@ const Deposit = () => {
                             {row.id}
                           </TableCell>
                           <TableCell align="left">
-                            {row.nominal || '-'}
+                            {currencyFormat(row.nominal ?? 0)}
                           </TableCell>
                           <TableCell align="left">
-                            {row.total_bayar || '-'}
+                            {currencyFormat(row.admin_nominal ?? 0)}
                           </TableCell>
                           <TableCell align="left">
-                            {row.admin_nominal || '-'}
+                            {currencyFormat(row.total_bayar ?? 0)}
                           </TableCell>
                           <TableCell align="left">{row.bank || '-'}</TableCell>
                           <TableCell align="center">
@@ -566,25 +567,25 @@ const Deposit = () => {
               <ListItem>
                 <ListItemText
                   primary="Nominal"
-                  secondary={detailData?.nominal ?? '-'}
+                  secondary={currencyFormat(detailData?.nominal ?? 0)}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Nominal Admin"
+                  secondary={currencyFormat(detailData?.admin_nominal ?? 0)}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Total bayar"
+                  secondary={currencyFormat(detailData?.total_bayar ?? 0)}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Type Admin"
                   secondary={detailData?.admin_type ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Nominal Admin"
-                  secondary={detailData?.admin_nominal ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Total bayar"
-                  secondary={detailData?.total_bayar ?? '-'}
                 />
               </ListItem>
               <ListItem>
@@ -597,6 +598,12 @@ const Deposit = () => {
                 <ListItemText
                   primary="Status"
                   secondary={detailData?.status_name ?? '-'}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="User"
+                  secondary={detailData?.user_name ?? '-'}
                 />
               </ListItem>
               <ListItem>

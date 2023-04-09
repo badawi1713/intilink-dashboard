@@ -17,7 +17,7 @@ const Aside = ({ openAside, setOpenAside }: any) => {
           />
           <aside
             ref={asideRef}
-            className="absolute z-20 xl:sticky px-10 py-16 bg-white shadow-lg w-full max-w-sm xl:max-w-full border min-h-full xl:min-h-screen"
+            className="absolute z-20 xl:sticky px-10 py-16 bg-white shadow-lg w-full max-w-xs xl:max-w-full border min-h-full"
           >
             <img
               alt="intilink-logo"
