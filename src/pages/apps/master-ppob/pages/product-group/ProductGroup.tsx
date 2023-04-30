@@ -337,8 +337,6 @@ const ProductGroup = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterProductGroupData());
-      } else {
-        dispatch(getMasterProductGroupData());
       }
     },
     [debouncedSearchTerm] // Only call effect if debounced search term changes

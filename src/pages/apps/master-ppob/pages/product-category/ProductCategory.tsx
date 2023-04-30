@@ -369,8 +369,6 @@ const ProductCategory = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterProductCategoryData());
-      } else {
-        dispatch(getMasterProductCategoryData());
       }
     },
     [debouncedSearchTerm] // Only call effect if debounced search term changes

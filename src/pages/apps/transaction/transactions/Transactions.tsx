@@ -33,18 +33,18 @@ import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
 import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
 import {
-  handleGetDepositData,
-  handleGetDepositDetailData,
-} from 'src/store/actions/transaction-action/deposit-action';
+  handleGetTransactionsData,
+  handleGetTransactionsDetailData,
+} from 'src/store/actions/transaction-action/transactions-action';
 import {
-  setDepositLimit,
-  setDepositPage,
-  setDepositResetDetailData,
-  setDepositResetState,
-  setDepositSearchData,
-  setDepositSortBy,
-  setDepositSortType,
-} from 'src/store/slices/transaction-slice/deposit-slice';
+  setTransactionsLimit,
+  setTransactionsPage,
+  setTransactionsResetDetailData,
+  setTransactionsResetState,
+  setTransactionsSearchData,
+  setTransactionsSortBy,
+  setTransactionsSortType,
+} from 'src/store/slices/transaction-slice/transactions-slice';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 
@@ -94,43 +94,43 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 
 interface Data {
   id: number;
-  nominal: number;
-  admin_nominal: number;
+  denom: number;
+  status: string;
+  keterangan: string;
+  produk_name: string;
+  id_pel: string;
+  admin: number;
+  harga_up: number;
   total_bayar: number;
-  bank: string;
-  kode_bayar: string;
-  status_name: string;
-  user_id: number;
-  deleted: boolean;
+  reff_id: string;
   created_date: string;
-  expired_date?: string;
 }
 
 function createData(
   id: number,
-  nominal: number,
-  admin_nominal: number,
+  denom: number,
+  status: string,
+  keterangan: string,
+  produk_name: string,
+  id_pel: string,
+  admin: number,
+  harga_up: number,
   total_bayar: number,
-  bank: string,
-  kode_bayar: string,
-  status_name: string,
-  user_id: number,
-  deleted: boolean,
+  reff_id: string,
   created_date: string,
-  expired_date?: string
 ): Data {
   return {
     id,
-    nominal,
-    admin_nominal,
+    denom,
+    status,
+    keterangan,
+    produk_name,
+    id_pel,
+    admin,
+    harga_up,
     total_bayar,
-    bank,
-    kode_bayar,
-    status_name,
-    user_id,
-    deleted,
+    reff_id,
     created_date,
-    expired_date,
   };
 }
 
@@ -153,15 +153,45 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
-    id: 'nominal',
+    id: 'denom',
     disablePadding: false,
-    label: 'Nominal',
+    label: 'Denom',
     disableSort: false,
   },
   {
-    id: 'admin_nominal',
+    id: 'status',
     disablePadding: false,
-    label: 'Nominal Admin',
+    label: 'Status',
+    disableSort: false,
+  },
+  {
+    id: 'keterangan',
+    disablePadding: false,
+    label: 'Keterangan',
+    disableSort: false,
+  },
+  {
+    id: 'produk_name',
+    disablePadding: false,
+    label: 'Produk',
+    disableSort: false,
+  },
+  {
+    id: 'id_pel',
+    disablePadding: false,
+    label: 'ID Pelanggan',
+    disableSort: false,
+  },
+  {
+    id: 'admin',
+    disablePadding: false,
+    label: 'Biaya Admin',
+    disableSort: false,
+  },
+  {
+    id: 'harga_up',
+    disablePadding: false,
+    label: 'Harga Up',
     disableSort: false,
   },
   {
@@ -171,29 +201,9 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
-    id: 'bank',
+    id: 'reff_id',
     disablePadding: false,
-    label: 'Bank',
-    disableSort: false,
-  },
-  {
-    id: 'kode_bayar',
-    disablePadding: false,
-    label: 'Kode Bayar',
-    disableSort: false,
-    align: 'center',
-  },
-  {
-    id: 'status_name',
-    disablePadding: false,
-    label: 'Status',
-    disableSort: false,
-    align: 'center',
-  },
-  {
-    id: 'user_id',
-    disablePadding: false,
-    label: 'User ID',
+    label: 'Reff ID',
     disableSort: false,
     align: 'center',
   },
@@ -203,19 +213,13 @@ const headCells: readonly HeadCell[] = [
     label: 'Created Date',
     disableSort: false,
   },
-  {
-    id: 'expired_date',
-    disablePadding: false,
-    label: 'Expired Date',
-    disableSort: false,
-  },
-  {
-    id: 'id',
-    disablePadding: false,
-    label: 'Action',
-    align: 'center',
-    disableSort: true,
-  },
+  // {
+  //   id: 'id',
+  //   disablePadding: false,
+  //   label: 'Action',
+  //   align: 'center',
+  //   disableSort: true,
+  // },
 ];
 
 interface EnhancedTableProps {
@@ -276,7 +280,7 @@ type FormType = {
   total_bayar: number;
 };
 
-const Deposit = () => {
+const Transactions = () => {
   const dispatch = useAppDispatch();
   const {
     data,
@@ -290,7 +294,7 @@ const Deposit = () => {
     error,
     loadingDetail,
     detailData,
-  } = useAppSelector((state) => state.depositReducer);
+  } = useAppSelector((state) => state.transactionsReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
@@ -322,7 +326,7 @@ const Deposit = () => {
   };
   const handleClose = () => {
     setOpenDialog(false);
-    dispatch(setDepositResetDetailData());
+    dispatch(setTransactionsResetDetailData());
   };
 
   const handleEditConfirmation = handleSubmit(() => {
@@ -330,7 +334,7 @@ const Deposit = () => {
   });
 
   const handleGetData = useCallback(async () => {
-    dispatch(handleGetDepositData());
+    dispatch(handleGetTransactionsData());
   }, [dispatch]);
 
   useEffect(() => {
@@ -343,7 +347,7 @@ const Deposit = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
-        dispatch(handleGetDepositData());
+        dispatch(handleGetTransactionsData());
       }
     },
     [debouncedSearchTerm] // Only call effect if debounced search term changes
@@ -352,16 +356,16 @@ const Deposit = () => {
   const rows = data?.map((row: Data) =>
     createData(
       row?.id,
-      row?.nominal,
-      row?.admin_nominal,
+      row?.denom,
+      row?.status,
+      row?.keterangan,
+      row?.produk_name,
+      row?.id_pel,
+      row?.admin,
+      row?.harga_up,
       row?.total_bayar,
-      row?.bank,
-      row?.kode_bayar,
-      row?.status_name,
-      row?.user_id,
-      row?.deleted,
-      row?.created_date,
-      row?.expired_date
+      row?.reff_id,
+      row?.created_date
     )
   );
 
@@ -369,10 +373,10 @@ const Deposit = () => {
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';
-      dispatch(setDepositSortBy(newOrderBy));
-      dispatch(setDepositSortType(toggledOrder));
+      dispatch(setTransactionsSortBy(newOrderBy));
+      dispatch(setTransactionsSortType(toggledOrder));
 
-      dispatch(handleGetDepositData());
+      dispatch(handleGetTransactionsData());
     },
 
     [sortType, sortBy, dispatch]
@@ -380,8 +384,8 @@ const Deposit = () => {
 
   const handleChangePage = React.useCallback(
     (event: unknown, newPage: number) => {
-      dispatch(setDepositPage(newPage));
-      dispatch(handleGetDepositData());
+      dispatch(setTransactionsPage(newPage));
+      dispatch(handleGetTransactionsData());
     },
     [dispatch, page]
   );
@@ -389,16 +393,16 @@ const Deposit = () => {
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    dispatch(setDepositPage(0));
-    dispatch(setDepositLimit(+event.target.value));
+    dispatch(setTransactionsPage(0));
+    dispatch(setTransactionsLimit(+event.target.value));
 
-    dispatch(handleGetDepositData());
+    dispatch(handleGetTransactionsData());
   };
 
   const handleDeleteData = async (id: number) => {
     const response = await dispatch(deleteMenuData(id));
     if (response) {
-      dispatch(handleGetDepositData());
+      dispatch(handleGetTransactionsData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
     }
@@ -414,7 +418,7 @@ const Deposit = () => {
             placeholder="Cari data..."
             onChange={(e: React.FormEvent<HTMLInputElement>) =>
               dispatch(
-                setDepositSearchData((e.target as HTMLInputElement).value)
+                setTransactionsSearchData((e.target as HTMLInputElement).value)
               )
             }
           />
@@ -424,9 +428,9 @@ const Deposit = () => {
         <div className="flex justify-between gap-4 items-center">
           <div>
             <Typography fontWeight={'bold'} variant="h6">
-              Daftar Deposit
+              Daftar Transaksi
             </Typography>
-            <Typography variant="body1">Manajemen daftar deposit</Typography>
+            <Typography variant="body1">Manajemen daftar transaksi</Typography>
           </div>
         </div>
         <section>
@@ -436,8 +440,8 @@ const Deposit = () => {
             <ErrorView
               message={error || ''}
               handleRetry={() => {
-                dispatch(setDepositResetState());
-                dispatch(handleGetDepositData());
+                dispatch(setTransactionsResetState());
+                dispatch(handleGetTransactionsData());
               }}
             />
           ) : rows?.length === 0 ? (
@@ -470,32 +474,36 @@ const Deposit = () => {
                             {row.id}
                           </TableCell>
                           <TableCell align="left">
-                            {currencyFormat(row.nominal ?? 0)}
+                            {currencyFormat(row.denom ?? 0)}
                           </TableCell>
                           <TableCell align="left">
-                            {currencyFormat(row.admin_nominal ?? 0)}
+                            {row.status || '-'}
+                          </TableCell>
+                          <TableCell align="left">
+                            {row.keterangan || '-'}
+                          </TableCell>
+                          <TableCell align="left">
+                            {row.produk_name || '-'}
+                          </TableCell>
+                          <TableCell align="left">
+                            {row.id_pel || '-'}
+                          </TableCell>
+                          <TableCell align="left">
+                            {currencyFormat(row.admin ?? 0)}
+                          </TableCell>
+                          <TableCell align="left">
+                            {currencyFormat(row.harga_up ?? 0)}
                           </TableCell>
                           <TableCell align="left">
                             {currencyFormat(row.total_bayar ?? 0)}
                           </TableCell>
-                          <TableCell align="left">{row.bank || '-'}</TableCell>
                           <TableCell align="center">
-                            {row.kode_bayar || '-'}
+                            {row.reff_id || '-'}
                           </TableCell>
-                          <TableCell align="center">
-                            {row.status_name || '-'}
-                          </TableCell>
-                          <TableCell align="center">
-                            {row.user_id || '-'}
-                          </TableCell>
-
                           <TableCell align="left">
                             {row.created_date || '-'}
                           </TableCell>
-                          <TableCell align="left">
-                            {row.expired_date || '-'}
-                          </TableCell>
-                          <TableCell align="center">
+                          {/* <TableCell align="center">
                             <section className="flex items-center gap-2">
                               <Tooltip title="Detail">
                                 <span>
@@ -504,7 +512,7 @@ const Deposit = () => {
                                     color="info"
                                     onClick={async () => {
                                       const response = await dispatch(
-                                        handleGetDepositDetailData(row.id)
+                                        handleGetTransactionsDetailData(row.id)
                                       );
 
                                       if (
@@ -522,7 +530,7 @@ const Deposit = () => {
                                 </span>
                               </Tooltip>
                             </section>
-                          </TableCell>
+                          </TableCell> */}
                         </TableRow>
                       );
                     })}
@@ -553,7 +561,7 @@ const Deposit = () => {
           id="customized-dialog-title"
           onClose={handleClose}
         >
-          Detail Deposit
+          Detail Transaksi
         </BootstrapDialogTitle>
         <DialogContent dividers>
           <section>
@@ -563,14 +571,20 @@ const Deposit = () => {
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Nominal"
-                  secondary={currencyFormat(detailData?.nominal ?? 0)}
+                  primary="Denom"
+                  secondary={currencyFormat(detailData?.denom ?? 0)}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Nominal Admin"
-                  secondary={currencyFormat(detailData?.admin_nominal ?? 0)}
+                  secondary={currencyFormat(detailData?.admin ?? 0)}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Harga Up"
+                  secondary={currencyFormat(detailData?.harga_up ?? 0)}
                 />
               </ListItem>
               <ListItem>
@@ -581,64 +595,35 @@ const Deposit = () => {
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Type Admin"
-                  secondary={detailData?.admin_type ?? '-'}
+                  primary="Reff ID"
+                  secondary={detailData?.reff_id ?? '-'}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Bank"
-                  secondary={detailData?.bank ?? '-'}
+                  primary="Produk"
+                  secondary={detailData?.produk_name ?? '-'}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="ID Pelanggan"
+                  secondary={detailData?.id_pel ?? '-'}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Status"
-                  secondary={detailData?.status_name ?? '-'}
+                  secondary={detailData?.status ?? '-'}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="User"
-                  secondary={detailData?.user_name ?? '-'}
+                  primary="Keterangan"
+                  secondary={detailData?.keterangan ?? '-'}
                 />
               </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="User ID"
-                  secondary={detailData?.user_id ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Created Date"
-                  secondary={detailData?.created_date ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Expired Date"
-                  secondary={detailData?.expired_date ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Biller"
-                  secondary={detailData?.biller ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Transaksi Biller ID"
-                  secondary={detailData?.biller_trx_id ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Reff ID"
-                  secondary={detailData?.reff_id ?? '-'}
-                />
-              </ListItem>
+             
             </List>
           </section>
         </DialogContent>
@@ -647,4 +632,4 @@ const Deposit = () => {
   );
 };
 
-export default Deposit;
+export default Transactions;

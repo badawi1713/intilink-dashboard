@@ -33,7 +33,7 @@ import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-import {
+  import {
   addNewMenuData,
   changeMasterMenuReducer,
   deleteMenuData,
@@ -348,8 +348,6 @@ const MasterMenu = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
-        dispatch(getMasterMenuData());
-      } else {
         dispatch(getMasterMenuData());
       }
     },

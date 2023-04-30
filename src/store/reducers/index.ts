@@ -5,6 +5,8 @@ import masterProductGroupReducer from './masters-reducer/product-group-reducer';
 
 import toastMessageReducer from '../slices/toast-message-slice';
 import depositReducer from '../slices/transaction-slice/deposit-slice';
+import transactionsReducer from '../slices/transaction-slice/transactions-slice';
+import transactionProcessReducer from '../slices/transaction-slice/transaction-process-slice'
 
 const reducers = {
   authReducer,
@@ -13,6 +15,8 @@ const reducers = {
   masterProductGroupReducer,
   toastMessageReducer,
   depositReducer,
+  transactionsReducer,
+  transactionProcessReducer
 };
 
 export default reducers;
