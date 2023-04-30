@@ -7,6 +7,7 @@ import toastMessageReducer from '../slices/toast-message-slice';
 import depositReducer from '../slices/transaction-slice/deposit-slice';
 import transactionsReducer from '../slices/transaction-slice/transactions-slice';
 import transactionProcessReducer from '../slices/transaction-slice/transaction-process-slice'
+import saldoMutationReducer from '../slices/transaction-slice/saldo-mutation-slice';
 
 const reducers = {
   authReducer,
@@ -16,7 +17,8 @@ const reducers = {
   toastMessageReducer,
   depositReducer,
   transactionsReducer,
-  transactionProcessReducer
+  transactionProcessReducer,
+  saldoMutationReducer
 };
 
 export default reducers;

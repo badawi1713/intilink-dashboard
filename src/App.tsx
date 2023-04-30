@@ -15,7 +15,7 @@ import {
 import ProductCategory from './pages/apps/master-ppob/pages/product-category';
 import ProductGroup from './pages/apps/master-ppob/pages/product-group';
 import SubProductGroup from './pages/apps/master-ppob/pages/product-group/pages/sub-product-group';
-import { Deposit, TransactionProcess, Transactions } from './pages/apps/transaction';
+import { Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
 import {
   getAccessTokenAction,
   userLogoutAction,
@@ -75,6 +75,7 @@ const App: FC = () => {
             <Route path="deposit" element={<Deposit />} />
             <Route path="transaksi" element={<Transactions />} />
             <Route path="proses-transaksi" element={<TransactionProcess/>} />
+            <Route path="mutasi" element={<SaldoMutation/>} />
           </Route>
           <Route path="*" element={<Page404 />} />
         </Route>
