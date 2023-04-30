@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Info } from '@mui/icons-material';
+import { CheckCircleOutline, Info } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   DialogContent,
@@ -26,15 +26,15 @@ import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ErrorView, Loading } from 'src/components';
+import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
 import {
   handleGetDepositData,
   handleGetDepositDetailData,
+  manualDepositTransaction,
 } from 'src/store/actions/transaction-action/deposit-action';
 import {
   setDepositLimit,
@@ -103,6 +103,7 @@ interface Data {
   user_id: number;
   deleted: boolean;
   created_date: string;
+  reff_id: string;
   expired_date?: string;
 }
 
@@ -117,7 +118,8 @@ function createData(
   user_id: number,
   deleted: boolean,
   created_date: string,
-  expired_date?: string
+  reff_id: string,
+  expired_date?: string,
 ): Data {
   return {
     id,
@@ -130,6 +132,7 @@ function createData(
     user_id,
     deleted,
     created_date,
+    reff_id,
     expired_date,
   };
 }
@@ -290,17 +293,18 @@ const Deposit = () => {
     error,
     loadingDetail,
     detailData,
+    loadingPost
   } = useAppSelector((state) => state.depositReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] =
+  const [openManualDepositConfirmation, setOpenManualDepositConfirmation] =
     useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] =
     useState<boolean>(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
@@ -361,7 +365,8 @@ const Deposit = () => {
       row?.user_id,
       row?.deleted,
       row?.created_date,
-      row?.expired_date
+      row?.reff_id,
+      row?.expired_date,
     )
   );
 
@@ -395,11 +400,11 @@ const Deposit = () => {
     dispatch(handleGetDepositData());
   };
 
-  const handleDeleteData = async (id: number) => {
-    const response = await dispatch(deleteMenuData(id));
-    if (response) {
+  const handleManualDepositData = async (id: string) => {
+    const response = await dispatch(manualDepositTransaction(id));
+    if (typeof response === 'boolean' && response) {
       dispatch(handleGetDepositData());
-      setOpenDeleteConfirmation(false);
+      setOpenManualDepositConfirmation(false);
       setSelectedId(null);
     }
   };
@@ -500,7 +505,7 @@ const Deposit = () => {
                               <Tooltip title="Detail">
                                 <span>
                                   <IconButton
-                                    disabled={loadingDetail}
+                                    disabled={loadingDetail || loadingPost}
                                     color="info"
                                     onClick={async () => {
                                       const response = await dispatch(
@@ -518,6 +523,22 @@ const Deposit = () => {
                                     aria-label="edit"
                                   >
                                     <Info fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                              <Tooltip title="Deposit Manual">
+                                <span>
+                                  <IconButton
+                                    disabled={loadingDetail || loadingPost}
+                                    color="success"
+                                    onClick={async () => {
+                                      setSelectedId(row?.reff_id);
+                                      setOpenManualDepositConfirmation(true);
+                                    }}
+                                    size="small"
+                                    aria-label="edit"
+                                  >
+                                    <CheckCircleOutline fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
@@ -643,6 +664,20 @@ const Deposit = () => {
           </section>
         </DialogContent>
       </BootstrapDialog>
+      {openManualDepositConfirmation && (
+        <Confirmation
+          open={openManualDepositConfirmation}
+          title={'Manual deposit?'}
+          content={`Konfirmasi untuk melakukan deposit secara manual dengan reff id ${selectedId}.`}
+          cancelActionHandler={() => setOpenManualDepositConfirmation(false)}
+          confirmActionHandler={() => handleManualDepositData(selectedId || '')}
+          loading={loadingPost || false}
+          loadingText={'Memproses'}
+          confirmActionText={'Ok'}
+          cancelActionText={'Batal'}
+          type="success"
+        />
+      )}
     </>
   );
 };

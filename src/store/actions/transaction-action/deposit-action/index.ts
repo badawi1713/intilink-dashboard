@@ -5,6 +5,8 @@ import {
   setDepositData,
   setDepositDetailData,
   setDepositDisableLoadingDetail,
+  setDepositDisablePostLoading,
+  setDepositEnablePostLoading,
   setDepositError,
   setDepositLoading,
   setDepositLoadingDetail,
@@ -12,49 +14,49 @@ import {
 
 const handleGetDepositDetailData =
   (id: number): AppThunk =>
-  async (dispatch) => {
-    dispatch(setDepositLoadingDetail());
-    try {
-      const response = await axios.get(`/v1/api/dashboard/deposit/${id}`);
-      const data = response.data?.data || null;
-      dispatch(setDepositDetailData(data));
-      return true;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError<AxiosErrorType>;
-        if (axiosError.response) {
-          const { message, code } = axiosError.response.data;
-          dispatch(
-            showMessage({
-              message:
-                `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
-              variant: 'error',
-            })
-          );
+    async (dispatch) => {
+      dispatch(setDepositLoadingDetail());
+      try {
+        const response = await axios.get(`/v1/api/dashboard/deposit/${id}`);
+        const data = response.data?.data || null;
+        dispatch(setDepositDetailData(data));
+        return true;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const axiosError = error as AxiosError<AxiosErrorType>;
+          if (axiosError.response) {
+            const { message, code } = axiosError.response.data;
+            dispatch(
+              showMessage({
+                message:
+                  `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
+                variant: 'error',
+              })
+            );
+          } else {
+            dispatch(
+              showMessage({
+                message: error.message || 'Maaf, sedang terjadi kesalahan',
+                variant: 'error',
+              })
+            );
+            dispatch(
+              setDepositError(error.message || 'Maaf, sedang terjadi kesalahan')
+            );
+          }
         } else {
           dispatch(
             showMessage({
-              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              message: 'Maaf, sedang terjadi kesalahan',
               variant: 'error',
             })
           );
-          dispatch(
-            setDepositError(error.message || 'Maaf, sedang terjadi kesalahan')
-          );
         }
-      } else {
-        dispatch(
-          showMessage({
-            message: 'Maaf, sedang terjadi kesalahan',
-            variant: 'error',
-          })
-        );
+        return false;
+      } finally {
+        dispatch(setDepositDisableLoadingDetail());
       }
-      return false;
-    } finally {
-      dispatch(setDepositDisableLoadingDetail());
-    }
-  };
+    };
 
 const handleGetDepositData =
   (): AppThunk => async (dispatch, getState: () => RootState) => {
@@ -91,4 +93,46 @@ const handleGetDepositData =
     }
   };
 
-export { handleGetDepositData, handleGetDepositDetailData };
+const manualDepositTransaction = (id: string): AppThunk => async (dispatch) => {
+  dispatch(setDepositEnablePostLoading())
+  try {
+    await axios.put(
+      `/v1/api/dashboard/deposit/sukses/${id}`
+    );
+    dispatch(
+      showMessage({
+        message: 'Berhasil melakukan deposit manual',
+        variant: 'success',
+      })
+    );
+  dispatch(setDepositDisablePostLoading())
+    return true;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<AxiosErrorType>;
+      if (axiosError.response) {
+        const { message, code } = axiosError.response.data;
+        dispatch(
+          showMessage({
+            message: `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          })
+        );
+      } else {
+        showMessage({
+          message: error.message || 'Maaf, sedang terjadi kesalahan',
+          variant: 'error',
+        })
+      }
+    } else {
+      showMessage({
+        message: 'Maaf, sedang terjadi kesalahan',
+        variant: 'error',
+      })
+    }
+  dispatch(setDepositDisablePostLoading())
+    return false;
+  }
+};
+
+export { handleGetDepositData, handleGetDepositDetailData, manualDepositTransaction };

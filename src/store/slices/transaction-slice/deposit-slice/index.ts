@@ -106,6 +106,12 @@ const depositSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setDepositEnablePostLoading: (state) => {
+      state.loadingPost = true
+    },
+    setDepositDisablePostLoading: (state) => {
+      state.loadingPost = false
+    },
     setDepositResetState: () => {
       return { ...initialState };
     },
@@ -126,6 +132,8 @@ export const {
   setDepositSortType,
   setDepositData,
   setDepositDetailData,
+  setDepositEnablePostLoading,
+  setDepositDisablePostLoading
 } = depositSlice.actions;
 
 export default depositSlice.reducer;
