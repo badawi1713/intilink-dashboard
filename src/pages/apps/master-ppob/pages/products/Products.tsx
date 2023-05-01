@@ -267,7 +267,7 @@ const Products = () => {
         useState<boolean>(false);
     const [editForm, setEditForm] = useState<boolean>(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
-    const [categoryId, setCategoryId] = useState<string>('');
+    const [categoryId, setCategoryId] = useState<string>('All');
     const [groupId, setGroupId] = useState<string>('');
 
     const formMethods = useForm<FormType>({
@@ -333,10 +333,14 @@ const Products = () => {
     const handleGetProductGroupData = async (event: SelectChangeEvent) => {
         const value = event.target.value as string
         setCategoryId(value);
-        const data = await dispatch(getProductsGroupListData(value || ""));
+        dispatch(changeMasterProductsReducer({
+            groupId: ''
+        }))
+        const data = await dispatch(getProductsGroupListData(value === "All" ? "" : value));
         if (data?.length > 0) {
             dispatch(changeMasterProductsReducer({
-                productGroupList: data
+                productGroupList: data,
+                groupId: data[0].id
             }))
             setGroupId(data[0].id || '');
         }
@@ -347,7 +351,7 @@ const Products = () => {
         const value = event.target.value as string
         setGroupId(value);
         await dispatch(changeMasterProductsReducer({
-            groupId: value
+            groupId: value === "All" ? "" : value
         }))
         dispatch(getMasterProductsData());
     }
@@ -485,7 +489,7 @@ const Products = () => {
                                     label="Product Category"
                                     onChange={handleGetProductGroupData}
                                 >
-                                    <MenuItem value="">
+                                    <MenuItem value="All">
                                         <em>All</em>
                                     </MenuItem>
                                     {
@@ -505,7 +509,7 @@ const Products = () => {
                                     label="Product Category"
                                     onChange={handleGetProductsByGroupData}
                                 >
-                                    <MenuItem value="">
+                                    <MenuItem value="All">
                                         <em>All</em>
                                     </MenuItem>
                                     {
@@ -554,14 +558,14 @@ const Products = () => {
                                             const labelId = `enhanced-table-checkbox-${index}`;
 
                                             return (
-                                                <TableRow hover tabIndex={-1} key={row.id}>
+                                                <TableRow hover tabIndex={-1} key={index}>
                                                     <TableCell
                                                         align="center"
                                                         component="th"
                                                         id={labelId}
                                                         scope="row"
                                                     >
-                                                        {row.id}
+                                                        {row.id || '-'}
                                                     </TableCell>
                                                     <TableCell align="left">{row.nama || '-'}</TableCell>
                                                     <TableCell align="left">
