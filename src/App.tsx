@@ -20,6 +20,7 @@ import {
   getAccessTokenAction,
   userLogoutAction,
 } from './store/actions/auth-action';
+import Products from './pages/apps/master-ppob/pages/products';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -65,6 +66,7 @@ const App: FC = () => {
           <Route path="master/ppob">
             <Route index element={<Navigate to="product-category" replace />} />
             <Route path="product-category" element={<ProductCategory />} />
+            <Route path="products" element={<Products />} />
             <Route path="product-group">
               <Route index element={<ProductGroup />} />
               <Route path="sub-product-group" element={<SubProductGroup />} />

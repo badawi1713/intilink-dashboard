@@ -41,7 +41,7 @@ import {
   getMasterProductGroupData,
   getProductGroupDetailData,
   getProductGroupListData,
-} from 'src/store/actions/masters-action/product-group-actions';
+} from 'src/store/actions/masters-action/product-group-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 

@@ -2,6 +2,7 @@ import authReducer from './auth-reducer';
 import masterMenuReducer from './masters-reducer/menu-reducer';
 import masterProductCategoryReducer from './masters-reducer/product-category-reducer';
 import masterProductGroupReducer from './masters-reducer/product-group-reducer';
+import masterProductsReducer from './masters-reducer/products-reducer';
 
 import toastMessageReducer from '../slices/toast-message-slice';
 import depositReducer from '../slices/transaction-slice/deposit-slice';
@@ -18,7 +19,8 @@ const reducers = {
   depositReducer,
   transactionsReducer,
   transactionProcessReducer,
-  saldoMutationReducer
+  saldoMutationReducer,
+  masterProductsReducer
 };
 
 export default reducers;
