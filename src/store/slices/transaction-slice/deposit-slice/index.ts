@@ -22,6 +22,7 @@ type DepositDetailData = {
 interface InitialDepositState {
   data?: any[];
   detailData?: null | DepositDetailData;
+  logDetailData?: null | any;
   page?: number;
   limit?: number;
   total?: number;
@@ -39,6 +40,7 @@ interface InitialDepositState {
 const initialState: InitialDepositState = {
   data: [],
   detailData: null,
+  logDetailData: null,
   limit: 10,
   page: 0,
   total: 0,
@@ -65,6 +67,13 @@ const depositSlice = createSlice({
       state.total = action.payload.total;
       state.loading = false;
     },
+    setDepositLogDetailData: (
+      state,
+      action: PayloadAction<any>
+    ) => {
+      state.logDetailData = action.payload;
+      state.loadingDetail = false;
+    },
     setDepositDetailData: (
       state,
       action: PayloadAction<null | DepositDetailData>
@@ -74,6 +83,7 @@ const depositSlice = createSlice({
     },
     setDepositResetDetailData: (state) => {
       state.detailData = null;
+      state.logDetailData = null;
     },
     setDepositPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
@@ -132,6 +142,7 @@ export const {
   setDepositSortType,
   setDepositData,
   setDepositDetailData,
+  setDepositLogDetailData,
   setDepositEnablePostLoading,
   setDepositDisablePostLoading
 } = depositSlice.actions;

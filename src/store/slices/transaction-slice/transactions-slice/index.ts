@@ -15,6 +15,7 @@ type TransactionsDetailData = {
 };
 interface InitialTransactionsState {
   data?: any[];
+  logDetailData?: null | any;
   detailData?: null | TransactionsDetailData;
   page?: number;
   limit?: number;
@@ -33,6 +34,7 @@ interface InitialTransactionsState {
 const initialState: InitialTransactionsState = {
   data: [],
   detailData: null,
+  logDetailData: null,
   limit: 10,
   page: 0,
   total: 0,
@@ -59,6 +61,13 @@ const TransactionsSlice = createSlice({
       state.total = action.payload.total;
       state.loading = false;
     },
+    setTransactionsLogDetailData: (
+      state,
+      action: PayloadAction<any>
+    ) => {
+      state.logDetailData = action.payload;
+      state.loadingDetail = false;
+    },
     setTransactionsDetailData: (
       state,
       action: PayloadAction<null | TransactionsDetailData>
@@ -68,6 +77,7 @@ const TransactionsSlice = createSlice({
     },
     setTransactionsResetDetailData: (state) => {
       state.detailData = null;
+      state.logDetailData = null;
     },
     setTransactionsPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
@@ -120,6 +130,7 @@ export const {
   setTransactionsSortType,
   setTransactionsData,
   setTransactionsDetailData,
+  setTransactionsLogDetailData
 } = TransactionsSlice.actions;
 
 export default TransactionsSlice.reducer;

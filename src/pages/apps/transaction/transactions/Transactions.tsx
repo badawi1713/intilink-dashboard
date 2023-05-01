@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Info } from '@mui/icons-material';
+import { History } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   DialogContent,
@@ -34,7 +34,7 @@ import { useAppSelector } from 'src/hooks/useAppSelector';
 import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
 import {
   handleGetTransactionsData,
-  handleGetTransactionsDetailData,
+  handleGetTransactionsLogDetailData
 } from 'src/store/actions/transaction-action/transactions-action';
 import {
   setTransactionsLimit,
@@ -213,13 +213,13 @@ const headCells: readonly HeadCell[] = [
     label: 'Created Date',
     disableSort: false,
   },
-  // {
-  //   id: 'id',
-  //   disablePadding: false,
-  //   label: 'Action',
-  //   align: 'center',
-  //   disableSort: true,
-  // },
+  {
+    id: 'id',
+    disablePadding: false,
+    label: 'Action',
+    align: 'center',
+    disableSort: true,
+  },
 ];
 
 interface EnhancedTableProps {
@@ -293,13 +293,18 @@ const Transactions = () => {
     loading,
     error,
     loadingDetail,
-    detailData,
+    logDetailData,
+    loadingPost
   } = useAppSelector((state) => state.transactionsReducer);
   const isMount = useRef<boolean>(true);
+
+  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : "-";
+  const responseLogData = JSON.stringify(responseLogDataJson, null, 2);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] =
     useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] =
@@ -324,8 +329,14 @@ const Transactions = () => {
   const handleClickOpen = () => {
     setOpenDialog(true);
   };
+  
   const handleClose = () => {
     setOpenDialog(false);
+    dispatch(setTransactionsResetDetailData());
+  };
+
+  const handleLogDetailClose = () => {
+    setOpenLogDialog(false);
     dispatch(setTransactionsResetDetailData());
   };
 
@@ -503,34 +514,34 @@ const Transactions = () => {
                           <TableCell align="left">
                             {row.created_date || '-'}
                           </TableCell>
-                          {/* <TableCell align="center">
+                          <TableCell align="center">
                             <section className="flex items-center gap-2">
-                              <Tooltip title="Detail">
+                              <Tooltip title="Biller Log">
                                 <span>
                                   <IconButton
-                                    disabled={loadingDetail}
-                                    color="info"
+                                    disabled={loadingDetail || loadingPost}
+                                    color="default"
                                     onClick={async () => {
                                       const response = await dispatch(
-                                        handleGetTransactionsDetailData(row.id)
+                                        handleGetTransactionsLogDetailData(row.reff_id)
                                       );
 
                                       if (
                                         typeof response === 'boolean' &&
                                         response
                                       ) {
-                                        handleClickOpen();
+                                        setOpenLogDialog(true)
                                       }
                                     }}
                                     size="small"
                                     aria-label="edit"
                                   >
-                                    <Info fontSize="small" />
+                                    <History fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
                             </section>
-                          </TableCell> */}
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -551,79 +562,46 @@ const Transactions = () => {
         </section>
       </main>
       <BootstrapDialog
-        onClose={handleClose}
+        onClose={handleLogDetailClose}
         aria-labelledby="customized-dialog-title"
-        open={openDialog}
-        maxWidth="sm"
+        open={openLogDialog}
+        maxWidth="xl"
         fullWidth
       >
         <BootstrapDialogTitle
           id="customized-dialog-title"
-          onClose={handleClose}
+          onClose={handleLogDetailClose}
         >
-          Detail Transaksi
+          Biller Log Transaksi
         </BootstrapDialogTitle>
         <DialogContent dividers>
           <section>
             <List dense>
               <ListItem>
-                <ListItemText primary="ID" secondary={detailData?.id ?? '-'} />
+                <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Denom"
-                  secondary={currencyFormat(detailData?.denom ?? 0)}
+                  primary="Tanggal"
+                  secondary={(logDetailData?.response_date || '-')}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Nominal Admin"
-                  secondary={currencyFormat(detailData?.admin ?? 0)}
+                  primary="Request"
+                  secondary={(logDetailData?.request || '-')}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary="Harga Up"
-                  secondary={currencyFormat(detailData?.harga_up ?? 0)}
+                  primary="Response"
+                  secondary={
+                    <pre>
+                      {responseLogData}
+                    </pre>
+                  }
                 />
               </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Total bayar"
-                  secondary={currencyFormat(detailData?.total_bayar ?? 0)}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Reff ID"
-                  secondary={detailData?.reff_id ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Produk"
-                  secondary={detailData?.produk_name ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="ID Pelanggan"
-                  secondary={detailData?.id_pel ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Status"
-                  secondary={detailData?.status ?? '-'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Keterangan"
-                  secondary={detailData?.keterangan ?? '-'}
-                />
-              </ListItem>
-             
             </List>
           </section>
         </DialogContent>

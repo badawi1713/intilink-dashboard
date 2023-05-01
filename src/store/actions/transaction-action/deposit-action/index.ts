@@ -10,6 +10,7 @@ import {
   setDepositError,
   setDepositLoading,
   setDepositLoadingDetail,
+  setDepositLogDetailData,
 } from 'src/store/slices/transaction-slice/deposit-slice';
 
 const handleGetDepositDetailData =
@@ -135,4 +136,50 @@ const manualDepositTransaction = (id: string): AppThunk => async (dispatch) => {
   }
 };
 
-export { handleGetDepositData, handleGetDepositDetailData, manualDepositTransaction };
+const handleGetDepositLogDetailData =
+  (id: string): AppThunk =>
+    async (dispatch) => {
+      dispatch(setDepositLoadingDetail());
+      try {
+        const response = await axios.get(`/v1/api/dashboard/transaksi/biller-log/${id}`);
+        const data = response.data?.data || null;
+        dispatch(setDepositLogDetailData(data));
+        return true;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const axiosError = error as AxiosError<AxiosErrorType>;
+          if (axiosError.response) {
+            const { message, code } = axiosError.response.data;
+            dispatch(
+              showMessage({
+                message:
+                  `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
+                variant: 'error',
+              })
+            );
+          } else {
+            dispatch(
+              showMessage({
+                message: error.message || 'Maaf, sedang terjadi kesalahan',
+                variant: 'error',
+              })
+            );
+            dispatch(
+              setDepositError(error.message || 'Maaf, sedang terjadi kesalahan')
+            );
+          }
+        } else {
+          dispatch(
+            showMessage({
+              message: 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            })
+          );
+        }
+        return false;
+      } finally {
+        dispatch(setDepositDisableLoadingDetail());
+      }
+    };
+
+export { handleGetDepositData, handleGetDepositDetailData, manualDepositTransaction, handleGetDepositLogDetailData };

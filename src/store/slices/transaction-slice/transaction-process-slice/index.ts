@@ -16,6 +16,7 @@ type TransactionProcessDetailData = {
 interface InitialTransactionProcessState {
   data?: any[];
   detailData?: null | TransactionProcessDetailData;
+  logDetailData?: null | any;
   page?: number;
   limit?: number;
   total?: number;
@@ -33,6 +34,7 @@ interface InitialTransactionProcessState {
 const initialState: InitialTransactionProcessState = {
   data: [],
   detailData: null,
+  logDetailData: null,
   limit: 10,
   page: 0,
   total: 0,
@@ -59,6 +61,13 @@ const TransactionProcessSlice = createSlice({
       state.total = action.payload.total;
       state.loading = false;
     },
+      setTransactionProcessLogDetailData: (
+      state,
+      action: PayloadAction<any>
+    ) => {
+      state.logDetailData = action.payload;
+      state.loadingDetail = false;
+    },
     setTransactionProcessDetailData: (
       state,
       action: PayloadAction<null | TransactionProcessDetailData>
@@ -68,6 +77,7 @@ const TransactionProcessSlice = createSlice({
     },
     setTransactionProcessResetDetailData: (state) => {
       state.detailData = null;
+      state.loadingDetail = false;
     },
     setTransactionProcessPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
@@ -120,6 +130,7 @@ export const {
   setTransactionProcessSortType,
   setTransactionProcessData,
   setTransactionProcessDetailData,
+  setTransactionProcessLogDetailData
 } = TransactionProcessSlice.actions;
 
 export default TransactionProcessSlice.reducer;

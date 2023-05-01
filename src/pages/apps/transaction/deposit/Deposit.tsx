@@ -1,8 +1,9 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { CheckCircleOutline, Info } from '@mui/icons-material';
+import { CheckCircleOutline, History, Info } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   DialogContent,
+  Divider,
   IconButton,
   List,
   ListItem,
@@ -34,6 +35,7 @@ import { useAppSelector } from 'src/hooks/useAppSelector';
 import {
   handleGetDepositData,
   handleGetDepositDetailData,
+  handleGetDepositLogDetailData,
   manualDepositTransaction,
 } from 'src/store/actions/transaction-action/deposit-action';
 import {
@@ -293,13 +295,18 @@ const Deposit = () => {
     error,
     loadingDetail,
     detailData,
+    logDetailData,
     loadingPost
   } = useAppSelector((state) => state.depositReducer);
   const isMount = useRef<boolean>(true);
 
+  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : "-";
+  const responseLogData = JSON.stringify(responseLogDataJson, null, 2);
+
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
   const [openManualDepositConfirmation, setOpenManualDepositConfirmation] =
     useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] =
@@ -326,6 +333,11 @@ const Deposit = () => {
   };
   const handleClose = () => {
     setOpenDialog(false);
+    dispatch(setDepositResetDetailData());
+  };
+
+  const handleLogDetailClose = () => {
+    setOpenLogDialog(false);
     dispatch(setDepositResetDetailData());
   };
 
@@ -502,6 +514,30 @@ const Deposit = () => {
                           </TableCell>
                           <TableCell align="center">
                             <section className="flex items-center gap-2">
+                              <Tooltip title="Biller Log">
+                                <span>
+                                  <IconButton
+                                    disabled={loadingDetail || loadingPost}
+                                    color="default"
+                                    onClick={async () => {
+                                      const response = await dispatch(
+                                        handleGetDepositLogDetailData(row.reff_id)
+                                      );
+
+                                      if (
+                                        typeof response === 'boolean' &&
+                                        response
+                                      ) {
+                                        setOpenLogDialog(true)
+                                      }
+                                    }}
+                                    size="small"
+                                    aria-label="edit"
+                                  >
+                                    <History fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
                               <Tooltip title="Detail">
                                 <span>
                                   <IconButton
@@ -658,6 +694,51 @@ const Deposit = () => {
                 <ListItemText
                   primary="Reff ID"
                   secondary={detailData?.reff_id ?? '-'}
+                />
+              </ListItem>
+            </List>
+          </section>
+        </DialogContent>
+      </BootstrapDialog>
+      <BootstrapDialog
+        onClose={handleLogDetailClose}
+        aria-labelledby="customized-dialog-title"
+        open={openLogDialog}
+        maxWidth="xl"
+        fullWidth
+      >
+        <BootstrapDialogTitle
+          id="customized-dialog-title"
+          onClose={handleLogDetailClose}
+        >
+          Biller Log Deposit
+        </BootstrapDialogTitle>
+        <DialogContent dividers>
+          <section>
+            <List dense>
+              <ListItem>
+                <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Tanggal"
+                  secondary={(logDetailData?.response_date || '-')}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Request"
+                  secondary={(logDetailData?.request || '-')}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Response"
+                  secondary={
+                    <pre>
+                      {responseLogData}
+                    </pre>
+                  }
                 />
               </ListItem>
             </List>
