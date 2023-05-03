@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { RootState } from 'src/store';
 import {
-    InitialMasterProductsState,
-    MasterProductsDispatchType,
+  InitialMasterProductsState,
+  MasterProductsDispatchType,
 } from '../../../action-types/masters-type/products-type/products-type';
 import * as REDUCER_TYPES from '../../../types';
 
@@ -16,10 +16,7 @@ const changeMasterProductsReducer = (payload: InitialMasterProductsState) => {
 };
 
 const getMasterProductsData = () => {
-  return async (
-    dispatch: MasterProductsDispatchType,
-    getState: () => RootState
-  ) => {
+  return async (dispatch: MasterProductsDispatchType, getState: () => RootState) => {
     const { masterProductsReducer } = getState();
     const { page, limit, sortType, sortBy, search, groupId } = masterProductsReducer;
 
@@ -33,7 +30,7 @@ const getMasterProductsData = () => {
 
     try {
       const response = await axios.get(
-        `/v1/api/dashboard/product?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}&groupId=${groupId}`
+        `/v1/api/dashboard/product?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}&groupId=${groupId}`,
       );
 
       const total = +response?.data?.data?.totalElements || 0;
@@ -104,50 +101,47 @@ const getProductsCategoryListData = () => {
 };
 
 const getProductsGroupListData = (id: string) => {
-    return async (dispatch: MasterProductsDispatchType) => {
+  return async (dispatch: MasterProductsDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+      payload: {
+        loadingList: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/product/list-group/${id}`);
+
+      const data = response.data || [];
+
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
         payload: {
-          loadingList: true,
+          productGroupList: data,
         },
       });
-  
-      try {
-        const response = await axios.get(`/v1/api/dashboard/product/list-group/${id}`);
-  
-        const data = response.data || [];
-  
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-          payload: {
-            productGroupList: data,
-          },
-        });
-        return data;
-      } catch (error) {
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-          payload: {
-            productGroupList: [],
-            loadingList: false,
-          },
-        });
-        return false;
-      } finally {
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-          payload: {
-            loadingList: false,
-          },
-        });
-      }
-    };
+      return data;
+    } catch (error) {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          productGroupList: [],
+          loadingList: false,
+        },
+      });
+      return false;
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          loadingList: false,
+        },
+      });
+    }
   };
+};
 
-const addNewProductsData = (data: {
-  name: string;
-  product_category_id: number;
-}) => {
+const addNewProductsData = (data: { name: string; product_category_id: number }) => {
   return async (dispatch: MasterProductsDispatchType) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
@@ -175,62 +169,65 @@ const addNewProductsData = (data: {
 };
 
 const getProductsDetailData = (id: number) => {
-    return async (dispatch: MasterProductsDispatchType) => {
+  return async (dispatch: MasterProductsDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+      payload: {
+        loadingDetail: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/product/${id}`);
+
+      const data = response.data?.data || {};
+      return data;
+    } catch (error) {
+      console.log(error);
+      return false;
+    } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
         payload: {
-          loadingDetail: true,
+          loadingDetail: false,
         },
       });
-  
-      try {
-        const response = await axios.get(`/v1/api/dashboard/product/${id}`);
-  
-        const data = response.data?.data || {};
-          return data;
-      } catch (error) {
-          console.log(error);
-          return false
-      } finally {
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-          payload: {
-            loadingDetail: false,
-          },
-        });
-      }
-    };
+    }
+  };
 };
-  
-const editProductsData = (id: number, data: {
+
+const editProductsData = (
+  id: number,
+  data: {
     name: string;
     product_category_id: number;
-  }) => {
-    return async (dispatch: MasterProductsDispatchType) => {
+  },
+) => {
+  return async (dispatch: MasterProductsDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+      payload: {
+        loadingPost: true,
+      },
+    });
+
+    try {
+      await axios.put(`/v1/api/dashboard/product/${id}`, data);
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
         payload: {
-          loadingPost: true,
+          loadingPost: false,
         },
       });
-  
-      try {
-        await axios.put(`/v1/api/dashboard/product/${id}`, data);
-  
-        return true;
-      } catch (error) {
-        console.log(error);
-        return false;
-      } finally {
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-          payload: {
-            loadingPost: false,
-          },
-        });
-      }
-    };
+    }
   };
+};
 
 const deleteProductsData = (id: number) => {
   return async (dispatch: MasterProductsDispatchType) => {
@@ -260,6 +257,12 @@ const deleteProductsData = (id: number) => {
 };
 
 export {
-    addNewProductsData, changeMasterProductsReducer, deleteProductsData, editProductsData, getMasterProductsData, getProductsDetailData, getProductsCategoryListData, getProductsGroupListData
+  addNewProductsData,
+  changeMasterProductsReducer,
+  deleteProductsData,
+  editProductsData,
+  getMasterProductsData,
+  getProductsDetailData,
+  getProductsCategoryListData,
+  getProductsGroupListData,
 };
-

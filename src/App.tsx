@@ -57,7 +57,7 @@ const App: FC = () => {
             </Route>
           </Route>
           <Route path="transaction">
-            <Route index element={<Navigate to="deposit" replace />} />
+            <Route index element={<Navigate to="proses-transaksi" replace />} />
             <Route path="deposit" element={<Deposit />} />
             <Route path="transaksi" element={<Transactions />} />
             <Route path="proses-transaksi" element={<TransactionProcess />} />

@@ -3,13 +3,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Autocomplete,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Autocomplete, IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -33,7 +27,7 @@ import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-  import {
+import {
   addNewMenuData,
   changeMasterMenuReducer,
   deleteMenuData,
@@ -108,7 +102,7 @@ function createData(
   deleted: boolean,
   parent_id: number,
   created_who: string,
-  updated_who?: string
+  updated_who?: string,
 ): Data {
   return {
     id,
@@ -187,20 +181,16 @@ const headCells: readonly HeadCell[] = [
 ];
 
 interface EnhancedTableProps {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    newOrderBy: keyof Data
-  ) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
   order: Order;
   orderBy: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, newOrderBy);
-    };
+  const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, newOrderBy);
+  };
 
   return (
     <TableHead>
@@ -220,9 +210,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
                   <Box component="span" sx={visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>
                 ) : null}
               </TableSortLabel>
@@ -246,29 +234,15 @@ type FormType = {
 
 const MasterMenu = () => {
   const dispatch = useAppDispatch();
-  const {
-    data,
-    page,
-    sortBy,
-    sortType,
-    limit,
-    total,
-    search,
-    menuList,
-    loadingPost,
-    loadingDelete,
-    loading,
-    error,
-  } = useAppSelector((state) => state.masterMenuReducer);
+  const { data, page, sortBy, sortType, limit, total, search, menuList, loadingPost, loadingDelete, loading, error } =
+    useAppSelector((state) => state.masterMenuReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] =
-    useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] =
-    useState<boolean>(false);
+  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
+  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [editForm, setEditForm] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -309,16 +283,16 @@ const MasterMenu = () => {
     setOpenEditConfirmation(true);
   });
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (formData) => {
     const payload = {
-      title: data.title,
-      icon: data.icon,
-      link: data.link,
-      parent_id: data.parent_id?.id || 0,
+      title: formData.title,
+      icon: formData.icon,
+      link: formData.link,
+      parent_id: formData.parent_id?.id || 0,
     };
     let response: boolean;
     if (editForm) {
-      response = await dispatch(editMenuData(data?.id, payload));
+      response = await dispatch(editMenuData(formData?.id, payload));
       if (response) {
         handleClose();
         setOpenEditConfirmation(false);
@@ -334,7 +308,7 @@ const MasterMenu = () => {
     }
   });
 
-  const handleGetData = useCallback(async () => {
+  const handleGetData = useCallback(() => {
     dispatch(getMasterMenuData());
   }, [dispatch]);
 
@@ -351,7 +325,7 @@ const MasterMenu = () => {
         dispatch(getMasterMenuData());
       }
     },
-    [debouncedSearchTerm] // Only call effect if debounced search term changes
+    [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
   const rows = data?.map((row: Data) =>
@@ -363,11 +337,11 @@ const MasterMenu = () => {
       row?.deleted,
       row?.parent_id,
       row?.created_who,
-      row?.updated_who
-    )
+      row?.updated_who,
+    ),
   );
 
-  const handleRequestSort = React.useCallback(
+  const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';
@@ -376,34 +350,32 @@ const MasterMenu = () => {
         changeMasterMenuReducer({
           sortBy: newOrderBy,
           sortType: toggledOrder,
-        })
+        }),
       );
       dispatch(getMasterMenuData());
     },
 
-    [sortType, sortBy, dispatch]
+    [sortType, sortBy, dispatch],
   );
 
-  const handleChangePage = React.useCallback(
+  const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(
         changeMasterMenuReducer({
           page: newPage,
-        })
+        }),
       );
       dispatch(getMasterMenuData());
     },
-    [dispatch, page]
+    [dispatch, page],
   );
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(
       changeMasterMenuReducer({
         page: 0,
         limit: +event.target.value,
-      })
+      }),
     );
     dispatch(getMasterMenuData());
   };
@@ -435,7 +407,7 @@ const MasterMenu = () => {
                 changeMasterMenuReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
-                })
+                }),
               )
             }
           />
@@ -449,12 +421,7 @@ const MasterMenu = () => {
             </Typography>
             <Typography variant="body1">Manajemen daftar menu</Typography>
           </div>
-          <Button
-            color="success"
-            size="small"
-            variant="contained"
-            onClick={handleClickOpen}
-          >
+          <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
             Tambah Data
           </Button>
         </div>
@@ -469,7 +436,7 @@ const MasterMenu = () => {
                   changeMasterMenuReducer({
                     page: 0,
                     sortBy: 'deleted',
-                  })
+                  }),
                 );
                 dispatch(getMasterMenuData());
               }}
@@ -479,11 +446,7 @@ const MasterMenu = () => {
           ) : (
             <Paper sx={{ width: '100%' }}>
               <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={'medium'}
-                >
+                <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
                     orderBy={sortBy || 'deleted'}
@@ -495,12 +458,7 @@ const MasterMenu = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell
-                            align="center"
-                            component="th"
-                            id={labelId}
-                            scope="row"
-                          >
+                          <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{row.title || '-'}</TableCell>
@@ -508,25 +466,13 @@ const MasterMenu = () => {
                           <TableCell align="left">{row.icon || '-'}</TableCell>
                           <TableCell align="center">
                             {!row.deleted ? (
-                              <CheckCircleIcon
-                                titleAccess="Tersedia"
-                                fontSize="small"
-                                color="success"
-                              />
+                              <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
                             ) : (
-                              <CancelIcon
-                                titleAccess="Dihapus"
-                                fontSize="small"
-                                color="error"
-                              />
+                              <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
                             )}
                           </TableCell>
-                          <TableCell align="left">
-                            {row.created_who || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.updated_who || '-'}
-                          </TableCell>
+                          <TableCell align="left">{row.created_who || '-'}</TableCell>
+                          <TableCell align="left">{row.updated_who || '-'}</TableCell>
                           <TableCell align="center">
                             <section className="flex items-center gap-2">
                               <Tooltip title="Hapus">
@@ -548,17 +494,12 @@ const MasterMenu = () => {
                                 <span>
                                   <IconButton
                                     onClick={async () => {
-                                      const response = await dispatch(
-                                        getMenuDetailData(row.id)
-                                      );
+                                      const response = await dispatch(getMenuDetailData(row.id));
                                       if (Object.keys(response).length > 0) {
                                         setSelectedId(response?.id);
                                         setEditForm(true);
                                         const selectedParentMenu =
-                                          menuList?.find(
-                                            (menu) =>
-                                              menu?.id === response?.parent_id
-                                          ) || null;
+                                          menuList?.find((menu) => menu?.id === response?.parent_id) || null;
                                         reset({
                                           id: response?.id,
                                           title: response?.title,
@@ -598,16 +539,8 @@ const MasterMenu = () => {
         </section>
       </main>
       {openFormDialog && (
-        <BootstrapDialog
-          aria-labelledby="customized-dialog-title"
-          open={openFormDialog}
-          maxWidth="md"
-          fullWidth
-        >
-          <BootstrapDialogTitle
-            id="customized-dialog-title"
-            onClose={handleClose}
-          >
+        <BootstrapDialog aria-labelledby="customized-dialog-title" open={openFormDialog} maxWidth="md" fullWidth>
+          <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
             {editForm ? 'Edit Data Menu' : 'Data Menu Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
@@ -666,7 +599,7 @@ const MasterMenu = () => {
                 <Controller
                   control={control}
                   name="parent_id"
-                  render={({ field: { onChange, value, ...field } }) => (
+                  render={({ field: { onChange, value } }) => (
                     <div className="flex flex-col gap-3 w-full">
                       <label className="text-sm font-semibold">Parent</label>
                       <Autocomplete
@@ -680,9 +613,7 @@ const MasterMenu = () => {
                         }}
                         fullWidth
                         options={menuList || []}
-                        getOptionLabel={(item) =>
-                          item.title ? item.title : ''
-                        }
+                        getOptionLabel={(item) => (item.title ? item.title : '')}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -701,11 +632,7 @@ const MasterMenu = () => {
             </section>
           </DialogContent>
           <DialogActions>
-            <Button
-              disabled={loadingPost}
-              color="inherit"
-              onClick={handleClose}
-            >
+            <Button disabled={loadingPost} color="inherit" onClick={handleClose}>
               Batal
             </Button>
             <Button

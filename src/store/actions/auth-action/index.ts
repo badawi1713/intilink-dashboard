@@ -1,14 +1,8 @@
 import axios from 'axios';
 import { AppThunk } from 'src/store';
 import { showMessage } from 'src/store/slices/toast-message-slice';
-import {
-  getAccessToken,
-  updateAccessToken,
-} from '../../../helpers/utils/accessToken';
-import {
-  AuthDispatchType,
-  InitialAuthState,
-} from '../../action-types/auth-action-type/auth-action.type';
+import { getAccessToken, updateAccessToken } from '../../../helpers/utils/accessToken';
+import { AuthDispatchType, InitialAuthState } from '../../action-types/auth-action-type/auth-action.type';
 import * as REDUCER_TYPES from '../../types';
 
 const changeAuthReducer = (payload: InitialAuthState) => {
@@ -34,7 +28,7 @@ const loginUserAction =
       const response = await axios.post('/v1/api/authenticate', payload);
       const jwt = (await response.data.data.jwt) || '';
       axios.defaults.headers.common.Authorization = `Bearer ${jwt}`;
-      await updateAccessToken(jwt);
+      updateAccessToken(jwt);
       dispatch({
         type: REDUCER_TYPES.SET_AUTH_REDUCER,
         payload: {
@@ -51,7 +45,7 @@ const loginUserAction =
             error?.message ||
             'Maaf, sedang terjadi gangguan.',
           variant: 'error',
-        })
+        }),
       );
       result = false;
     } finally {
@@ -65,7 +59,7 @@ const loginUserAction =
     return result;
   };
 
-const userLogoutAction = () => async (dispatch: AuthDispatchType) => {
+const userLogoutAction = () => (dispatch: AuthDispatchType) => {
   updateAccessToken('');
   dispatch({
     type: REDUCER_TYPES.SET_AUTH_REDUCER,
@@ -108,7 +102,7 @@ const getAccessTokenAction = (): AppThunk => async (dispatch) => {
           error?.message ||
           'Maaf, sedang terjadi gangguan.',
         variant: 'error',
-      })
+      }),
     );
   } finally {
     setTimeout(() => {
@@ -122,9 +116,4 @@ const getAccessTokenAction = (): AppThunk => async (dispatch) => {
   }
 };
 
-export {
-  changeAuthReducer,
-  getAccessTokenAction,
-  loginUserAction,
-  userLogoutAction,
-};
+export { changeAuthReducer, getAccessTokenAction, loginUserAction, userLogoutAction };

@@ -1,9 +1,9 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Delete, Edit, ImageSearchOutlined } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { FormControlLabel, IconButton, Switch, TextField, Tooltip, Typography } from '@mui/material';
+import { IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -21,8 +21,8 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
@@ -41,9 +41,8 @@ import * as yup from 'yup';
 // const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
 
 const productCategorySchema = yup.object().shape({
-  name: yup.string().required('Name is required'),
-  link: yup.string().required('Link is required'),
-  image: yup.mixed().required('Image file is required'),
+  nama: yup.string().required('Name is required'),
+  id: yup.string().required('ID is required'),
 });
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -87,34 +86,19 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 
 interface Data {
   id: number;
-  name: string;
-  image: string;
-  link: string;
+  nama: string;
+  keterangan: string;
   deleted: boolean;
-  background: string;
-  created_who: string;
-  updated_who?: string;
+  index: number;
 }
 
-function createData(
-  id: number,
-  name: string,
-  image: string,
-  link: string,
-  deleted: boolean,
-  background: string,
-  created_who: string,
-  updated_who?: string,
-): Data {
+function createData(id: number, nama: string, keterangan: string, deleted: boolean, index: number): Data {
   return {
     id,
-    name,
-    image,
-    link,
+    nama,
+    keterangan,
     deleted,
-    background,
-    created_who,
-    updated_who,
+    index,
   };
 }
 
@@ -133,55 +117,29 @@ const headCells: readonly HeadCell[] = [
     id: 'id',
     disablePadding: true,
     label: 'ID',
-    align: 'center',
     disableSort: false,
   },
   {
-    id: 'name',
+    id: 'nama',
     disablePadding: false,
     label: 'Name',
     disableSort: false,
   },
   {
-    id: 'link',
+    id: 'keterangan',
     disablePadding: false,
-    label: 'Link',
-    disableSort: false,
-  },
-  {
-    id: 'background',
-    disablePadding: false,
-    label: 'Background',
-    disableSort: true,
-    align: 'center',
-  },
-  {
-    id: 'image',
-    disablePadding: false,
-    label: 'Image',
+    label: 'Keterangan',
     disableSort: true,
   },
   {
     id: 'deleted',
     disablePadding: false,
-    label: 'Visible',
+    label: 'Available',
     align: 'center',
     disableSort: false,
   },
   {
-    id: 'created_who',
-    disablePadding: false,
-    label: 'Created By',
-    disableSort: false,
-  },
-  {
-    id: 'updated_who',
-    disablePadding: false,
-    label: 'Updated By',
-    disableSort: false,
-  },
-  {
-    id: 'id',
+    id: 'index',
     disablePadding: false,
     label: 'Action',
     align: 'center',
@@ -234,12 +192,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 type FormType = {
-  id: number;
-  name: string;
-  background: string;
-  image: string | File;
-  link: string;
-  visible: boolean;
+  id: string;
+  nama: string;
+  keterangan: string;
 };
 
 const ProductCategory = () => {
@@ -261,12 +216,9 @@ const ProductCategory = () => {
   const formMethods = useForm<FormType>({
     mode: 'onChange',
     defaultValues: {
-      id: 0,
-      name: '',
-      background: '#000000',
-      image: '',
-      link: '',
-      visible: false,
+      id: '',
+      nama: '',
+      keterangan: '',
     },
     resolver: yupResolver(productCategorySchema),
   });
@@ -283,12 +235,9 @@ const ProductCategory = () => {
     }
     setOpenFormDialog(false);
     reset({
-      id: 0,
-      name: '',
-      background: '#000000',
-      image: '',
-      link: '',
-      visible: false,
+      id: '',
+      nama: '',
+      keterangan: '',
     });
   };
 
@@ -296,26 +245,24 @@ const ProductCategory = () => {
     setOpenEditConfirmation(true);
   });
 
-  const onSubmit = handleSubmit(async (formData: FormType) => {
-    const form = new FormData();
-    form.append('name', formData.name);
-    form.append('background', formData.background);
-    form.append('link', formData.link);
-    form.append('image', formData?.image || '');
-    form.append('visible', formData.visible ? 'true' : 'false');
+  const onSubmit = handleSubmit(async (formData) => {
+    const payload = {
+      id: formData.id,
+      nama: formData.nama,
+      keterangan: formData.keterangan,
+    };
 
-    let response: boolean;
     if (editForm) {
-      response = await dispatch(editProductCategoryData(formData?.id, form));
-      if (response) {
+      const response = await dispatch(editProductCategoryData(formData?.id, payload));
+      if (typeof response === 'boolean' && response) {
         handleClose();
         setOpenEditConfirmation(false);
         setSelectedId(null);
         dispatch(getMasterProductCategoryData());
       }
     } else {
-      response = await dispatch(addNewProductCategoryData(form));
-      if (response) {
+      const response = await dispatch(addNewProductCategoryData(payload));
+      if (typeof response === 'boolean' && response) {
         handleClose();
         dispatch(getMasterProductCategoryData());
       }
@@ -342,18 +289,7 @@ const ProductCategory = () => {
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
-  const rows = data?.map((row: Data) =>
-    createData(
-      row?.id,
-      row?.name,
-      row?.image,
-      row?.link,
-      row?.deleted,
-      row?.background,
-      row?.created_who,
-      row?.updated_who,
-    ),
-  );
+  const rows = data?.map((row: Data, index) => createData(row?.id, row?.nama, row?.keterangan, row?.deleted, index));
 
   const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
@@ -396,14 +332,12 @@ const ProductCategory = () => {
 
   const handleDeleteData = async (id: number) => {
     const response = await dispatch(deleteProductCategoryData(id));
-    if (response) {
+    if (typeof response === 'boolean' && response) {
       dispatch(getMasterProductCategoryData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
     }
   };
-
-  const productCategoryImage = useWatch({ control, name: 'image' });
 
   return (
     <>
@@ -469,39 +403,11 @@ const ProductCategory = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell align="center" component="th" id={labelId} scope="row">
+                          <TableCell align="left" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
-                          <TableCell align="left">{row.name || '-'}</TableCell>
-                          <TableCell align="left">{row.link || '-'}</TableCell>
-                          <TableCell align="center">
-                            {row.background ? (
-                              <div
-                                title={row?.background}
-                                style={{ backgroundColor: row.background }}
-                                className="w-10 h-8 rounded-md mx-auto"
-                              />
-                            ) : (
-                              '-'
-                            )}
-                          </TableCell>
-                          <TableCell align="center">
-                            <Tooltip title="Preview">
-                              <span>
-                                <IconButton
-                                  onClick={() => {
-                                    setOpenImagePreview(true);
-                                    setSelectedImagePreview(row.image);
-                                  }}
-                                  size="small"
-                                  aria-label="preview"
-                                  color="info"
-                                >
-                                  <ImageSearchOutlined fontSize="small" />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                          </TableCell>
+                          <TableCell align="left">{row.nama || '-'}</TableCell>
+                          <TableCell align="left">{row.keterangan || '-'}</TableCell>
                           <TableCell align="center">
                             {!row.deleted ? (
                               <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
@@ -509,10 +415,8 @@ const ProductCategory = () => {
                               <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
                             )}
                           </TableCell>
-                          <TableCell align="left">{row.created_who || '-'}</TableCell>
-                          <TableCell align="left">{row.updated_who || '-'}</TableCell>
                           <TableCell align="center">
-                            <section className="flex items-center gap-2">
+                            <section className="flex items-center justify-center gap-2">
                               <Tooltip title="Hapus">
                                 <span>
                                   <IconButton
@@ -532,17 +436,14 @@ const ProductCategory = () => {
                                 <span>
                                   <IconButton
                                     onClick={async () => {
-                                      const response = await dispatch(getProductCategoryDetailData(row.id));
-                                      if (Object.keys(response).length > 0) {
+                                      const response: any = await dispatch(getProductCategoryDetailData(row.id));
+                                      if (typeof response === 'object' && Object.keys(response).length > 0) {
                                         setSelectedId(response?.id);
                                         setEditForm(true);
                                         reset({
                                           id: response?.id,
-                                          name: response?.name || '',
-                                          image: response?.image || '',
-                                          link: response?.link || '',
-                                          visible: response?.visible || false,
-                                          background: response?.background || '#000000',
+                                          nama: response?.nama || '',
+                                          keterangan: response?.keterangan || '',
                                         });
                                         handleClickOpen();
                                       }
@@ -581,124 +482,57 @@ const ProductCategory = () => {
             {editForm ? 'Edit Data Kategori Produk' : 'Data Kategori Produk Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
-            <section className="flex-col flex gap-4 w-full mb-8">
-              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Name</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Type product category name"
-                        helperText={errors?.name && errors.name?.message}
-                        error={!!errors?.name}
-                      />
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="link"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Link</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Type product category link"
-                        helperText={errors?.link && errors.link?.message}
-                        error={!!errors?.link}
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="background"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Background</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Type product category background"
-                        helperText={errors?.background && errors.background?.message}
-                        error={!!errors?.background}
-                        type="color"
-                      />
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="image"
-                  render={({ field: { onChange } }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Choose Image</label>
-                      <section className="flex gap-3 items-stretch">
-                        <TextField
-                          //   {...field}
-                          onChange={(event: ChangeEvent) => {
-                            const target = event.target as HTMLInputElement;
-                            const file: File = (target.files as FileList)[0];
-                            onChange(file);
-                          }}
-                          placeholder="Type product category image"
-                          helperText={errors?.image && errors.image?.message}
-                          error={!!errors?.image}
-                          type="file"
-                          fullWidth
-                          inputProps={{
-                            accept: 'image/png, image/jpg, image/jpeg',
-                          }}
-                        />
-                        {productCategoryImage && (
-                          <img
-                            src={
-                              typeof productCategoryImage === 'string'
-                                ? productCategoryImage
-                                : productCategoryImage instanceof Blob
-                                ? URL.createObjectURL(productCategoryImage)
-                                : ''
-                            }
-                            alt="product-preview"
-                            className=" w-14 p-2 bg-slate-100 rounded-md object-contain"
-                          />
-                        )}
-                      </section>
-                    </div>
-                  )}
-                />
-              </div>
-              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="visible"
-                  render={({ field: { onChange, value } }) => (
-                    <div className="flex flex-col gap-3">
-                      <label className="text-sm font-semibold">Visible</label>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={value || false}
-                            onChange={(e) => {
-                              onChange(e.target.checked);
-                            }}
-                            name="visible"
-                          />
-                        }
-                        label={value ? 'SHOW' : 'HIDE'}
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-            </section>
+            <div className="flex flex-col items-stretch gap-4 w-full">
+              <Controller
+                control={control}
+                name="id"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-3 w-full">
+                    <label className="text-sm font-semibold">ID</label>
+                    <TextField
+                      {...field}
+                      disabled={editForm}
+                      fullWidth
+                      placeholder="Category ID"
+                      helperText={errors?.id && errors.id?.message}
+                      error={!!errors?.id}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="nama"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-3 w-full">
+                    <label className="text-sm font-semibold">Name</label>
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Product category name"
+                      helperText={errors?.nama && errors.nama?.message}
+                      error={!!errors?.nama}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="keterangan"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-3 w-full">
+                    <label className="text-sm font-semibold">Notes</label>
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Notes"
+                      helperText={errors?.keterangan && errors.keterangan?.message}
+                      error={!!errors?.keterangan}
+                    />
+                  </div>
+                )}
+              />
+            </div>
           </DialogContent>
           <DialogActions>
             <Button disabled={loadingPost} color="inherit" onClick={handleClose}>

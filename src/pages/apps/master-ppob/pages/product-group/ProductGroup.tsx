@@ -3,7 +3,18 @@ import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { Autocomplete, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -34,7 +45,7 @@ import {
   editProductGroupData,
   getMasterProductGroupData,
   getProductGroupDetailData,
-  getProductGroupListData,
+  getProductCategoryListData,
 } from 'src/store/actions/masters-action/product-group-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
@@ -90,8 +101,8 @@ interface Data {
   product_category_name: string;
   deleted: boolean;
   product_category_id: number;
-  created_who: string;
-  updated_who?: string;
+  keterangan: string;
+  index: number;
 }
 
 function createData(
@@ -101,8 +112,8 @@ function createData(
   product_category_name: string,
   deleted: boolean,
   product_category_id: number,
-  created_who: string,
-  updated_who?: string,
+  keterangan: string,
+  index: number,
 ): Data {
   return {
     id,
@@ -111,8 +122,8 @@ function createData(
     product_category_name,
     deleted,
     product_category_id,
-    created_who,
-    updated_who,
+    keterangan,
+    index,
   };
 }
 
@@ -131,19 +142,18 @@ const headCells: readonly HeadCell[] = [
     id: 'id',
     disablePadding: true,
     label: 'ID',
-    align: 'center',
     disableSort: false,
   },
   {
     id: 'name',
     disablePadding: false,
-    label: 'Name',
+    label: 'Category',
     disableSort: false,
   },
   {
-    id: 'product_category_name',
+    id: 'keterangan',
     disablePadding: false,
-    label: 'Category',
+    label: 'Name',
     disableSort: false,
   },
   {
@@ -154,19 +164,7 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
-    id: 'created_who',
-    disablePadding: false,
-    label: 'Created By',
-    disableSort: false,
-  },
-  {
-    id: 'updated_who',
-    disablePadding: false,
-    label: 'Updated By',
-    disableSort: false,
-  },
-  {
-    id: 'id',
+    id: 'index',
     disablePadding: false,
     label: 'Action',
     align: 'center',
@@ -251,6 +249,7 @@ const ProductGroup = () => {
   const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [editForm, setEditForm] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [categoryId, setCategoryId] = useState<string>('All');
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
@@ -266,7 +265,6 @@ const ProductGroup = () => {
   const { errors } = formState;
 
   const handleClickOpen = () => {
-    dispatch(getProductGroupListData());
     setOpenFormDialog(true);
   };
   const handleClose = () => {
@@ -290,18 +288,17 @@ const ProductGroup = () => {
       name: formData.name,
       product_category_id: formData.product_category_id?.id || 0,
     };
-    let response: boolean;
     if (editForm) {
-      response = await dispatch(editProductGroupData(formData?.id, payload));
-      if (response) {
+      const response = await dispatch(editProductGroupData(formData?.id, payload));
+      if (typeof response === 'boolean' && response) {
         handleClose();
         setOpenEditConfirmation(false);
         setSelectedId(null);
         dispatch(getMasterProductGroupData());
       }
     } else {
-      response = await dispatch(addNewProductGroupData(payload));
-      if (response) {
+      const response = await dispatch(addNewProductGroupData(payload));
+      if (typeof response === 'boolean' && response) {
         handleClose();
         dispatch(getMasterProductGroupData());
       }
@@ -310,6 +307,7 @@ const ProductGroup = () => {
 
   const handleGetData = useCallback(() => {
     dispatch(getMasterProductGroupData());
+    dispatch(getProductCategoryListData());
   }, [dispatch]);
 
   useEffect(() => {
@@ -328,16 +326,16 @@ const ProductGroup = () => {
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
-  const rows = data?.map((row: Data) =>
+  const rows = data?.map((row: Data, index) =>
     createData(
       row?.id,
-      row?.name,
+      row?.product_category_name,
       row?.icon,
       row?.product_category_name,
       row?.deleted,
       row?.product_category_id,
-      row?.created_who,
-      row?.updated_who,
+      row?.keterangan,
+      index,
     ),
   );
 
@@ -387,11 +385,22 @@ const ProductGroup = () => {
 
   const handleDeleteData = async (id: number) => {
     const response = await dispatch(deleteProductGroupData(id));
-    if (response) {
+    if (typeof response === 'boolean' && response) {
       dispatch(getMasterProductGroupData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
     }
+  };
+
+  const handleGetProductGroupData = (event: SelectChangeEvent) => {
+    const value = event.target.value;
+    setCategoryId(value);
+    dispatch(
+      changeMasterProductGroupReducer({
+        categoryId: value === 'All' ? '' : value,
+      }),
+    );
+    dispatch(getMasterProductGroupData());
   };
 
   return (
@@ -421,9 +430,33 @@ const ProductGroup = () => {
             </Typography>
             <Typography variant="body1">Manajemen daftar grup produk</Typography>
           </div>
-          <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
-            Tambah Data
-          </Button>
+          <div className="flex items-center gap-3 justify-between">
+            <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
+              Tambah Data
+            </Button>
+            <div className="flex items-center gap-3">
+              <FormControl sx={{ minWidth: 220 }} size="small">
+                <InputLabel id="product-category-select">Product Category</InputLabel>
+                <Select
+                  size="small"
+                  labelId="product-category-select-label"
+                  id="product-category-select"
+                  value={categoryId}
+                  label="Product Category"
+                  onChange={handleGetProductGroupData}
+                >
+                  <MenuItem value="All">
+                    <em>All</em>
+                  </MenuItem>
+                  {productCategoryList?.map((category) => (
+                    <MenuItem key={category?.id} value={category?.id}>
+                      {category?.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          </div>
         </div>
         <section>
           {loading ? (
@@ -458,11 +491,11 @@ const ProductGroup = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell align="center" component="th" id={labelId} scope="row">
+                          <TableCell align="left" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{row.name || '-'}</TableCell>
-                          <TableCell align="left">{row.product_category_name || '-'}</TableCell>
+                          <TableCell align="left">{row.keterangan || '-'}</TableCell>
                           <TableCell align="center">
                             {!row.deleted ? (
                               <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
@@ -470,10 +503,8 @@ const ProductGroup = () => {
                               <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
                             )}
                           </TableCell>
-                          <TableCell align="left">{row.created_who || '-'}</TableCell>
-                          <TableCell align="left">{row.updated_who || '-'}</TableCell>
                           <TableCell align="center">
-                            <section className="flex items-center gap-2">
+                            <section className="flex items-center justify-center gap-2">
                               <Tooltip title="Hapus">
                                 <span>
                                   <IconButton
@@ -493,8 +524,8 @@ const ProductGroup = () => {
                                 <span>
                                   <IconButton
                                     onClick={async () => {
-                                      const response = await dispatch(getProductGroupDetailData(row.id));
-                                      if (Object.keys(response).length > 0) {
+                                      const response: any = await dispatch(getProductGroupDetailData(row.id));
+                                      if (typeof response === 'object' && Object.keys(response).length > 0) {
                                         setSelectedId(response?.id);
                                         setEditForm(true);
                                         const selectedParentProductGroup =
@@ -503,7 +534,7 @@ const ProductGroup = () => {
                                           ) || null;
                                         reset({
                                           id: response?.id,
-                                          name: response?.name,
+                                          name: response?.keterangan,
                                           product_category_id: selectedParentProductGroup,
                                           icon: response?.icon,
                                           product_category_name: response?.product_category_name,

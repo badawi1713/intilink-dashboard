@@ -4,30 +4,25 @@ import reducers from './reducers';
 const middlewares: any[] = [];
 
 const createReducer = () => (state: any, action: never) => {
-    const combinedReducer = combineReducers({
-        ...reducers,
-    });
-    return combinedReducer(state, action);
+  const combinedReducer = combineReducers({
+    ...reducers,
+  });
+  return combinedReducer(state, action);
 };
 
 const reducer = createReducer();
 
 const store = configureStore({
-    reducer,
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            immutableCheck: false,
-            serializableCheck: false,
-        }).concat(middlewares),
+  reducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      immutableCheck: false,
+      serializableCheck: false,
+    }).concat(middlewares),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  Action<string>
->;
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action<string>>;
 
 export default store;
