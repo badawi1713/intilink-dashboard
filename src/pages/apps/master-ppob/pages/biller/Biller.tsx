@@ -522,7 +522,7 @@ const Biller = () => {
                               <Tooltip title="Saldo Check">
                                 <span>
                                   <IconButton
-                                    disabled={row?.have_saldo}
+                                    disabled={!row?.have_saldo}
                                     onClick={async () => {
                                       const response: any = await dispatch(getBillerSaldoData(row.id));
                                       if (typeof response === 'boolean' && response) {
