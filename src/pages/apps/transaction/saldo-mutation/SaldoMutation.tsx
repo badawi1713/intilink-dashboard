@@ -101,6 +101,7 @@ interface Data {
     user_kredit_id: number;
     user_kredit_name: string;
     created_date: string;
+    nominal: number;
 }
 
 function createData(
@@ -112,6 +113,7 @@ function createData(
     user_kredit_id: number,
     user_kredit_name: string,
     created_date: string,
+    nominal: number,
 ): Data {
     return {
         id,
@@ -122,6 +124,7 @@ function createData(
         user_kredit_id,
         user_kredit_name,
         created_date,
+        nominal
     };
 }
 
@@ -147,6 +150,12 @@ const headCells: readonly HeadCell[] = [
         id: 'produk_name',
         disablePadding: false,
         label: 'Produk',
+        disableSort: false,
+    },
+    {
+        id: 'nominal',
+        disablePadding: false,
+        label: 'Nominal',
         disableSort: false,
     },
     {
@@ -266,7 +275,6 @@ const SaldoMutation = () => {
         search,
         loading,
         error,
-        loadingDetail,
         detailData,
     } = useAppSelector((state) => state.saldoMutationReducer);
     const isMount = useRef<boolean>(true);
@@ -336,7 +344,8 @@ const SaldoMutation = () => {
             row?.user_debit_name,
             row?.user_kredit_id,
             row?.user_kredit_name,
-            row?.created_date
+            row?.created_date,
+            row?.nominal
         )
     );
 
@@ -435,7 +444,7 @@ const SaldoMutation = () => {
                                             const labelId = `enhanced-table-checkbox-${index}`;
 
                                             return (
-                                                <TableRow hover tabIndex={-1} key={row.id}>
+                                                <TableRow hover tabIndex={-1} key={index}>
                                                     <TableCell
                                                         align="center"
                                                         component="th"
@@ -446,6 +455,9 @@ const SaldoMutation = () => {
                                                     </TableCell>
                                                     <TableCell align="left">
                                                         {row.produk_name || '-'}
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        {currencyFormat(row.nominal ?? 0)}
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         {row.user_debit_id || '-'}
