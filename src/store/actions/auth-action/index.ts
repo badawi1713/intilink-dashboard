@@ -23,7 +23,7 @@ const changeAuthReducer = (payload: InitialAuthState) => {
 const loginUserAction =
   (payload: { id: string; password: string }): AppThunk =>
   async (dispatch) => {
-    let result: boolean = false;
+    let result = false;
     dispatch({
       type: REDUCER_TYPES.SET_AUTH_REDUCER,
       payload: {

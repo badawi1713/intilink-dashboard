@@ -1,3 +1,3 @@
-import SubProductGroup from "./SubProductGroup";
+import SubProductGroup from './SubProductGroup';
 
 export default SubProductGroup;

@@ -1,4 +1,2 @@
-.next
-dist
-node_modules
-.yarn
+node_modules/
+dist/

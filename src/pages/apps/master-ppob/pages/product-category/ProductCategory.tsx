@@ -3,14 +3,7 @@ import { Delete, Edit, ImageSearchOutlined } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  FormControlLabel,
-  IconButton,
-  Switch,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { FormControlLabel, IconButton, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -28,13 +21,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
-import React, {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
@@ -117,7 +104,7 @@ function createData(
   deleted: boolean,
   background: string,
   created_who: string,
-  updated_who?: string
+  updated_who?: string,
 ): Data {
   return {
     id,
@@ -203,20 +190,16 @@ const headCells: readonly HeadCell[] = [
 ];
 
 interface EnhancedTableProps {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    newOrderBy: keyof Data
-  ) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
   order: Order;
   orderBy: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, newOrderBy);
-    };
+  const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, newOrderBy);
+  };
 
   return (
     <TableHead>
@@ -236,9 +219,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
                   <Box component="span" sx={visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>
                 ) : null}
               </TableSortLabel>
@@ -263,28 +244,15 @@ type FormType = {
 
 const ProductCategory = () => {
   const dispatch = useAppDispatch();
-  const {
-    data,
-    page,
-    sortBy,
-    sortType,
-    limit,
-    total,
-    search,
-    loadingPost,
-    loadingDelete,
-    loading,
-    error,
-  } = useAppSelector((state) => state.masterProductCategoryReducer);
+  const { data, page, sortBy, sortType, limit, total, search, loadingPost, loadingDelete, loading, error } =
+    useAppSelector((state) => state.masterProductCategoryReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] =
-    useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] =
-    useState<boolean>(false);
+  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
+  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
   const [editForm, setEditForm] = useState<boolean>(false);
@@ -328,17 +296,17 @@ const ProductCategory = () => {
     setOpenEditConfirmation(true);
   });
 
-  const onSubmit = handleSubmit(async (data: FormType) => {
-    const formData = await new FormData();
-    formData.append('name', data.name);
-    formData.append('background', data.background);
-    formData.append('link', data.link);
-    formData.append('image', data?.image || '');
-    formData.append('visible', data.visible ? 'true' : 'false');
+  const onSubmit = handleSubmit(async (formData: FormType) => {
+    const form = new FormData();
+    form.append('name', formData.name);
+    form.append('background', formData.background);
+    form.append('link', formData.link);
+    form.append('image', formData?.image || '');
+    form.append('visible', formData.visible ? 'true' : 'false');
 
     let response: boolean;
     if (editForm) {
-      response = await dispatch(editProductCategoryData(data?.id, formData));
+      response = await dispatch(editProductCategoryData(formData?.id, form));
       if (response) {
         handleClose();
         setOpenEditConfirmation(false);
@@ -346,7 +314,7 @@ const ProductCategory = () => {
         dispatch(getMasterProductCategoryData());
       }
     } else {
-      response = await dispatch(addNewProductCategoryData(formData));
+      response = await dispatch(addNewProductCategoryData(form));
       if (response) {
         handleClose();
         dispatch(getMasterProductCategoryData());
@@ -354,7 +322,7 @@ const ProductCategory = () => {
     }
   });
 
-  const handleGetData = useCallback(async () => {
+  const handleGetData = useCallback(() => {
     dispatch(getMasterProductCategoryData());
   }, [dispatch]);
 
@@ -371,7 +339,7 @@ const ProductCategory = () => {
         dispatch(getMasterProductCategoryData());
       }
     },
-    [debouncedSearchTerm] // Only call effect if debounced search term changes
+    [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
   const rows = data?.map((row: Data) =>
@@ -383,11 +351,11 @@ const ProductCategory = () => {
       row?.deleted,
       row?.background,
       row?.created_who,
-      row?.updated_who
-    )
+      row?.updated_who,
+    ),
   );
 
-  const handleRequestSort = React.useCallback(
+  const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';
@@ -396,34 +364,32 @@ const ProductCategory = () => {
         changeMasterProductCategoryReducer({
           sortBy: newOrderBy,
           sortType: toggledOrder,
-        })
+        }),
       );
       dispatch(getMasterProductCategoryData());
     },
 
-    [sortType, sortBy, dispatch]
+    [sortType, sortBy, dispatch],
   );
 
-  const handleChangePage = React.useCallback(
+  const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(
         changeMasterProductCategoryReducer({
           page: newPage,
-        })
+        }),
       );
       dispatch(getMasterProductCategoryData());
     },
-    [dispatch, page]
+    [dispatch, page],
   );
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(
       changeMasterProductCategoryReducer({
         page: 0,
         limit: +event.target.value,
-      })
+      }),
     );
     dispatch(getMasterProductCategoryData());
   };
@@ -452,7 +418,7 @@ const ProductCategory = () => {
                 changeMasterProductCategoryReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
-                })
+                }),
               )
             }
           />
@@ -464,16 +430,9 @@ const ProductCategory = () => {
             <Typography fontWeight={'bold'} variant="h6">
               Master Kategori Produk
             </Typography>
-            <Typography variant="body1">
-              Manajemen daftar kategori produk
-            </Typography>
+            <Typography variant="body1">Manajemen daftar kategori produk</Typography>
           </div>
-          <Button
-            color="success"
-            size="small"
-            variant="contained"
-            onClick={handleClickOpen}
-          >
+          <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
             Tambah Data
           </Button>
         </div>
@@ -488,7 +447,7 @@ const ProductCategory = () => {
                   changeMasterProductCategoryReducer({
                     page: 0,
                     sortBy: 'deleted',
-                  })
+                  }),
                 );
                 dispatch(getMasterProductCategoryData());
               }}
@@ -498,11 +457,7 @@ const ProductCategory = () => {
           ) : (
             <Paper sx={{ width: '100%' }}>
               <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={'medium'}
-                >
+                <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
                     orderBy={sortBy || 'deleted'}
@@ -514,12 +469,7 @@ const ProductCategory = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell
-                            align="center"
-                            component="th"
-                            id={labelId}
-                            scope="row"
-                          >
+                          <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{row.name || '-'}</TableCell>
@@ -554,25 +504,13 @@ const ProductCategory = () => {
                           </TableCell>
                           <TableCell align="center">
                             {!row.deleted ? (
-                              <CheckCircleIcon
-                                titleAccess="Tersedia"
-                                fontSize="small"
-                                color="success"
-                              />
+                              <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
                             ) : (
-                              <CancelIcon
-                                titleAccess="Dihapus"
-                                fontSize="small"
-                                color="error"
-                              />
+                              <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
                             )}
                           </TableCell>
-                          <TableCell align="left">
-                            {row.created_who || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.updated_who || '-'}
-                          </TableCell>
+                          <TableCell align="left">{row.created_who || '-'}</TableCell>
+                          <TableCell align="left">{row.updated_who || '-'}</TableCell>
                           <TableCell align="center">
                             <section className="flex items-center gap-2">
                               <Tooltip title="Hapus">
@@ -594,9 +532,7 @@ const ProductCategory = () => {
                                 <span>
                                   <IconButton
                                     onClick={async () => {
-                                      const response = await dispatch(
-                                        getProductCategoryDetailData(row.id)
-                                      );
+                                      const response = await dispatch(getProductCategoryDetailData(row.id));
                                       if (Object.keys(response).length > 0) {
                                         setSelectedId(response?.id);
                                         setEditForm(true);
@@ -606,8 +542,7 @@ const ProductCategory = () => {
                                           image: response?.image || '',
                                           link: response?.link || '',
                                           visible: response?.visible || false,
-                                          background:
-                                            response?.background || '#000000',
+                                          background: response?.background || '#000000',
                                         });
                                         handleClickOpen();
                                       }
@@ -641,19 +576,9 @@ const ProductCategory = () => {
         </section>
       </main>
       {openFormDialog && (
-        <BootstrapDialog
-          aria-labelledby="customized-dialog-title"
-          open={openFormDialog}
-          maxWidth="md"
-          fullWidth
-        >
-          <BootstrapDialogTitle
-            id="customized-dialog-title"
-            onClose={handleClose}
-          >
-            {editForm
-              ? 'Edit Data Kategori Produk'
-              : 'Data Kategori Produk Baru'}
+        <BootstrapDialog aria-labelledby="customized-dialog-title" open={openFormDialog} maxWidth="md" fullWidth>
+          <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
+            {editForm ? 'Edit Data Kategori Produk' : 'Data Kategori Produk Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
             <section className="flex-col flex gap-4 w-full mb-8">
@@ -697,16 +622,12 @@ const ProductCategory = () => {
                   name="background"
                   render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">
-                        Background
-                      </label>
+                      <label className="text-sm font-semibold">Background</label>
                       <TextField
                         {...field}
                         fullWidth
                         placeholder="Type product category background"
-                        helperText={
-                          errors?.background && errors.background?.message
-                        }
+                        helperText={errors?.background && errors.background?.message}
                         error={!!errors?.background}
                         type="color"
                       />
@@ -716,11 +637,9 @@ const ProductCategory = () => {
                 <Controller
                   control={control}
                   name="image"
-                  render={({ field: { onChange, ...field } }) => (
+                  render={({ field: { onChange } }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">
-                        Choose Image
-                      </label>
+                      <label className="text-sm font-semibold">Choose Image</label>
                       <section className="flex gap-3 items-stretch">
                         <TextField
                           //   {...field}
@@ -760,7 +679,7 @@ const ProductCategory = () => {
                 <Controller
                   control={control}
                   name="visible"
-                  render={({ field: { onChange, value, ...field } }) => (
+                  render={({ field: { onChange, value } }) => (
                     <div className="flex flex-col gap-3">
                       <label className="text-sm font-semibold">Visible</label>
                       <FormControlLabel
@@ -782,11 +701,7 @@ const ProductCategory = () => {
             </section>
           </DialogContent>
           <DialogActions>
-            <Button
-              disabled={loadingPost}
-              color="inherit"
-              onClick={handleClose}
-            >
+            <Button disabled={loadingPost} color="inherit" onClick={handleClose}>
               Batal
             </Button>
             <Button
@@ -855,11 +770,7 @@ const ProductCategory = () => {
           </BootstrapDialogTitle>
           <DialogContent dividers>
             <section className="flex flex-col items-center justify-center h-[240px]">
-              <img
-                alt="preview"
-                className="w-full h-full p-1 object-scale-down"
-                src={selectedImagePreview}
-              />
+              <img alt="preview" className="w-full h-full p-1 object-scale-down" src={selectedImagePreview} />
             </section>
           </DialogContent>
         </BootstrapDialog>

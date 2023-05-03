@@ -3,13 +3,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Autocomplete,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Autocomplete, IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -108,7 +102,7 @@ function createData(
   deleted: boolean,
   product_category_id: number,
   created_who: string,
-  updated_who?: string
+  updated_who?: string,
 ): Data {
   return {
     id,
@@ -181,20 +175,16 @@ const headCells: readonly HeadCell[] = [
 ];
 
 interface EnhancedTableProps {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    newOrderBy: keyof Data
-  ) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
   order: Order;
   orderBy: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, newOrderBy);
-    };
+  const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, newOrderBy);
+  };
 
   return (
     <TableHead>
@@ -214,9 +204,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
                   <Box component="span" sx={visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>
                 ) : null}
               </TableSortLabel>
@@ -259,10 +247,8 @@ const ProductGroup = () => {
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] =
-    useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] =
-    useState<boolean>(false);
+  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
+  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [editForm, setEditForm] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -299,14 +285,14 @@ const ProductGroup = () => {
     setOpenEditConfirmation(true);
   });
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (formData) => {
     const payload = {
-      name: data.name,
-      product_category_id: data.product_category_id?.id || 0,
+      name: formData.name,
+      product_category_id: formData.product_category_id?.id || 0,
     };
     let response: boolean;
     if (editForm) {
-      response = await dispatch(editProductGroupData(data?.id, payload));
+      response = await dispatch(editProductGroupData(formData?.id, payload));
       if (response) {
         handleClose();
         setOpenEditConfirmation(false);
@@ -322,7 +308,7 @@ const ProductGroup = () => {
     }
   });
 
-  const handleGetData = useCallback(async () => {
+  const handleGetData = useCallback(() => {
     dispatch(getMasterProductGroupData());
   }, [dispatch]);
 
@@ -339,7 +325,7 @@ const ProductGroup = () => {
         dispatch(getMasterProductGroupData());
       }
     },
-    [debouncedSearchTerm] // Only call effect if debounced search term changes
+    [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
   const rows = data?.map((row: Data) =>
@@ -351,11 +337,11 @@ const ProductGroup = () => {
       row?.deleted,
       row?.product_category_id,
       row?.created_who,
-      row?.updated_who
-    )
+      row?.updated_who,
+    ),
   );
 
-  const handleRequestSort = React.useCallback(
+  const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';
@@ -364,41 +350,38 @@ const ProductGroup = () => {
         changeMasterProductGroupReducer({
           sortBy: newOrderBy,
           sortType: toggledOrder,
-        })
+        }),
       );
       dispatch(getMasterProductGroupData());
     },
 
-    [sortType, sortBy, dispatch]
+    [sortType, sortBy, dispatch],
   );
 
-  const handleChangePage = React.useCallback(
+  const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(
         changeMasterProductGroupReducer({
           page: newPage,
-        })
+        }),
       );
       dispatch(getMasterProductGroupData());
     },
-    [dispatch, page]
+    [dispatch, page],
   );
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(
       changeMasterProductGroupReducer({
         page: 0,
         limit: +event.target.value,
-      })
+      }),
     );
     dispatch(getMasterProductGroupData());
   };
 
   const getProductGroupListItem = (option: { id: number; name: string }) => {
-    if (!option?.id)
-      option = productCategoryList?.find((op) => op.id === option);
+    if (!option?.id) option = productCategoryList?.find((op) => op.id === option);
     return option;
   };
 
@@ -424,7 +407,7 @@ const ProductGroup = () => {
                 changeMasterProductGroupReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
-                })
+                }),
               )
             }
           />
@@ -436,16 +419,9 @@ const ProductGroup = () => {
             <Typography fontWeight={'bold'} variant="h6">
               Master Grup Produk
             </Typography>
-            <Typography variant="body1">
-              Manajemen daftar grup produk
-            </Typography>
+            <Typography variant="body1">Manajemen daftar grup produk</Typography>
           </div>
-          <Button
-            color="success"
-            size="small"
-            variant="contained"
-            onClick={handleClickOpen}
-          >
+          <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
             Tambah Data
           </Button>
         </div>
@@ -460,7 +436,7 @@ const ProductGroup = () => {
                   changeMasterProductGroupReducer({
                     page: 0,
                     sortBy: 'deleted',
-                  })
+                  }),
                 );
                 dispatch(getMasterProductGroupData());
               }}
@@ -470,11 +446,7 @@ const ProductGroup = () => {
           ) : (
             <Paper sx={{ width: '100%' }}>
               <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={'medium'}
-                >
+                <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
                     orderBy={sortBy || 'deleted'}
@@ -486,39 +458,20 @@ const ProductGroup = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell
-                            align="center"
-                            component="th"
-                            id={labelId}
-                            scope="row"
-                          >
+                          <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{row.name || '-'}</TableCell>
-                          <TableCell align="left">
-                            {row.product_category_name || '-'}
-                          </TableCell>
+                          <TableCell align="left">{row.product_category_name || '-'}</TableCell>
                           <TableCell align="center">
                             {!row.deleted ? (
-                              <CheckCircleIcon
-                                titleAccess="Tersedia"
-                                fontSize="small"
-                                color="success"
-                              />
+                              <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
                             ) : (
-                              <CancelIcon
-                                titleAccess="Dihapus"
-                                fontSize="small"
-                                color="error"
-                              />
+                              <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
                             )}
                           </TableCell>
-                          <TableCell align="left">
-                            {row.created_who || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.updated_who || '-'}
-                          </TableCell>
+                          <TableCell align="left">{row.created_who || '-'}</TableCell>
+                          <TableCell align="left">{row.updated_who || '-'}</TableCell>
                           <TableCell align="center">
                             <section className="flex items-center gap-2">
                               <Tooltip title="Hapus">
@@ -540,26 +493,20 @@ const ProductGroup = () => {
                                 <span>
                                   <IconButton
                                     onClick={async () => {
-                                      const response = await dispatch(
-                                        getProductGroupDetailData(row.id)
-                                      );
+                                      const response = await dispatch(getProductGroupDetailData(row.id));
                                       if (Object.keys(response).length > 0) {
                                         setSelectedId(response?.id);
                                         setEditForm(true);
                                         const selectedParentProductGroup =
                                           productCategoryList?.find(
-                                            (productGroup) =>
-                                              productGroup?.id ===
-                                              response?.product_category_id
+                                            (productGroup) => productGroup?.id === response?.product_category_id,
                                           ) || null;
                                         reset({
                                           id: response?.id,
                                           name: response?.name,
-                                          product_category_id:
-                                            selectedParentProductGroup,
+                                          product_category_id: selectedParentProductGroup,
                                           icon: response?.icon,
-                                          product_category_name:
-                                            response?.product_category_name,
+                                          product_category_name: response?.product_category_name,
                                         });
                                         handleClickOpen();
                                       }
@@ -593,16 +540,8 @@ const ProductGroup = () => {
         </section>
       </main>
       {openFormDialog && (
-        <BootstrapDialog
-          aria-labelledby="customized-dialog-title"
-          open={openFormDialog}
-          maxWidth="md"
-          fullWidth
-        >
-          <BootstrapDialogTitle
-            id="customized-dialog-title"
-            onClose={handleClose}
-          >
+        <BootstrapDialog aria-labelledby="customized-dialog-title" open={openFormDialog} maxWidth="md" fullWidth>
+          <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
             {editForm ? 'Edit Data Grup Produk' : 'Data Grup Produk Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
@@ -627,11 +566,9 @@ const ProductGroup = () => {
                 <Controller
                   control={control}
                   name="product_category_id"
-                  render={({ field: { onChange, value, ...field } }) => (
+                  render={({ field: { onChange, value } }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">
-                        Product Category
-                      </label>
+                      <label className="text-sm font-semibold">Product Category</label>
                       <Autocomplete
                         onChange={(event, item) => {
                           onChange(item);
@@ -639,9 +576,7 @@ const ProductGroup = () => {
                         id="product_category_id"
                         value={value}
                         isOptionEqualToValue={(option, val) => {
-                          return (
-                            option?.id === getProductGroupListItem(val)?.id
-                          );
+                          return option?.id === getProductGroupListItem(val)?.id;
                         }}
                         fullWidth
                         options={productCategoryList || []}
@@ -664,11 +599,7 @@ const ProductGroup = () => {
             </section>
           </DialogContent>
           <DialogActions>
-            <Button
-              disabled={loadingPost}
-              color="inherit"
-              onClick={handleClose}
-            >
+            <Button disabled={loadingPost} color="inherit" onClick={handleClose}>
               Batal
             </Button>
             <Button

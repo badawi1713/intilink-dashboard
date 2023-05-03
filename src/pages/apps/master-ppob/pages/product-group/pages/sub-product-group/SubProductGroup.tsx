@@ -1,5 +1,5 @@
 const SubProductGroup = () => {
-    return <div>SubProductGroup</div>;
+  return <div>SubProductGroup</div>;
 };
 
 export default SubProductGroup;

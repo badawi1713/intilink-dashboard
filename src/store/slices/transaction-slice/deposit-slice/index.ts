@@ -59,25 +59,16 @@ const depositSlice = createSlice({
   name: 'deposit',
   initialState,
   reducers: {
-    setDepositData: (
-      state,
-      action: PayloadAction<{ data: any[]; total: number }>
-    ) => {
+    setDepositData: (state, action: PayloadAction<{ data: any[]; total: number }>) => {
       state.data = action.payload.data;
       state.total = action.payload.total;
       state.loading = false;
     },
-    setDepositLogDetailData: (
-      state,
-      action: PayloadAction<any>
-    ) => {
+    setDepositLogDetailData: (state, action: PayloadAction<any>) => {
       state.logDetailData = action.payload;
       state.loadingDetail = false;
     },
-    setDepositDetailData: (
-      state,
-      action: PayloadAction<null | DepositDetailData>
-    ) => {
+    setDepositDetailData: (state, action: PayloadAction<null | DepositDetailData>) => {
       state.detailData = action.payload;
       state.loadingDetail = false;
     },
@@ -117,10 +108,10 @@ const depositSlice = createSlice({
       state.error = action.payload;
     },
     setDepositEnablePostLoading: (state) => {
-      state.loadingPost = true
+      state.loadingPost = true;
     },
     setDepositDisablePostLoading: (state) => {
-      state.loadingPost = false
+      state.loadingPost = false;
     },
     setDepositResetState: () => {
       return { ...initialState };
@@ -144,7 +135,7 @@ export const {
   setDepositDetailData,
   setDepositLogDetailData,
   setDepositEnablePostLoading,
-  setDepositDisablePostLoading
+  setDepositDisablePostLoading,
 } = depositSlice.actions;
 
 export default depositSlice.reducer;

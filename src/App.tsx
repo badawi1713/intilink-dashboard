@@ -4,29 +4,17 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { Layout, SplashScreen } from './components';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { useAppSelector } from './hooks/useAppSelector';
-import {
-  ForgotPassword,
-  Home,
-  Login,
-  MasterMenu,
-  Page404,
-  ResetPassword,
-} from './pages';
+import { ForgotPassword, Home, Login, MasterMenu, Page404, ResetPassword } from './pages';
 import ProductCategory from './pages/apps/master-ppob/pages/product-category';
 import ProductGroup from './pages/apps/master-ppob/pages/product-group';
 import SubProductGroup from './pages/apps/master-ppob/pages/product-group/pages/sub-product-group';
 import { Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
-import {
-  getAccessTokenAction,
-  userLogoutAction,
-} from './store/actions/auth-action';
+import { getAccessTokenAction, userLogoutAction } from './store/actions/auth-action';
 import Products from './pages/apps/master-ppob/pages/products';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
-  const { loading, user, preload } = useAppSelector(
-    (state) => state.authReducer
-  );
+  const { loading, user, preload } = useAppSelector((state) => state.authReducer);
   const navigate = useNavigate();
   const isMounted = useRef<boolean>(true);
 
@@ -40,17 +28,13 @@ const App: FC = () => {
   axios.interceptors.response.use(
     (response) => response,
     (error) =>
-      new Promise((resolve, reject) => {
-        if (
-          error.response?.status === 401 &&
-          error.config &&
-          !error.config.__isRetryRequest
-        ) {
+      new Promise(() => {
+        if (error.response?.status === 401 && error.config && !error.config.__isRetryRequest) {
           dispatch(userLogoutAction());
           navigate('/');
         }
         throw error;
-      })
+      }),
   );
 
   if (loading || preload) {

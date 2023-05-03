@@ -53,25 +53,16 @@ const TransactionsSlice = createSlice({
   name: 'Transactions',
   initialState,
   reducers: {
-    setTransactionsData: (
-      state,
-      action: PayloadAction<{ data: any[]; total: number }>
-    ) => {
+    setTransactionsData: (state, action: PayloadAction<{ data: any[]; total: number }>) => {
       state.data = action.payload.data;
       state.total = action.payload.total;
       state.loading = false;
     },
-    setTransactionsLogDetailData: (
-      state,
-      action: PayloadAction<any>
-    ) => {
+    setTransactionsLogDetailData: (state, action: PayloadAction<any>) => {
       state.logDetailData = action.payload;
       state.loadingDetail = false;
     },
-    setTransactionsDetailData: (
-      state,
-      action: PayloadAction<null | TransactionsDetailData>
-    ) => {
+    setTransactionsDetailData: (state, action: PayloadAction<null | TransactionsDetailData>) => {
       state.detailData = action.payload;
       state.loadingDetail = false;
     },
@@ -130,7 +121,7 @@ export const {
   setTransactionsSortType,
   setTransactionsData,
   setTransactionsDetailData,
-  setTransactionsLogDetailData
+  setTransactionsLogDetailData,
 } = TransactionsSlice.actions;
 
 export default TransactionsSlice.reducer;
