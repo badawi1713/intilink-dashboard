@@ -120,7 +120,12 @@ const getProductCategoryListData = (): AppThunk => {
   };
 };
 
-const addNewProductGroupData = (data: { name: string; product_category_id: number }): AppThunk => {
+const addNewProductGroupData = (data: {
+  nama: string;
+  product_category_id: number;
+  keterangan: string;
+  id: string;
+}): AppThunk => {
   return async (dispatch) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_PRODUCT_GROUP_REDUCER,
@@ -231,10 +236,12 @@ const getProductGroupDetailData = (id: number): AppThunk => {
 };
 
 const editProductGroupData = (
-  id: number,
+  id: string,
   data: {
-    name: string;
+    nama: string;
     product_category_id: number;
+    keterangan: string;
+    id: string;
   },
 ): AppThunk => {
   return async (dispatch) => {
@@ -310,7 +317,6 @@ const deleteProductGroupData = (id: number): AppThunk => {
           variant: 'success',
         }),
       );
-      return;
       return true;
     } catch (error) {
       if (axios.isAxiosError(error)) {

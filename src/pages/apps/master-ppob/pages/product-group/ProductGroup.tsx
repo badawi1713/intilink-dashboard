@@ -52,6 +52,8 @@ import * as yup from 'yup';
 
 const productGroupSchema = yup.object().shape({
   name: yup.string().required('Name is required'),
+  id: yup.string().required('ID is required'),
+  notes: yup.string().required('Notes is required'),
   product_category_id: yup.object().nullable().required('Category is required'),
 });
 
@@ -147,13 +149,13 @@ const headCells: readonly HeadCell[] = [
   {
     id: 'name',
     disablePadding: false,
-    label: 'Category',
+    label: 'Name',
     disableSort: false,
   },
   {
     id: 'keterangan',
     disablePadding: false,
-    label: 'Name',
+    label: 'Keterangan',
     disableSort: false,
   },
   {
@@ -217,11 +219,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 type FormType = {
-  id: number;
+  id: string;
   name: string;
   product_category_id: null | { id: number; name: string };
-  icon: string;
-  product_category_name: string;
+  notes: string;
 };
 
 const ProductGroup = () => {
@@ -254,8 +255,9 @@ const ProductGroup = () => {
   const formMethods = useForm<FormType>({
     mode: 'onChange',
     defaultValues: {
-      id: 0,
+      id: '',
       name: '',
+      notes: '',
       product_category_id: null,
     },
     resolver: yupResolver(productGroupSchema),
@@ -273,8 +275,9 @@ const ProductGroup = () => {
     }
     setOpenFormDialog(false);
     reset({
-      id: 0,
+      id: '',
       name: '',
+      notes: '',
       product_category_id: null,
     });
   };
@@ -285,8 +288,10 @@ const ProductGroup = () => {
 
   const onSubmit = handleSubmit(async (formData) => {
     const payload = {
-      name: formData.name,
       product_category_id: formData.product_category_id?.id || 0,
+      nama: formData.name,
+      keterangan: formData.notes,
+      id: formData.id,
     };
     if (editForm) {
       const response = await dispatch(editProductGroupData(formData?.id, payload));
@@ -534,10 +539,9 @@ const ProductGroup = () => {
                                           ) || null;
                                         reset({
                                           id: response?.id,
-                                          name: response?.keterangan,
+                                          name: response?.product_category_name,
                                           product_category_id: selectedParentProductGroup,
-                                          icon: response?.icon,
-                                          product_category_name: response?.product_category_name,
+                                          notes: response?.keterangan,
                                         });
                                         handleClickOpen();
                                       }
@@ -580,6 +584,23 @@ const ProductGroup = () => {
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
                   control={control}
+                  name="id"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">ID</label>
+                      <TextField
+                        {...field}
+                        disabled={editForm}
+                        fullWidth
+                        placeholder="Type product group id"
+                        helperText={errors?.id && errors.id?.message}
+                        error={!!errors?.id}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
                   name="name"
                   render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
@@ -590,6 +611,24 @@ const ProductGroup = () => {
                         placeholder="Type product group name"
                         helperText={errors?.name && errors.name?.message}
                         error={!!errors?.name}
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="notes"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Keterangan</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type product group notes"
+                        helperText={errors?.notes && errors.notes?.message}
+                        error={!!errors?.notes}
                       />
                     </div>
                   )}
