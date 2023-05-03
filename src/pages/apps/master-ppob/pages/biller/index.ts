@@ -1,3 +1,3 @@
-import ProductCategory from './ProductCategory';
+import Biller from './Biller';
 
-export default ProductCategory;
+export default Biller;
