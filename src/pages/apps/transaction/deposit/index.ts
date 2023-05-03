@@ -1,3 +1,3 @@
-import Deposit from "./Deposit";
+import Deposit from './Deposit';
 
 export default Deposit;

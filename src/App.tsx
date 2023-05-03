@@ -5,12 +5,13 @@ import { Layout, SplashScreen } from './components';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { useAppSelector } from './hooks/useAppSelector';
 import { ForgotPassword, Home, Login, MasterMenu, Page404, ResetPassword } from './pages';
+import Biller from './pages/apps/master-ppob/pages/biller/Biller';
 import ProductCategory from './pages/apps/master-ppob/pages/product-category';
 import ProductGroup from './pages/apps/master-ppob/pages/product-group';
 import SubProductGroup from './pages/apps/master-ppob/pages/product-group/pages/sub-product-group';
+import Products from './pages/apps/master-ppob/pages/products';
 import { Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
 import { getAccessTokenAction, userLogoutAction } from './store/actions/auth-action';
-import Products from './pages/apps/master-ppob/pages/products';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -55,6 +56,7 @@ const App: FC = () => {
               <Route index element={<ProductGroup />} />
               <Route path="sub-product-group" element={<SubProductGroup />} />
             </Route>
+            <Route path="biller" element={<Biller />} />
           </Route>
           <Route path="transaction">
             <Route index element={<Navigate to="proses-transaksi" replace />} />

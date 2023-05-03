@@ -1,6 +1,5 @@
-export type InitialMasterProductCategoryState = {
+export type InitialMasterBillerState = {
   data?: any[];
-  billerSaldo?: string;
   page?: number;
   limit?: number;
   total?: number;
@@ -15,9 +14,9 @@ export type InitialMasterProductCategoryState = {
   error?: null | string;
 };
 
-export type MasterProductCategoryAction = {
+export type MasterBillerAction = {
   type: string;
-  payload: InitialMasterProductCategoryState;
+  payload: InitialMasterBillerState;
 };
 
-export type MasterProductCategoryDispatchType = (args: MasterProductCategoryAction) => MasterProductCategoryAction;
+export type MasterBillerDispatchType = (args: MasterBillerAction) => MasterBillerAction;

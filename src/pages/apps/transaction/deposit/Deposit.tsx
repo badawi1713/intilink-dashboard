@@ -1,16 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CheckCircleOutline, History, Info } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  DialogContent,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { DialogContent, IconButton, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -224,20 +215,16 @@ const headCells: readonly HeadCell[] = [
 ];
 
 interface EnhancedTableProps {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    newOrderBy: keyof Data
-  ) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
   order: Order;
   orderBy: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, newOrderBy);
-    };
+  const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, newOrderBy);
+  };
 
   return (
     <TableHead>
@@ -257,9 +244,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
                   <Box component="span" sx={visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>
                 ) : null}
               </TableSortLabel>
@@ -296,21 +281,19 @@ const Deposit = () => {
     loadingDetail,
     detailData,
     logDetailData,
-    loadingPost
+    loadingPost,
   } = useAppSelector((state) => state.depositReducer);
   const isMount = useRef<boolean>(true);
 
-  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : "-";
+  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : '-';
   const responseLogData = JSON.stringify(responseLogDataJson, null, 2);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
-  const [openManualDepositConfirmation, setOpenManualDepositConfirmation] =
-    useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] =
-    useState<boolean>(false);
+  const [openManualDepositConfirmation, setOpenManualDepositConfirmation] = useState<boolean>(false);
+  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const formMethods = useForm<FormType>({
@@ -345,7 +328,7 @@ const Deposit = () => {
     setOpenEditConfirmation(true);
   });
 
-  const handleGetData = useCallback(async () => {
+  const handleGetData = useCallback(() => {
     dispatch(handleGetDepositData());
   }, [dispatch]);
 
@@ -362,7 +345,7 @@ const Deposit = () => {
         dispatch(handleGetDepositData());
       }
     },
-    [debouncedSearchTerm] // Only call effect if debounced search term changes
+    [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
   const rows = data?.map((row: Data) =>
@@ -379,7 +362,7 @@ const Deposit = () => {
       row?.created_date,
       row?.reff_id,
       row?.expired_date,
-    )
+    ),
   );
 
   const handleRequestSort = React.useCallback(
@@ -392,7 +375,7 @@ const Deposit = () => {
       dispatch(handleGetDepositData());
     },
 
-    [sortType, sortBy, dispatch]
+    [sortType, sortBy, dispatch],
   );
 
   const handleChangePage = React.useCallback(
@@ -400,12 +383,10 @@ const Deposit = () => {
       dispatch(setDepositPage(newPage));
       dispatch(handleGetDepositData());
     },
-    [dispatch, page]
+    [dispatch, page],
   );
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setDepositPage(0));
     dispatch(setDepositLimit(+event.target.value));
 
@@ -430,9 +411,7 @@ const Deposit = () => {
             type="search"
             placeholder="Cari data..."
             onChange={(e: React.FormEvent<HTMLInputElement>) =>
-              dispatch(
-                setDepositSearchData((e.target as HTMLInputElement).value)
-              )
+              dispatch(setDepositSearchData((e.target as HTMLInputElement).value))
             }
           />
         </div>
@@ -462,11 +441,7 @@ const Deposit = () => {
           ) : (
             <Paper sx={{ width: '100%' }}>
               <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={'medium'}
-                >
+                <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
                     orderBy={sortBy || 'deleted'}
@@ -478,40 +453,19 @@ const Deposit = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell
-                            align="center"
-                            component="th"
-                            id={labelId}
-                            scope="row"
-                          >
+                          <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.nominal ?? 0)}
-                          </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.admin_nominal ?? 0)}
-                          </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.total_bayar ?? 0)}
-                          </TableCell>
+                          <TableCell align="left">{currencyFormat(row.nominal ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.admin_nominal ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.total_bayar ?? 0)}</TableCell>
                           <TableCell align="left">{row.bank || '-'}</TableCell>
-                          <TableCell align="center">
-                            {row.kode_bayar || '-'}
-                          </TableCell>
-                          <TableCell align="center">
-                            {row.status_name || '-'}
-                          </TableCell>
-                          <TableCell align="center">
-                            {row.user_id || '-'}
-                          </TableCell>
+                          <TableCell align="center">{row.kode_bayar || '-'}</TableCell>
+                          <TableCell align="center">{row.status_name || '-'}</TableCell>
+                          <TableCell align="center">{row.user_id || '-'}</TableCell>
 
-                          <TableCell align="left">
-                            {row.created_date || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.expired_date || '-'}
-                          </TableCell>
+                          <TableCell align="left">{row.created_date || '-'}</TableCell>
+                          <TableCell align="left">{row.expired_date || '-'}</TableCell>
                           <TableCell align="center">
                             <section className="flex items-center gap-2">
                               <Tooltip title="Biller Log">
@@ -520,15 +474,10 @@ const Deposit = () => {
                                     disabled={loadingDetail || loadingPost}
                                     color="default"
                                     onClick={async () => {
-                                      const response = await dispatch(
-                                        handleGetDepositLogDetailData(row.reff_id)
-                                      );
+                                      const response = await dispatch(handleGetDepositLogDetailData(row.reff_id));
 
-                                      if (
-                                        typeof response === 'boolean' &&
-                                        response
-                                      ) {
-                                        setOpenLogDialog(true)
+                                      if (typeof response === 'boolean' && response) {
+                                        setOpenLogDialog(true);
                                       }
                                     }}
                                     size="small"
@@ -544,14 +493,9 @@ const Deposit = () => {
                                     disabled={loadingDetail || loadingPost}
                                     color="info"
                                     onClick={async () => {
-                                      const response = await dispatch(
-                                        handleGetDepositDetailData(row.id)
-                                      );
+                                      const response = await dispatch(handleGetDepositDetailData(row.id));
 
-                                      if (
-                                        typeof response === 'boolean' &&
-                                        response
-                                      ) {
+                                      if (typeof response === 'boolean' && response) {
                                         handleClickOpen();
                                       }
                                     }}
@@ -567,7 +511,7 @@ const Deposit = () => {
                                   <IconButton
                                     disabled={loadingDetail || loadingPost}
                                     color="success"
-                                    onClick={async () => {
+                                    onClick={() => {
                                       setSelectedId(row?.reff_id);
                                       setOpenManualDepositConfirmation(true);
                                     }}
@@ -606,10 +550,7 @@ const Deposit = () => {
         maxWidth="sm"
         fullWidth
       >
-        <BootstrapDialogTitle
-          id="customized-dialog-title"
-          onClose={handleClose}
-        >
+        <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
           Detail Deposit
         </BootstrapDialogTitle>
         <DialogContent dividers>
@@ -619,82 +560,43 @@ const Deposit = () => {
                 <ListItemText primary="ID" secondary={detailData?.id ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Nominal"
-                  secondary={currencyFormat(detailData?.nominal ?? 0)}
-                />
+                <ListItemText primary="Nominal" secondary={currencyFormat(detailData?.nominal ?? 0)} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Nominal Admin"
-                  secondary={currencyFormat(detailData?.admin_nominal ?? 0)}
-                />
+                <ListItemText primary="Nominal Admin" secondary={currencyFormat(detailData?.admin_nominal ?? 0)} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Total bayar"
-                  secondary={currencyFormat(detailData?.total_bayar ?? 0)}
-                />
+                <ListItemText primary="Total bayar" secondary={currencyFormat(detailData?.total_bayar ?? 0)} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Type Admin"
-                  secondary={detailData?.admin_type ?? '-'}
-                />
+                <ListItemText primary="Type Admin" secondary={detailData?.admin_type ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Bank"
-                  secondary={detailData?.bank ?? '-'}
-                />
+                <ListItemText primary="Bank" secondary={detailData?.bank ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Status"
-                  secondary={detailData?.status_name ?? '-'}
-                />
+                <ListItemText primary="Status" secondary={detailData?.status_name ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="User"
-                  secondary={detailData?.user_name ?? '-'}
-                />
+                <ListItemText primary="User" secondary={detailData?.user_name ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="User ID"
-                  secondary={detailData?.user_id ?? '-'}
-                />
+                <ListItemText primary="User ID" secondary={detailData?.user_id ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Created Date"
-                  secondary={detailData?.created_date ?? '-'}
-                />
+                <ListItemText primary="Created Date" secondary={detailData?.created_date ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Expired Date"
-                  secondary={detailData?.expired_date ?? '-'}
-                />
+                <ListItemText primary="Expired Date" secondary={detailData?.expired_date ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Biller"
-                  secondary={detailData?.biller ?? '-'}
-                />
+                <ListItemText primary="Biller" secondary={detailData?.biller ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Transaksi Biller ID"
-                  secondary={detailData?.biller_trx_id ?? '-'}
-                />
+                <ListItemText primary="Transaksi Biller ID" secondary={detailData?.biller_trx_id ?? '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Reff ID"
-                  secondary={detailData?.reff_id ?? '-'}
-                />
+                <ListItemText primary="Reff ID" secondary={detailData?.reff_id ?? '-'} />
               </ListItem>
             </List>
           </section>
@@ -707,10 +609,7 @@ const Deposit = () => {
         maxWidth="xl"
         fullWidth
       >
-        <BootstrapDialogTitle
-          id="customized-dialog-title"
-          onClose={handleLogDetailClose}
-        >
+        <BootstrapDialogTitle id="customized-dialog-title" onClose={handleLogDetailClose}>
           Biller Log Deposit
         </BootstrapDialogTitle>
         <DialogContent dividers>
@@ -720,26 +619,13 @@ const Deposit = () => {
                 <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Tanggal"
-                  secondary={(logDetailData?.response_date || '-')}
-                />
+                <ListItemText primary="Tanggal" secondary={logDetailData?.response_date || '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Request"
-                  secondary={(logDetailData?.request || '-')}
-                />
+                <ListItemText primary="Request" secondary={logDetailData?.request || '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Response"
-                  secondary={
-                    <pre>
-                      {responseLogData}
-                    </pre>
-                  }
-                />
+                <ListItemText primary="Response" secondary={<pre>{responseLogData}</pre>} />
               </ListItem>
             </List>
           </section>

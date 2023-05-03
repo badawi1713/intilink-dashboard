@@ -6,6 +6,7 @@ import * as REDUCER_TYPES from '../../../types';
 
 const initialState: InitialMasterProductCategoryState = {
   data: [],
+  billerSaldo: '',
   limit: 5,
   page: 0,
   total: 0,
@@ -22,7 +23,7 @@ const initialState: InitialMasterProductCategoryState = {
 
 const masterProductCategoryReducer = (state = initialState, action: MasterProductCategoryAction) => {
   switch (action.type) {
-    case REDUCER_TYPES.SET_MASTER_PRODUCT_CATEGORY_REDUCER:
+    case REDUCER_TYPES.SET_MASTER_BILLER_REDUCER:
       return { ...state, ...action.payload };
     default:
       return state;
