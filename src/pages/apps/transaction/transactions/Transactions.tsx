@@ -1,15 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { History } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  DialogContent,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { DialogContent, IconButton, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -34,7 +26,7 @@ import { useAppSelector } from 'src/hooks/useAppSelector';
 import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
 import {
   handleGetTransactionsData,
-  handleGetTransactionsLogDetailData
+  handleGetTransactionsLogDetailData,
 } from 'src/store/actions/transaction-action/transactions-action';
 import {
   setTransactionsLimit,
@@ -104,6 +96,8 @@ interface Data {
   total_bayar: number;
   reff_id: string;
   created_date: string;
+  harga_beli: number;
+  index: number;
 }
 
 function createData(
@@ -118,6 +112,8 @@ function createData(
   total_bayar: number,
   reff_id: string,
   created_date: string,
+  harga_beli: number,
+  index: number,
 ): Data {
   return {
     id,
@@ -131,6 +127,8 @@ function createData(
     total_bayar,
     reff_id,
     created_date,
+    harga_beli,
+    index,
   };
 }
 
@@ -183,6 +181,12 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
+    id: 'harga_beli',
+    disablePadding: false,
+    label: 'Harga Beli',
+    disableSort: false,
+  },
+  {
     id: 'admin',
     disablePadding: false,
     label: 'Biaya Admin',
@@ -214,7 +218,7 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
-    id: 'id',
+    id: 'index',
     disablePadding: false,
     label: 'Action',
     align: 'center',
@@ -223,20 +227,16 @@ const headCells: readonly HeadCell[] = [
 ];
 
 interface EnhancedTableProps {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    newOrderBy: keyof Data
-  ) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
   order: Order;
   orderBy: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, newOrderBy);
-    };
+  const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, newOrderBy);
+  };
 
   return (
     <TableHead>
@@ -256,9 +256,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
                   <Box component="span" sx={visuallyHidden}>
-                    {order === 'desc'
-                      ? 'sorted descending'
-                      : 'sorted ascending'}
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>
                 ) : null}
               </TableSortLabel>
@@ -294,21 +292,19 @@ const Transactions = () => {
     error,
     loadingDetail,
     logDetailData,
-    loadingPost
+    loadingPost,
   } = useAppSelector((state) => state.transactionsReducer);
   const isMount = useRef<boolean>(true);
 
-  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : "-";
+  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : '-';
   const responseLogData = JSON.stringify(responseLogDataJson, null, 2);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] =
-    useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] =
-    useState<boolean>(false);
+  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
+  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const formMethods = useForm<FormType>({
@@ -329,7 +325,7 @@ const Transactions = () => {
   const handleClickOpen = () => {
     setOpenDialog(true);
   };
-  
+
   const handleClose = () => {
     setOpenDialog(false);
     dispatch(setTransactionsResetDetailData());
@@ -344,7 +340,7 @@ const Transactions = () => {
     setOpenEditConfirmation(true);
   });
 
-  const handleGetData = useCallback(async () => {
+  const handleGetData = useCallback(() => {
     dispatch(handleGetTransactionsData());
   }, [dispatch]);
 
@@ -361,10 +357,10 @@ const Transactions = () => {
         dispatch(handleGetTransactionsData());
       }
     },
-    [debouncedSearchTerm] // Only call effect if debounced search term changes
+    [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
-  const rows = data?.map((row: Data) =>
+  const rows = data?.map((row: Data, index) =>
     createData(
       row?.id,
       row?.denom,
@@ -376,8 +372,10 @@ const Transactions = () => {
       row?.harga_up,
       row?.total_bayar,
       row?.reff_id,
-      row?.created_date
-    )
+      row?.created_date,
+      row?.harga_beli,
+      index,
+    ),
   );
 
   const handleRequestSort = React.useCallback(
@@ -390,7 +388,7 @@ const Transactions = () => {
       dispatch(handleGetTransactionsData());
     },
 
-    [sortType, sortBy, dispatch]
+    [sortType, sortBy, dispatch],
   );
 
   const handleChangePage = React.useCallback(
@@ -398,12 +396,10 @@ const Transactions = () => {
       dispatch(setTransactionsPage(newPage));
       dispatch(handleGetTransactionsData());
     },
-    [dispatch, page]
+    [dispatch, page],
   );
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setTransactionsPage(0));
     dispatch(setTransactionsLimit(+event.target.value));
 
@@ -428,9 +424,7 @@ const Transactions = () => {
             type="search"
             placeholder="Cari data..."
             onChange={(e: React.FormEvent<HTMLInputElement>) =>
-              dispatch(
-                setTransactionsSearchData((e.target as HTMLInputElement).value)
-              )
+              dispatch(setTransactionsSearchData((e.target as HTMLInputElement).value))
             }
           />
         </div>
@@ -460,11 +454,7 @@ const Transactions = () => {
           ) : (
             <Paper sx={{ width: '100%' }}>
               <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={'medium'}
-                >
+                <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
                     orderBy={sortBy || 'deleted'}
@@ -476,44 +466,20 @@ const Transactions = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell
-                            align="center"
-                            component="th"
-                            id={labelId}
-                            scope="row"
-                          >
+                          <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.denom ?? 0)}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.status || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.keterangan || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.produk_name || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.id_pel || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.admin ?? 0)}
-                          </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.harga_up ?? 0)}
-                          </TableCell>
-                          <TableCell align="left">
-                            {currencyFormat(row.total_bayar ?? 0)}
-                          </TableCell>
-                          <TableCell align="center">
-                            {row.reff_id || '-'}
-                          </TableCell>
-                          <TableCell align="left">
-                            {row.created_date || '-'}
-                          </TableCell>
+                          <TableCell align="left">{currencyFormat(row.denom ?? 0)}</TableCell>
+                          <TableCell align="left">{row.status || '-'}</TableCell>
+                          <TableCell align="left">{row.keterangan || '-'}</TableCell>
+                          <TableCell align="left">{row.produk_name || '-'}</TableCell>
+                          <TableCell align="left">{row.id_pel || '-'}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.harga_beli ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.admin ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.harga_up ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.total_bayar ?? 0)}</TableCell>
+                          <TableCell align="center">{row.reff_id || '-'}</TableCell>
+                          <TableCell align="left">{row.created_date || '-'}</TableCell>
                           <TableCell align="center">
                             <section className="flex items-center gap-2">
                               <Tooltip title="Biller Log">
@@ -522,15 +488,10 @@ const Transactions = () => {
                                     disabled={loadingDetail || loadingPost}
                                     color="default"
                                     onClick={async () => {
-                                      const response = await dispatch(
-                                        handleGetTransactionsLogDetailData(row.reff_id)
-                                      );
+                                      const response = await dispatch(handleGetTransactionsLogDetailData(row.reff_id));
 
-                                      if (
-                                        typeof response === 'boolean' &&
-                                        response
-                                      ) {
-                                        setOpenLogDialog(true)
+                                      if (typeof response === 'boolean' && response) {
+                                        setOpenLogDialog(true);
                                       }
                                     }}
                                     size="small"
@@ -568,10 +529,7 @@ const Transactions = () => {
         maxWidth="xl"
         fullWidth
       >
-        <BootstrapDialogTitle
-          id="customized-dialog-title"
-          onClose={handleLogDetailClose}
-        >
+        <BootstrapDialogTitle id="customized-dialog-title" onClose={handleLogDetailClose}>
           Biller Log Transaksi
         </BootstrapDialogTitle>
         <DialogContent dividers>
@@ -581,26 +539,13 @@ const Transactions = () => {
                 <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Tanggal"
-                  secondary={(logDetailData?.response_date || '-')}
-                />
+                <ListItemText primary="Tanggal" secondary={logDetailData?.response_date || '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Request"
-                  secondary={(logDetailData?.request || '-')}
-                />
+                <ListItemText primary="Request" secondary={logDetailData?.request || '-'} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary="Response"
-                  secondary={
-                    <pre>
-                      {responseLogData}
-                    </pre>
-                  }
-                />
+                <ListItemText primary="Response" secondary={<pre>{responseLogData}</pre>} />
               </ListItem>
             </List>
           </section>
