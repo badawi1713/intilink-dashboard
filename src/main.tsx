@@ -17,7 +17,7 @@ axios.interceptors.request.use(
     request.headers.Authorization = `Bearer ${token}`;
     return request;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 createRoot(document.getElementById('root') as HTMLElement).render(
@@ -28,5 +28,5 @@ createRoot(document.getElementById('root') as HTMLElement).render(
         <Toast />
       </Provider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

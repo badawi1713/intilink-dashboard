@@ -1,10 +1,11 @@
-import axios from 'axios';
-import { RootState } from 'src/store';
+import axios, { AxiosError } from 'axios';
+import { AppThunk, RootState } from 'src/store';
 import {
   InitialMasterProductsState,
   MasterProductsDispatchType,
 } from '../../../action-types/masters-type/products-type/products-type';
 import * as REDUCER_TYPES from '../../../types';
+import { showMessage } from 'src/store/slices/toast-message-slice';
 
 const changeMasterProductsReducer = (payload: InitialMasterProductsState) => {
   return (dispatch: MasterProductsDispatchType) => {
@@ -79,6 +80,7 @@ const getProductsCategoryListData = () => {
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
         payload: {
           productCategoryList: data,
+          productCategoryFormList: data,
         },
       });
     } catch (error) {
@@ -86,6 +88,7 @@ const getProductsCategoryListData = () => {
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
         payload: {
           productCategoryList: [],
+          productCategoryFormList: [],
           loadingList: false,
         },
       });
@@ -141,8 +144,8 @@ const getProductsGroupListData = (id: string) => {
   };
 };
 
-const addNewProductsData = (data: { name: string; product_category_id: number }) => {
-  return async (dispatch: MasterProductsDispatchType) => {
+const addNewProductsData = (formData: any): AppThunk => {
+  return async (dispatch) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
       payload: {
@@ -151,12 +154,41 @@ const addNewProductsData = (data: { name: string; product_category_id: number })
     });
 
     try {
-      await axios.post(`/v1/api/dashboard/product`, data);
-
+      await axios.post(`/v1/api/dashboard/product`, formData);
+      dispatch(
+        showMessage({
+          message: 'Berhasil menambahkan data baru!',
+          variant: 'success',
+        }),
+      );
       return true;
     } catch (error) {
-      console.log(error);
-      return false;
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
     } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
@@ -168,42 +200,8 @@ const addNewProductsData = (data: { name: string; product_category_id: number })
   };
 };
 
-const getProductsDetailData = (id: number) => {
-  return async (dispatch: MasterProductsDispatchType) => {
-    dispatch({
-      type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-      payload: {
-        loadingDetail: true,
-      },
-    });
-
-    try {
-      const response = await axios.get(`/v1/api/dashboard/product/${id}`);
-
-      const data = response.data?.data || {};
-      return data;
-    } catch (error) {
-      console.log(error);
-      return false;
-    } finally {
-      dispatch({
-        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
-        payload: {
-          loadingDetail: false,
-        },
-      });
-    }
-  };
-};
-
-const editProductsData = (
-  id: number,
-  data: {
-    name: string;
-    product_category_id: number;
-  },
-) => {
-  return async (dispatch: MasterProductsDispatchType) => {
+const editProductsData = (id: string, data: any): AppThunk => {
+  return async (dispatch) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
       payload: {
@@ -213,11 +211,40 @@ const editProductsData = (
 
     try {
       await axios.put(`/v1/api/dashboard/product/${id}`, data);
-
+      dispatch(
+        showMessage({
+          message: `Berhasil mengubah data dengan ID: ${id}`,
+          variant: 'success',
+        }),
+      );
       return true;
     } catch (error) {
-      console.log(error);
-      return false;
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
     } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
@@ -229,8 +256,8 @@ const editProductsData = (
   };
 };
 
-const deleteProductsData = (id: number) => {
-  return async (dispatch: MasterProductsDispatchType) => {
+const deleteProductsData = (id: string): AppThunk => {
+  return async (dispatch) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
       payload: {
@@ -240,16 +267,125 @@ const deleteProductsData = (id: number) => {
 
     try {
       await axios.delete(`/v1/api/dashboard/product/${id}`);
-
+      dispatch(
+        showMessage({
+          message: `Berhasil menghapus data dengan ID: ${id}`,
+          variant: 'success',
+        }),
+      );
       return true;
     } catch (error) {
-      console.log(error);
-      return false;
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
     } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
         payload: {
           loadingDelete: false,
+        },
+      });
+    }
+  };
+};
+
+const getProductsGroupListFormData = (id: string) => {
+  return async (dispatch: MasterProductsDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+      payload: {
+        loadingList: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/product/list-group/${id}`);
+
+      const data = response.data || [];
+
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          productGroupFormList: data,
+        },
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          productGroupFormList: [],
+          loadingList: false,
+        },
+      });
+      return false;
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          loadingList: false,
+        },
+      });
+    }
+  };
+};
+
+const getProductsBillerListFormData = () => {
+  return async (dispatch: MasterProductsDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+      payload: {
+        loadingList: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/biller/list`);
+
+      const data = response.data || [];
+
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          billerList: data,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          billerList: [],
+          loadingList: false,
+        },
+      });
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_PRODUCTS_REDUCER,
+        payload: {
+          loadingList: false,
         },
       });
     }
@@ -262,7 +398,8 @@ export {
   deleteProductsData,
   editProductsData,
   getMasterProductsData,
-  getProductsDetailData,
   getProductsCategoryListData,
   getProductsGroupListData,
+  getProductsGroupListFormData,
+  getProductsBillerListFormData,
 };

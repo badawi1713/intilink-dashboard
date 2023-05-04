@@ -1,17 +1,21 @@
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Delete, Edit } from '@mui/icons-material';
+import { Delete, Edit, ImageSearchOutlined, BrokenImage } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import {
-  Autocomplete,
   FormControl,
+  FormControlLabel,
+  FormHelperText,
   IconButton,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   SelectChangeEvent,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -33,8 +37,8 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
@@ -46,16 +50,56 @@ import {
   deleteProductsData,
   editProductsData,
   getMasterProductsData,
-  getProductsDetailData,
+  getProductsBillerListFormData,
   getProductsCategoryListData,
   getProductsGroupListData,
 } from 'src/store/actions/masters-action/products-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 
+const formTypeList = [
+  { id: 1, name: 'Fix' },
+  { id: 2, name: 'Persentase' },
+];
+
 const productsSchema = yup.object().shape({
+  adminNominal: yup.number().required('Admin nominal is required'),
+  selectedAdminType: yup.string().required('Admin type is required'),
+  selectedBillerProduct: yup.string().required('Biller product type is required'),
+  selectedBiller: yup.string().required('Biller is required'),
+  selectedProductGroup: yup.string().required('Product group is required'),
+  denom: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Denom is required')
+    .min(0, 'Denom minimum is Rp0')
+    .required('Denom is required'),
+  buyPrice: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Buy price is required')
+    .min(0, 'Buy price minimum is Rp0')
+    .required('Buy price is required'),
+  sellPrice: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Sell price is required')
+    .min(0, 'Sell price minimum is Rp0')
+    .required('Sell price is required'),
+  upPrice: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Up price is required')
+    .min(0, 'Up price minimum is Rp0')
+    .required('Up price is required'),
+  id: yup.string().required('Product ID is required'),
+  image: yup.mixed().required("Product's image is required"),
+  commission: yup.number().required('Commission is required'),
   name: yup.string().required('Name is required'),
-  product_category_id: yup.object().nullable().required('Category is required'),
 });
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -98,29 +142,62 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 }
 
 interface Data {
-  id: number;
-  nama: string;
+  admin_nominal: number;
+  admin_type_id: number;
+  admin_type_name: string;
+  biller_id: number;
+  biller_name: string;
+  denom: number;
   harga_beli: number;
   harga_jual: number;
+  harga_up: number;
+  id: string;
+  image: string;
+  keterangan: string;
+  komisi: number;
+  nama: string;
   status: boolean;
-  biller_name: string;
+  product_biller_id: number;
+  index: number;
 }
 
 function createData(
-  id: number,
-  nama: string,
+  admin_nominal: number,
+  admin_type_id: number,
+  admin_type_name: string,
+  biller_id: number,
+  biller_name: string,
+  denom: number,
   harga_beli: number,
   harga_jual: number,
+  harga_up: number,
+  id: string,
+  image: string,
+  keterangan: string,
+  komisi: number,
+  nama: string,
   status: boolean,
-  biller_name: string,
+  product_biller_id: number,
+  index: number,
 ): Data {
   return {
-    id,
-    nama,
+    admin_nominal,
+    admin_type_id,
+    admin_type_name,
+    biller_id,
+    biller_name,
+    denom,
     harga_beli,
     harga_jual,
+    harga_up,
+    id,
+    image,
+    keterangan,
+    komisi,
+    nama,
     status,
-    biller_name,
+    product_biller_id,
+    index,
   };
 }
 
@@ -139,19 +216,31 @@ const headCells: readonly HeadCell[] = [
     id: 'id',
     disablePadding: true,
     label: 'ID',
-    align: 'center',
     disableSort: false,
   },
   {
     id: 'nama',
     disablePadding: false,
-    label: 'Produk',
+    label: 'Product',
     disableSort: false,
+  },
+  {
+    id: 'image',
+    disablePadding: false,
+    label: 'Image',
+    disableSort: true,
+    align: 'center',
   },
   {
     id: 'biller_name',
     disablePadding: false,
     label: 'Biller',
+    disableSort: false,
+  },
+  {
+    id: 'denom',
+    disablePadding: false,
+    label: 'Denom',
     disableSort: false,
   },
   {
@@ -164,6 +253,30 @@ const headCells: readonly HeadCell[] = [
     id: 'harga_jual',
     disablePadding: false,
     label: 'Harga Jual',
+    disableSort: false,
+  },
+  {
+    id: 'harga_up',
+    disablePadding: false,
+    label: 'Harga Up',
+    disableSort: false,
+  },
+  {
+    id: 'komisi',
+    disablePadding: false,
+    label: 'Komisi',
+    disableSort: false,
+  },
+  {
+    id: 'admin_nominal',
+    disablePadding: false,
+    label: 'Admin Nominal',
+    disableSort: false,
+  },
+  {
+    id: 'admin_type_name',
+    disablePadding: false,
+    label: 'Admin Type',
     disableSort: false,
   },
   {
@@ -227,11 +340,21 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 type FormType = {
-  id: number;
+  adminNominal: number;
+  selectedAdminType: string;
+  selectedBillerProduct: string;
+  selectedBiller: string;
+  selectedProductGroup: string;
+  denom: number;
+  buyPrice: number;
+  sellPrice: number;
+  upPrice: number;
+  id: string;
+  image: string;
+  notes: string;
+  commission: number;
   name: string;
-  product_category_id: null | { id: number; name: string };
-  icon: string;
-  product_category_name: string;
+  status: boolean;
 };
 
 const Products = () => {
@@ -246,6 +369,7 @@ const Products = () => {
     search,
     productCategoryList,
     productGroupList,
+    billerList,
     loadingPost,
     loadingDelete,
     loading,
@@ -256,19 +380,33 @@ const Products = () => {
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
+  const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [editForm, setEditForm] = useState<boolean>(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string>('All');
   const [groupId, setGroupId] = useState<string>('');
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
     defaultValues: {
-      id: 0,
+      adminNominal: 0,
+      selectedAdminType: '1',
+      selectedBillerProduct: '1',
+      selectedBiller: '',
+      selectedProductGroup: '',
+      denom: 0,
+      buyPrice: 0,
+      sellPrice: 0,
+      upPrice: 0,
+      id: '',
+      image: '',
+      notes: '',
+      commission: 0,
       name: '',
-      product_category_id: null,
+      status: true,
     },
     resolver: yupResolver(productsSchema),
   });
@@ -285,9 +423,21 @@ const Products = () => {
     }
     setOpenFormDialog(false);
     reset({
-      id: 0,
+      adminNominal: 0,
+      selectedAdminType: '1',
+      selectedBillerProduct: '1',
+      selectedBiller: '',
+      selectedProductGroup: '',
+      denom: 0,
+      buyPrice: 0,
+      sellPrice: 0,
+      upPrice: 0,
+      id: '',
+      image: '',
+      notes: '',
+      commission: 0,
       name: '',
-      product_category_id: null,
+      status: true,
     });
   };
 
@@ -295,23 +445,33 @@ const Products = () => {
     setOpenEditConfirmation(true);
   });
 
-  const onSubmit = handleSubmit(async (formData) => {
-    const payload = {
-      name: formData.name,
-      product_category_id: formData.product_category_id?.id || 0,
-    };
-    let response: boolean;
+  const onSubmit = handleSubmit(async (formData: FormType) => {
+    const form = new FormData();
+    form.append('admin_nominal', `${formData.adminNominal}`);
+    form.append('admin_type', formData.selectedAdminType || '');
+    form.append('biller_id', `${formData.selectedBiller || ''}`);
+    form.append('denom', `${formData.denom}`);
+    form.append('harga_beli', `${formData.buyPrice}`);
+    form.append('harga_up', `${formData.upPrice}`);
+    form.append('image', typeof formData?.image === 'string' ? '' : formData?.image);
+    form.append('keterangan', formData.notes);
+    form.append('komisi', `${formData.commission}`);
+    form.append('name', formData.name);
+    form.append('status', `${formData.status}`);
+    form.append('product_group_id', `${formData.selectedProductGroup || ''}`);
+    form.append('product_biller_id', formData.selectedBillerProduct);
+    form.append('id', formData.id);
     if (editForm) {
-      response = await dispatch(editProductsData(formData?.id, payload));
-      if (response) {
+      const response = await dispatch(editProductsData(formData?.id, form));
+      if (typeof response === 'boolean' && response) {
         handleClose();
         setOpenEditConfirmation(false);
         setSelectedId(null);
         dispatch(getMasterProductsData());
       }
     } else {
-      response = await dispatch(addNewProductsData(payload));
-      if (response) {
+      const response = await dispatch(addNewProductsData(form));
+      if (typeof response === 'boolean' && response) {
         handleClose();
         dispatch(getMasterProductsData());
       }
@@ -321,6 +481,7 @@ const Products = () => {
   const handleGetData = useCallback(() => {
     dispatch(getMasterProductsData());
     dispatch(getProductsCategoryListData());
+    dispatch(getProductsBillerListFormData());
   }, [dispatch]);
 
   const handleGetProductGroupData = async (event: SelectChangeEvent) => {
@@ -371,8 +532,37 @@ const Products = () => {
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
-  const rows = data?.map((row: Data) =>
-    createData(row?.id, row?.nama, row?.harga_beli, row?.harga_jual, row?.status, row?.biller_name),
+  useEffect(() => {
+    return () => {
+      dispatch(
+        changeMasterProductsReducer({
+          productGroupList: [],
+          groupId: '',
+        }),
+      );
+    };
+  }, []);
+
+  const rows = data?.map((row: Data, index) =>
+    createData(
+      row?.admin_nominal,
+      row?.admin_type_id,
+      row?.admin_type_name,
+      row?.biller_id,
+      row?.biller_name,
+      row?.denom,
+      row?.harga_beli,
+      row?.harga_jual,
+      row?.harga_up,
+      row?.id,
+      row?.image,
+      row?.keterangan,
+      row?.komisi,
+      row?.nama,
+      row?.status,
+      row?.product_biller_id,
+      index,
+    ),
   );
 
   const handleRequestSort = useCallback(
@@ -414,19 +604,16 @@ const Products = () => {
     dispatch(getMasterProductsData());
   };
 
-  const getProductsListItem = (option: { id: number; name: string }) => {
-    if (!option?.id) option = productCategoryList?.find((op) => op.id === option);
-    return option;
-  };
-
-  const handleDeleteData = async (id: number) => {
+  const handleDeleteData = async (id: string) => {
     const response = await dispatch(deleteProductsData(id));
-    if (response) {
+    if (typeof response === 'boolean' && response) {
       dispatch(getMasterProductsData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
     }
   };
+
+  const productImage = useWatch({ control, name: 'image' });
 
   return (
     <>
@@ -456,7 +643,7 @@ const Products = () => {
             <Typography variant="body1">Manajemen daftar produk</Typography>
           </div>
           <div className="flex items-center gap-3 justify-between">
-            <Button disabled color="success" size="small" variant="contained" onClick={handleClickOpen}>
+            <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
               Tambah Data
             </Button>
             <div className="flex items-center gap-3">
@@ -538,13 +725,41 @@ const Products = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={index}>
-                          <TableCell align="center" component="th" id={labelId} scope="row">
+                          <TableCell align="left" component="th" id={labelId} scope="row">
                             {row.id || '-'}
                           </TableCell>
                           <TableCell align="left">{row.nama || '-'}</TableCell>
+                          <TableCell align="center">
+                            <Tooltip title={row?.image ? 'Preview' : 'No Image'}>
+                              <span>
+                                <IconButton
+                                  disabled={!row?.image}
+                                  onClick={() => {
+                                    setOpenImagePreview(true);
+                                    setSelectedImagePreview(`${import.meta.env.VITE_IMAGE_URL + row.image}`);
+                                  }}
+                                  size="small"
+                                  aria-label="preview"
+                                  color="info"
+                                >
+                                  {row?.image ? (
+                                    <ImageSearchOutlined fontSize="small" />
+                                  ) : (
+                                    <BrokenImage fontSize="small" />
+                                  )}
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell align="left">{row.biller_name || '-'}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.denom ?? 0)}</TableCell>
                           <TableCell align="left">{currencyFormat(row.harga_beli ?? 0)}</TableCell>
                           <TableCell align="left">{currencyFormat(row.harga_jual ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.harga_up ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.komisi ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.admin_nominal ?? 0)}</TableCell>
+                          <TableCell align="left">{row.admin_type_name || '-'}</TableCell>
+
                           <TableCell align="center">
                             {row.status ? (
                               <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
@@ -553,11 +768,11 @@ const Products = () => {
                             )}
                           </TableCell>
                           <TableCell align="center">
-                            <section className="flex items-center gap-2">
+                            <section className="flex items-center justify-center gap-2">
                               <Tooltip title="Hapus">
                                 <span>
                                   <IconButton
-                                    disabled
+                                    disabled={loading}
                                     onClick={() => {
                                       setSelectedId(row.id);
                                       setOpenDeleteConfirmation(true);
@@ -573,25 +788,30 @@ const Products = () => {
                               <Tooltip title="Edit">
                                 <span>
                                   <IconButton
-                                    disabled
-                                    onClick={async () => {
-                                      const response = await dispatch(getProductsDetailData(row.id));
-                                      if (Object.keys(response).length > 0) {
-                                        setSelectedId(response?.id);
-                                        setEditForm(true);
-                                        const selectedParentProducts =
-                                          productCategoryList?.find(
-                                            (products) => products?.id === response?.product_category_id,
-                                          ) || null;
-                                        reset({
-                                          id: response?.id,
-                                          name: response?.name,
-                                          product_category_id: selectedParentProducts,
-                                          icon: response?.icon,
-                                          product_category_name: response?.product_category_name,
-                                        });
-                                        handleClickOpen();
-                                      }
+                                    disabled={loading}
+                                    onClick={() => {
+                                      setSelectedId(row?.id);
+                                      setEditForm(true);
+                                      reset({
+                                        adminNominal: row?.admin_nominal || 0,
+                                        selectedAdminType: row?.admin_type_id ? `${row?.admin_type_id}` : '1',
+                                        selectedBillerProduct: row?.product_biller_id
+                                          ? `${row?.product_biller_id}`
+                                          : '1',
+                                        selectedBiller: row?.biller_id ? `${row?.biller_id}` : '',
+                                        selectedProductGroup: categoryId === 'All' ? '' : `${groupId}`,
+                                        denom: row?.denom || 0,
+                                        buyPrice: row?.harga_beli || 0,
+                                        sellPrice: row?.harga_jual || 0,
+                                        upPrice: row?.harga_up || 0,
+                                        id: row?.id || '',
+                                        image: row?.image || '',
+                                        notes: row?.keterangan || '',
+                                        commission: row?.komisi || 0,
+                                        name: row?.nama || '',
+                                        status: row?.status || true,
+                                      });
+                                      handleClickOpen();
                                     }}
                                     size="small"
                                     aria-label="edit"
@@ -631,6 +851,23 @@ const Products = () => {
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
                   control={control}
+                  name="id"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Product ID</label>
+                      <TextField
+                        {...field}
+                        disabled={editForm}
+                        fullWidth
+                        placeholder="Type product ID"
+                        helperText={errors?.id && errors.id?.message}
+                        error={!!errors?.id}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
                   name="name"
                   render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
@@ -638,41 +875,318 @@ const Products = () => {
                       <TextField
                         {...field}
                         fullWidth
-                        placeholder="Type product group name"
+                        placeholder="Type product name"
                         helperText={errors?.name && errors.name?.message}
                         error={!!errors?.name}
                       />
                     </div>
                   )}
                 />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
                   control={control}
-                  name="product_category_id"
-                  render={({ field: { onChange, value } }) => (
+                  name="selectedBiller"
+                  render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Product Category</label>
-                      <Autocomplete
-                        onChange={(event, item) => {
-                          onChange(item);
-                        }}
-                        id="product_category_id"
-                        value={value}
-                        isOptionEqualToValue={(option, val) => {
-                          return option?.id === getProductsListItem(val)?.id;
-                        }}
-                        fullWidth
-                        options={productCategoryList || []}
-                        getOptionLabel={(item) => (item?.name ? item.name : '')}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={!!errors.product_category_id}
-                            helperText={errors?.product_category_id?.message}
-                            variant="outlined"
-                            placeholder="Choose product category"
-                            fullWidth
-                          />
+                      <label className="text-sm font-semibold">Biller</label>
+                      <FormControl error={!!errors.selectedBiller} required fullWidth>
+                        <Select
+                          input={<OutlinedInput />}
+                          fullWidth
+                          id="biller-select"
+                          {...field}
+                          placeholder="Choose biller"
+                        >
+                          {billerList?.map((type) => (
+                            <MenuItem key={type?.id} value={type?.id}>
+                              {type?.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>{errors?.selectedBiller?.message}</FormHelperText>
+                      </FormControl>
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="selectedProductGroup"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Product Group</label>
+                      <FormControl error={!!errors.selectedProductGroup} required fullWidth>
+                        <Select
+                          input={<OutlinedInput />}
+                          fullWidth
+                          id="product-group-select"
+                          {...field}
+                          placeholder="Choose product group"
+                        >
+                          {productGroupList?.map((type) => (
+                            <MenuItem key={type?.id} value={type?.id}>
+                              {type?.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>{errors?.selectedProductGroup?.message}</FormHelperText>
+                      </FormControl>
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="image"
+                  render={({ field: { onChange } }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Choose Image</label>
+                      <section className="flex gap-3 items-stretch">
+                        <TextField
+                          onChange={(event: ChangeEvent) => {
+                            const target = event.target as HTMLInputElement;
+                            const file: File = (target.files as FileList)[0];
+                            onChange(file);
+                          }}
+                          placeholder="Choose image"
+                          helperText={errors?.image && errors.image?.message}
+                          error={!!errors?.image}
+                          type="file"
+                          fullWidth
+                          inputProps={{
+                            accept: 'image/png, image/jpg, image/jpeg',
+                          }}
+                        />
+                        {productImage && (
+                          <a
+                            href={
+                              typeof productImage === 'string'
+                                ? `${import.meta.env.VITE_IMAGE_URL + productImage}`
+                                : productImage
+                                ? URL.createObjectURL(productImage)
+                                : ''
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                            className=" w-14 p-2 bg-slate-100 rounded-md"
+                          >
+                            <img
+                              src={
+                                typeof productImage === 'string'
+                                  ? `${import.meta.env.VITE_IMAGE_URL + productImage}`
+                                  : productImage
+                                  ? URL.createObjectURL(productImage)
+                                  : ''
+                              }
+                              alt="product-preview"
+                              className="object-contain w-full h-full"
+                            />
+                          </a>
                         )}
+                      </section>
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="selectedAdminType"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Admin Type</label>
+                      <FormControl error={!!errors.selectedAdminType} required fullWidth>
+                        <Select
+                          input={<OutlinedInput />}
+                          fullWidth
+                          id="admin-type-select"
+                          {...field}
+                          placeholder="Choose admin type"
+                        >
+                          {formTypeList?.map((type) => (
+                            <MenuItem key={type?.id} value={type?.id}>
+                              {type?.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>{errors?.selectedAdminType?.message}</FormHelperText>
+                      </FormControl>
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="selectedBillerProduct"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Biller Product Type</label>
+                      <FormControl error={!!errors.selectedBillerProduct} required fullWidth>
+                        <Select
+                          input={<OutlinedInput />}
+                          fullWidth
+                          id="biller-type-select"
+                          {...field}
+                          placeholder="Choose biller product type"
+                        >
+                          {formTypeList?.map((type) => (
+                            <MenuItem key={type?.id} value={type?.id}>
+                              {type?.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>{errors?.selectedBillerProduct?.message}</FormHelperText>
+                      </FormControl>
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="notes"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Notes</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        multiline
+                        maxRows={4}
+                        placeholder="Type notes"
+                        helperText={errors?.notes && errors.notes?.message}
+                        error={!!errors?.notes}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="adminNominal"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Admin Nominal</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type product admin nominal"
+                        helperText={errors?.adminNominal && errors.adminNominal?.message}
+                        error={!!errors?.adminNominal}
+                        type="number"
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="denom"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Denom</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type denom"
+                        helperText={errors?.denom && errors.denom?.message}
+                        error={!!errors?.denom}
+                        type="number"
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="commission"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Komisi</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type commission"
+                        helperText={errors?.commission && errors.commission?.message}
+                        error={!!errors?.commission}
+                        type="number"
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="sellPrice"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Sell Price</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type sell price"
+                        helperText={errors?.sellPrice && errors.sellPrice?.message}
+                        error={!!errors?.sellPrice}
+                        type="number"
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="buyPrice"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Buy Price</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type buy price"
+                        helperText={errors?.buyPrice && errors.buyPrice?.message}
+                        error={!!errors?.buyPrice}
+                        type="number"
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="upPrice"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Up Price</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type up price"
+                        helperText={errors?.upPrice && errors.upPrice?.message}
+                        error={!!errors?.upPrice}
+                        type="number"
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field: { onChange, value } }) => (
+                    <div className="flex flex-col gap-3">
+                      <label className="text-sm font-semibold">Status</label>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={value || false}
+                            onChange={(e) => {
+                              onChange(e.target.checked);
+                            }}
+                            name="status"
+                          />
+                        }
+                        label={value ? 'ACTIVE' : 'DISABLE'}
                       />
                     </div>
                   )}
@@ -706,7 +1220,7 @@ const Products = () => {
           title={'Hapus data produk?'}
           content={`Konfirmasi untuk menghapus data produk dengan id ${selectedId}.`}
           cancelActionHandler={() => setOpenDeleteConfirmation(false)}
-          confirmActionHandler={() => handleDeleteData(selectedId || 0)}
+          confirmActionHandler={() => handleDeleteData(selectedId || '')}
           loading={loadingDelete || false}
           loadingText={'Menghapus'}
           confirmActionText={'Hapus'}
@@ -727,6 +1241,33 @@ const Products = () => {
           cancelActionText={'Batal'}
           type="primary"
         />
+      )}
+      {openImagePreview && (
+        <BootstrapDialog
+          onClose={() => {
+            setSelectedImagePreview('');
+            setOpenImagePreview(false);
+          }}
+          aria-labelledby="customized-dialog-title"
+          open={openImagePreview}
+          maxWidth="sm"
+          fullWidth
+        >
+          <BootstrapDialogTitle
+            id="customized-dialog-title"
+            onClose={() => {
+              setSelectedImagePreview('');
+              setOpenImagePreview(false);
+            }}
+          >
+            {'Image Preview'}
+          </BootstrapDialogTitle>
+          <DialogContent dividers>
+            <section className="flex flex-col items-center justify-center h-[240px]">
+              <img alt="preview" className="w-full h-full p-1 object-scale-down" src={selectedImagePreview} />
+            </section>
+          </DialogContent>
+        </BootstrapDialog>
       )}
     </>
   );
