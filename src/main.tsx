@@ -9,7 +9,7 @@ import { getAccessToken } from './helpers/utils/accessToken';
 import './index.css';
 import store from './store';
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+axios.defaults.baseURL = import.meta.env.VITE_DEV_BASE_URL;
 
 axios.interceptors.request.use(
   (request) => {
