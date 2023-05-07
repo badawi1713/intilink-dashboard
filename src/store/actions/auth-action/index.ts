@@ -5,6 +5,8 @@ import { getAccessToken, updateAccessToken } from '../../../helpers/utils/access
 import { AuthDispatchType, InitialAuthState } from '../../action-types/auth-action-type/auth-action.type';
 import * as REDUCER_TYPES from '../../types';
 
+const MODE = import.meta.env.VITE_MODE;
+
 const changeAuthReducer = (payload: InitialAuthState) => {
   return (dispatch: AuthDispatchType) => {
     dispatch({
@@ -25,7 +27,7 @@ const loginUserAction =
       },
     });
     try {
-      const response = await axios.post('/v1/api/authenticate', payload);
+      const response = await axios.post(MODE === 'PROD' ? '/v1/api/dashboard/auth' : '/v1/api/authenticate', payload);
       const jwt = (await response.data.data.jwt) || '';
       axios.defaults.headers.common.Authorization = `Bearer ${jwt}`;
       updateAccessToken(jwt);
