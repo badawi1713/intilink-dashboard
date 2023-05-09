@@ -37,6 +37,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
+import axios from 'axios';
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Confirmation, ErrorView, Loading } from 'src/components';
@@ -345,6 +346,7 @@ type FormType = {
   selectedBillerProduct: string;
   selectedBiller: string;
   selectedProductGroup: string;
+  selectedProductCategory: string;
   denom: number;
   buyPrice: number;
   sellPrice: number;
@@ -388,6 +390,8 @@ const Products = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string>('All');
   const [groupId, setGroupId] = useState<string>('');
+  const [productGroupNewFormList, setProductGroupNewFormList] = useState<any[]>([]);
+  const [loadingGroupProductList, setLoadingGroupProductList] = useState<boolean>(false);
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
@@ -397,6 +401,7 @@ const Products = () => {
       selectedBillerProduct: '1',
       selectedBiller: '',
       selectedProductGroup: '',
+      selectedProductCategory: '',
       denom: 0,
       buyPrice: 0,
       sellPrice: 0,
@@ -428,6 +433,7 @@ const Products = () => {
       selectedBillerProduct: '1',
       selectedBiller: '',
       selectedProductGroup: '',
+      selectedProductCategory: '',
       denom: 0,
       buyPrice: 0,
       sellPrice: 0,
@@ -610,6 +616,21 @@ const Products = () => {
       dispatch(getMasterProductsData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
+    }
+  };
+
+  const handleGetProductsGroupList = async (id: string) => {
+    setLoadingGroupProductList(true);
+    try {
+      const response = await axios.get(`/v1/api/dashboard/product/list-group/${id}`);
+
+      const responseData = response.data || [];
+
+      setProductGroupNewFormList(responseData);
+    } catch (e) {
+      setProductGroupNewFormList([]);
+    } finally {
+      setLoadingGroupProductList(false);
     }
   };
 
@@ -898,6 +919,9 @@ const Products = () => {
                           {...field}
                           placeholder="Choose biller"
                         >
+                          <MenuItem disabled value="">
+                            <em>Choose biller</em>
+                          </MenuItem>
                           {billerList?.map((type) => (
                             <MenuItem key={type?.id} value={type?.id}>
                               {type?.name}
@@ -909,31 +933,95 @@ const Products = () => {
                     </div>
                   )}
                 />
-                <Controller
-                  control={control}
-                  name="selectedProductGroup"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Product Group</label>
-                      <FormControl error={!!errors.selectedProductGroup} required fullWidth>
-                        <Select
-                          input={<OutlinedInput />}
-                          fullWidth
-                          id="product-group-select"
-                          {...field}
-                          placeholder="Choose product group"
-                        >
-                          {productGroupList?.map((type) => (
-                            <MenuItem key={type?.id} value={type?.id}>
-                              {type?.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <FormHelperText>{errors?.selectedProductGroup?.message}</FormHelperText>
-                      </FormControl>
-                    </div>
-                  )}
-                />
+                {!editForm ? (
+                  <>
+                    <Controller
+                      control={control}
+                      name="selectedProductCategory"
+                      render={({ field }) => (
+                        <div className="flex flex-col gap-3 w-full">
+                          <label className="text-sm font-semibold">Product Category</label>
+                          <FormControl error={!!errors.selectedProductCategory} required fullWidth>
+                            <Select
+                              input={<OutlinedInput />}
+                              fullWidth
+                              id="product-category-select"
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                handleGetProductsGroupList(e.target.value);
+                              }}
+                            >
+                              <MenuItem disabled value="">
+                                <em>Choose product category</em>
+                              </MenuItem>
+                              {productCategoryList?.map((type) => (
+                                <MenuItem key={type?.id} value={type?.id}>
+                                  {type?.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </div>
+                      )}
+                    />
+                    <Controller
+                      control={control}
+                      name="selectedProductGroup"
+                      render={({ field }) => (
+                        <div className="flex flex-col gap-3 w-full">
+                          <label className="text-sm font-semibold">Product Group</label>
+                          <FormControl error={!!errors.selectedProductGroup} required fullWidth>
+                            <Select input={<OutlinedInput />} fullWidth id="product-group-select" {...field}>
+                              <MenuItem disabled value="">
+                                <em>{loadingGroupProductList ? 'Loading' : 'Choose product group'}</em>
+                              </MenuItem>
+                              {productGroupNewFormList?.map((type) => (
+                                <MenuItem key={type?.id} value={type?.id}>
+                                  {type?.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            <FormHelperText>
+                              {errors?.selectedProductGroup?.message && productGroupNewFormList?.length === 0
+                                ? productGroupNewFormList?.length === 0 &&
+                                  'Diharuskan memilih Product Category terlebih dahulu'
+                                : productGroupNewFormList?.length === 0
+                                ? 'Diharuskan memilih Product Category terlebih dahulu'
+                                : errors?.selectedProductGroup?.message}
+                            </FormHelperText>
+                          </FormControl>
+                        </div>
+                      )}
+                    />
+                  </>
+                ) : (
+                  <Controller
+                    control={control}
+                    name="selectedProductGroup"
+                    render={({ field }) => (
+                      <div className="flex flex-col gap-3 w-full">
+                        <label className="text-sm font-semibold">Product Group</label>
+                        <FormControl error={!!errors.selectedProductGroup} required fullWidth>
+                          <Select
+                            input={<OutlinedInput />}
+                            fullWidth
+                            id="product-group-select"
+                            {...field}
+                            placeholder="Choose product group"
+                          >
+                            {productGroupList?.map((type) => (
+                              <MenuItem key={type?.id} value={type?.id}>
+                                {type?.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          <FormHelperText>{errors?.selectedProductGroup?.message}</FormHelperText>
+                        </FormControl>
+                      </div>
+                    )}
+                  />
+                )}
               </div>
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
@@ -1005,6 +1093,9 @@ const Products = () => {
                           {...field}
                           placeholder="Choose admin type"
                         >
+                          <MenuItem disabled value="">
+                            <em>Choose admin type</em>
+                          </MenuItem>
                           {formTypeList?.map((type) => (
                             <MenuItem key={type?.id} value={type?.id}>
                               {type?.name}
@@ -1030,6 +1121,9 @@ const Products = () => {
                           {...field}
                           placeholder="Choose biller product type"
                         >
+                          <MenuItem disabled value="">
+                            <em>Choose biller</em>
+                          </MenuItem>
                           {formTypeList?.map((type) => (
                             <MenuItem key={type?.id} value={type?.id}>
                               {type?.name}
