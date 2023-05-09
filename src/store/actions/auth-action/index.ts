@@ -85,7 +85,9 @@ const getAccessTokenAction = (): AppThunk => async (dispatch) => {
   });
   try {
     if (token) {
-      const response = await axios.get('/v1/api/dashboard-access-token');
+      const response = await axios.get(
+        MODE === 'PROD' ? '/v1/api/dashboard/access-token' : '/v1/api/dashboard-access-token',
+      );
       dispatch({
         type: REDUCER_TYPES.SET_AUTH_REDUCER,
         payload: {
