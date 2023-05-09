@@ -55,6 +55,7 @@ import {
   getProductsCategoryListData,
   getProductsGroupListData,
 } from 'src/store/actions/masters-action/products-action';
+import { showMessage } from 'src/store/slices/toast-message-slice';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 
@@ -153,7 +154,7 @@ interface Data {
   harga_jual: number;
   harga_up: number;
   id: string;
-  image: string;
+  image: any;
   keterangan: string;
   komisi: number;
   nama: string;
@@ -173,7 +174,7 @@ function createData(
   harga_jual: number,
   harga_up: number,
   id: string,
-  image: string,
+  image: any,
   keterangan: string,
   komisi: number,
   nama: string,
@@ -352,7 +353,7 @@ type FormType = {
   sellPrice: number;
   upPrice: number;
   id: string;
-  image: string;
+  image: any;
   notes: string;
   commission: number;
   name: string;
@@ -416,7 +417,7 @@ const Products = () => {
     resolver: yupResolver(productsSchema),
   });
 
-  const { control, formState, handleSubmit, reset } = formMethods;
+  const { control, formState, handleSubmit, reset, setValue } = formMethods;
   const { errors } = formState;
 
   const handleClickOpen = () => {
@@ -467,6 +468,32 @@ const Products = () => {
     form.append('product_group_id', `${formData.selectedProductGroup || ''}`);
     form.append('product_biller_id', formData.selectedBillerProduct);
     form.append('id', formData.id);
+    if (formData?.image && formData?.image instanceof Blob) {
+      if (formData?.image?.size > 1048576) {
+        dispatch(
+          showMessage({
+            message: 'Maximum photo file is 1 MB',
+            variant: 'error',
+          }),
+        );
+        setOpenEditConfirmation(false);
+        return false;
+      }
+      if (
+        formData?.image?.type !== 'image/jpeg' &&
+        formData?.image?.type !== 'image/png' &&
+        formData?.image?.type !== 'image/jpg'
+      ) {
+        dispatch(
+          showMessage({
+            message: 'File format must be in jpeg, jpg, or png',
+            variant: 'error',
+          }),
+        );
+        setOpenEditConfirmation(false);
+        return false;
+      }
+    }
     if (editForm) {
       const response = await dispatch(editProductsData(formData?.id, form));
       if (typeof response === 'boolean' && response) {
@@ -635,6 +662,7 @@ const Products = () => {
   };
 
   const productImage = useWatch({ control, name: 'image' });
+  const productCategory = useWatch({ control, name: 'selectedProductCategory' });
 
   return (
     <>
@@ -950,6 +978,7 @@ const Products = () => {
                               onChange={(e) => {
                                 field.onChange(e);
                                 handleGetProductsGroupList(e.target.value);
+                                setValue('selectedProductGroup', '');
                               }}
                             >
                               <MenuItem disabled value="">
@@ -983,10 +1012,9 @@ const Products = () => {
                               ))}
                             </Select>
                             <FormHelperText>
-                              {errors?.selectedProductGroup?.message && productGroupNewFormList?.length === 0
-                                ? productGroupNewFormList?.length === 0 &&
-                                  'Diharuskan memilih Product Category terlebih dahulu'
-                                : productGroupNewFormList?.length === 0
+                              {productCategory && productGroupNewFormList?.length === 0
+                                ? 'Pilihan Product Category tidak tersedia'
+                                : !errors?.selectedProductGroup?.message && productGroupNewFormList?.length === 0
                                 ? 'Diharuskan memilih Product Category terlebih dahulu'
                                 : errors?.selectedProductGroup?.message}
                             </FormHelperText>
@@ -1038,7 +1066,6 @@ const Products = () => {
                             onChange(file);
                           }}
                           placeholder="Choose image"
-                          helperText={errors?.image && errors.image?.message}
                           error={!!errors?.image}
                           type="file"
                           fullWidth

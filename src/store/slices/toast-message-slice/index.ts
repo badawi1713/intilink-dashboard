@@ -7,17 +7,17 @@ export interface ShowMessageType {
 }
 
 interface InitialToastMessageState {
-    message?: string;
-    variant?: 'info' | 'error' | 'success' | 'warning';
-    show?: boolean;
-    hideDuration?: number;
+  message?: string;
+  variant?: 'info' | 'error' | 'success' | 'warning';
+  show?: boolean;
+  hideDuration?: number;
 }
 
 const initialState: InitialToastMessageState = {
-    message: '',
-    variant: 'info',
-    show: false,
-    hideDuration: 6000
+  message: '',
+  variant: 'info',
+  show: false,
+  hideDuration: 6000,
 };
 
 const toastMessageSlice = createSlice({
@@ -32,7 +32,7 @@ const toastMessageSlice = createSlice({
     },
     hideMessage: (state) => {
       state.show = false;
-    }
+    },
   },
 });
 
