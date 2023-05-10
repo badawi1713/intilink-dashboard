@@ -398,8 +398,8 @@ const Products = () => {
     mode: 'onChange',
     defaultValues: {
       adminNominal: 0,
-      selectedAdminType: '1',
-      selectedBillerProduct: '1',
+      selectedAdminType: '',
+      selectedBillerProduct: '',
       selectedBiller: '',
       selectedProductGroup: '',
       selectedProductCategory: '',
@@ -430,8 +430,8 @@ const Products = () => {
     setOpenFormDialog(false);
     reset({
       adminNominal: 0,
-      selectedAdminType: '1',
-      selectedBillerProduct: '1',
+      selectedAdminType: '',
+      selectedBillerProduct: '',
       selectedBiller: '',
       selectedProductGroup: '',
       selectedProductCategory: '',
@@ -1012,7 +1012,9 @@ const Products = () => {
                               ))}
                             </Select>
                             <FormHelperText>
-                              {productCategory && productGroupNewFormList?.length === 0
+                              {loadingGroupProductList
+                                ? 'Loading'
+                                : productCategory && productGroupNewFormList?.length === 0
                                 ? 'Pilihan Product Category tidak tersedia'
                                 : !errors?.selectedProductGroup?.message && productGroupNewFormList?.length === 0
                                 ? 'Diharuskan memilih Product Category terlebih dahulu'
