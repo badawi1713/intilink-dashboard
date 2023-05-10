@@ -159,7 +159,7 @@ interface Data {
   komisi: number;
   nama: string;
   status: boolean;
-  product_biller_id: number;
+  product_biller_id: string;
   index: number;
 }
 
@@ -179,7 +179,7 @@ function createData(
   komisi: number,
   nama: string,
   status: boolean,
-  product_biller_id: number,
+  product_biller_id: string,
   index: number,
 ): Data {
   return {
@@ -576,7 +576,7 @@ const Products = () => {
     };
   }, []);
 
-  const rows = data?.map((row: Data, index) =>
+  const rows = data?.map((row, index) =>
     createData(
       row?.admin_nominal,
       row?.admin_type_id,
@@ -593,7 +593,7 @@ const Products = () => {
       row?.komisi,
       row?.nama,
       row?.status,
-      row?.product_biller_id,
+      row?.produk_biller_id,
       index,
     ),
   );
