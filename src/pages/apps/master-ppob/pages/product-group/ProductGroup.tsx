@@ -435,11 +435,11 @@ const ProductGroup = () => {
             </Typography>
             <Typography variant="body1">Manajemen daftar grup produk</Typography>
           </div>
-          <div className="flex items-center gap-3 justify-between">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
             <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
               Tambah Data
             </Button>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
               <FormControl sx={{ minWidth: 220 }} size="small">
                 <InputLabel id="product-category-select">Product Category</InputLabel>
                 <Select

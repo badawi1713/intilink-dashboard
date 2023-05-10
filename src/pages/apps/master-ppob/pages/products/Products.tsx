@@ -67,7 +67,7 @@ const formTypeList = [
 const productsSchema = yup.object().shape({
   adminNominal: yup.number().required('Admin nominal is required'),
   selectedAdminType: yup.string().required('Admin type is required'),
-  selectedBillerProduct: yup.string().required('Biller product type is required'),
+  billerProductId: yup.string().required('Biller product type is required'),
   selectedBiller: yup.string().required('Biller is required'),
   selectedProductGroup: yup.string().required('Product group is required'),
   denom: yup
@@ -282,6 +282,12 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
+    id: 'product_biller_id',
+    disablePadding: false,
+    label: 'Product Biller ID',
+    disableSort: false,
+  },
+  {
     id: 'status',
     disablePadding: false,
     label: 'Available',
@@ -344,7 +350,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 type FormType = {
   adminNominal: number;
   selectedAdminType: string;
-  selectedBillerProduct: string;
+  billerProductId: string;
   selectedBiller: string;
   selectedProductGroup: string;
   selectedProductCategory: string;
@@ -399,7 +405,7 @@ const Products = () => {
     defaultValues: {
       adminNominal: 0,
       selectedAdminType: '',
-      selectedBillerProduct: '',
+      billerProductId: '',
       selectedBiller: '',
       selectedProductGroup: '',
       selectedProductCategory: '',
@@ -431,7 +437,7 @@ const Products = () => {
     reset({
       adminNominal: 0,
       selectedAdminType: '',
-      selectedBillerProduct: '',
+      billerProductId: '',
       selectedBiller: '',
       selectedProductGroup: '',
       selectedProductCategory: '',
@@ -466,7 +472,7 @@ const Products = () => {
     form.append('name', formData.name);
     form.append('status', `${formData.status}`);
     form.append('product_group_id', `${formData.selectedProductGroup || ''}`);
-    form.append('product_biller_id', formData.selectedBillerProduct);
+    form.append('product_biller_id', formData.billerProductId);
     form.append('id', formData.id);
     if (formData?.image && formData?.image instanceof Blob) {
       if (formData?.image?.size > 1048576) {
@@ -691,11 +697,11 @@ const Products = () => {
             </Typography>
             <Typography variant="body1">Manajemen daftar produk</Typography>
           </div>
-          <div className="flex items-center gap-3 justify-between">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
             <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
               Tambah Data
             </Button>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
               <FormControl sx={{ minWidth: 220 }} size="small">
                 <InputLabel id="product-category-select">Product Category</InputLabel>
                 <Select
@@ -808,6 +814,7 @@ const Products = () => {
                           <TableCell align="left">{currencyFormat(row.komisi ?? 0)}</TableCell>
                           <TableCell align="left">{currencyFormat(row.admin_nominal ?? 0)}</TableCell>
                           <TableCell align="left">{row.admin_type_name || '-'}</TableCell>
+                          <TableCell align="left">{row.product_biller_id || '-'}</TableCell>
 
                           <TableCell align="center">
                             {row.status ? (
@@ -844,9 +851,7 @@ const Products = () => {
                                       reset({
                                         adminNominal: row?.admin_nominal || 0,
                                         selectedAdminType: row?.admin_type_id ? `${row?.admin_type_id}` : '1',
-                                        selectedBillerProduct: row?.product_biller_id
-                                          ? `${row?.product_biller_id}`
-                                          : '1',
+                                        billerProductId: row?.product_biller_id || '',
                                         selectedBiller: row?.biller_id ? `${row?.biller_id}` : '',
                                         selectedProductGroup: categoryId === 'All' ? '' : `${groupId}`,
                                         denom: row?.denom || 0,
@@ -1110,6 +1115,22 @@ const Products = () => {
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
                   control={control}
+                  name="billerProductId"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Biller Product ID</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Type product ID"
+                        helperText={errors?.billerProductId && errors.billerProductId?.message}
+                        error={!!errors?.billerProductId}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
                   name="selectedAdminType"
                   render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
@@ -1132,34 +1153,6 @@ const Products = () => {
                           ))}
                         </Select>
                         <FormHelperText>{errors?.selectedAdminType?.message}</FormHelperText>
-                      </FormControl>
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="selectedBillerProduct"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Biller Product Type</label>
-                      <FormControl error={!!errors.selectedBillerProduct} required fullWidth>
-                        <Select
-                          input={<OutlinedInput />}
-                          fullWidth
-                          id="biller-type-select"
-                          {...field}
-                          placeholder="Choose biller product type"
-                        >
-                          <MenuItem disabled value="">
-                            <em>Choose biller</em>
-                          </MenuItem>
-                          {formTypeList?.map((type) => (
-                            <MenuItem key={type?.id} value={type?.id}>
-                              {type?.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <FormHelperText>{errors?.selectedBillerProduct?.message}</FormHelperText>
                       </FormControl>
                     </div>
                   )}
