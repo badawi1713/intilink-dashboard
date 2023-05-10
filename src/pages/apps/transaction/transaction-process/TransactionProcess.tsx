@@ -1,5 +1,4 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { History, Info } from '@mui/icons-material';
+import { History } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import { DialogContent, IconButton, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -17,16 +16,13 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
 import {
   handleGetTransactionProcessData,
-  handleGetTransactionProcessDetailData,
   handleGetTransactionProcessLogDetailData,
 } from 'src/store/actions/transaction-action/transaction-process-action';
 import {
@@ -39,12 +35,6 @@ import {
   setTransactionProcessSortType,
 } from 'src/store/slices/transaction-slice/transaction-process-slice';
 import { useDebounce } from 'usehooks-ts';
-import * as yup from 'yup';
-
-const menuSchema = yup.object().shape({
-  nominal: yup.string().required('Title is required'),
-  total_bayar: yup.string().required('Link is required'),
-});
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -88,6 +78,7 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 interface Data {
   id: number;
   denom: number;
+  type: string;
   status: string;
   keterangan: string;
   produk_name: string;
@@ -104,6 +95,7 @@ interface Data {
 function createData(
   id: number,
   denom: number,
+  type: string,
   status: string,
   keterangan: string,
   produk_name: string,
@@ -119,6 +111,7 @@ function createData(
   return {
     id,
     denom,
+    type,
     status,
     keterangan,
     produk_name,
@@ -158,10 +151,18 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
+    id: 'type',
+    disablePadding: false,
+    label: 'Type',
+    disableSort: true,
+    align: 'center',
+  },
+  {
     id: 'status',
     disablePadding: false,
     label: 'Status',
     disableSort: false,
+    align: 'center',
   },
   {
     id: 'keterangan',
@@ -271,14 +272,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-type FormType = {
-  id: number;
-  nominal: number;
-  user_id: null | { id: number; nominal: string };
-  admin_nominal: number;
-  total_bayar: number;
-};
-
 const TransactionProcess = () => {
   const dispatch = useAppDispatch();
   const { data, page, sortBy, sortType, limit, total, search, loading, error, loadingDetail, logDetailData } =
@@ -290,43 +283,12 @@ const TransactionProcess = () => {
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  const formMethods = useForm<FormType>({
-    mode: 'onChange',
-    defaultValues: {
-      id: 0,
-      nominal: 0,
-      user_id: null,
-      admin_nominal: 0,
-      total_bayar: 0,
-    },
-    resolver: yupResolver(menuSchema),
-  });
-
-  const { control, formState, handleSubmit, reset } = formMethods;
-  const { errors } = formState;
-
-  const handleClickOpen = () => {
-    setOpenDialog(true);
-  };
-  const handleClose = () => {
-    setOpenDialog(false);
-    dispatch(setTransactionProcessResetDetailData());
-  };
 
   const handleLogDetailClose = () => {
     setOpenLogDialog(false);
     dispatch(setTransactionProcessResetDetailData());
   };
-
-  const handleEditConfirmation = handleSubmit(() => {
-    setOpenEditConfirmation(true);
-  });
 
   const handleGetData = useCallback(() => {
     dispatch(handleGetTransactionProcessData());
@@ -352,6 +314,7 @@ const TransactionProcess = () => {
     createData(
       row?.id,
       row?.denom,
+      row?.type,
       row?.status,
       row?.keterangan,
       row?.produk_name,
@@ -366,7 +329,7 @@ const TransactionProcess = () => {
     ),
   );
 
-  const handleRequestSort = React.useCallback(
+  const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';
@@ -379,7 +342,7 @@ const TransactionProcess = () => {
     [sortType, sortBy, dispatch],
   );
 
-  const handleChangePage = React.useCallback(
+  const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(setTransactionProcessPage(newPage));
       dispatch(handleGetTransactionProcessData());
@@ -392,15 +355,6 @@ const TransactionProcess = () => {
     dispatch(setTransactionProcessLimit(+event.target.value));
 
     dispatch(handleGetTransactionProcessData());
-  };
-
-  const handleDeleteData = async (id: number) => {
-    const response = await dispatch(deleteMenuData(id));
-    if (response) {
-      dispatch(handleGetTransactionProcessData());
-      setOpenDeleteConfirmation(false);
-      setSelectedId(null);
-    }
   };
 
   return (
@@ -458,7 +412,8 @@ const TransactionProcess = () => {
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{currencyFormat(row.denom ?? 0)}</TableCell>
-                          <TableCell align="left">{row.status || '-'}</TableCell>
+                          <TableCell align="center">{row.type || '-'}</TableCell>
+                          <TableCell align="center">{row.status || '-'}</TableCell>
                           <TableCell align="left">{row.keterangan || '-'}</TableCell>
                           <TableCell align="left">{row.produk_name || '-'}</TableCell>
                           <TableCell align="left">{row.id_pel || '-'}</TableCell>

@@ -1,4 +1,3 @@
-import { yupResolver } from '@hookform/resolvers/yup';
 import { History } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import { DialogContent, IconButton, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
@@ -17,13 +16,11 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-import { deleteMenuData } from 'src/store/actions/masters-action/menu-action';
 import {
   handleGetTransactionsData,
   handleGetTransactionsLogDetailData,
@@ -38,12 +35,6 @@ import {
   setTransactionsSortType,
 } from 'src/store/slices/transaction-slice/transactions-slice';
 import { useDebounce } from 'usehooks-ts';
-import * as yup from 'yup';
-
-const menuSchema = yup.object().shape({
-  nominal: yup.string().required('Title is required'),
-  total_bayar: yup.string().required('Link is required'),
-});
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -87,6 +78,7 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 interface Data {
   id: number;
   denom: number;
+  type: string;
   status: string;
   keterangan: string;
   produk_name: string;
@@ -103,6 +95,7 @@ interface Data {
 function createData(
   id: number,
   denom: number,
+  type: string,
   status: string,
   keterangan: string,
   produk_name: string,
@@ -118,6 +111,7 @@ function createData(
   return {
     id,
     denom,
+    type,
     status,
     keterangan,
     produk_name,
@@ -157,10 +151,18 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
+    id: 'type',
+    disablePadding: false,
+    label: 'Type',
+    disableSort: true,
+    align: 'center',
+  },
+  {
     id: 'status',
     disablePadding: false,
     label: 'Status',
     disableSort: false,
+    align: 'center',
   },
   {
     id: 'keterangan',
@@ -270,14 +272,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-type FormType = {
-  id: number;
-  nominal: number;
-  user_id: null | { id: number; nominal: string };
-  admin_nominal: number;
-  total_bayar: number;
-};
-
 const Transactions = () => {
   const dispatch = useAppDispatch();
   const {
@@ -301,44 +295,12 @@ const Transactions = () => {
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
-  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
-  const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  const formMethods = useForm<FormType>({
-    mode: 'onChange',
-    defaultValues: {
-      id: 0,
-      nominal: 0,
-      user_id: null,
-      admin_nominal: 0,
-      total_bayar: 0,
-    },
-    resolver: yupResolver(menuSchema),
-  });
-
-  const { control, formState, handleSubmit, reset } = formMethods;
-  const { errors } = formState;
-
-  const handleClickOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setOpenDialog(false);
-    dispatch(setTransactionsResetDetailData());
-  };
 
   const handleLogDetailClose = () => {
     setOpenLogDialog(false);
     dispatch(setTransactionsResetDetailData());
   };
-
-  const handleEditConfirmation = handleSubmit(() => {
-    setOpenEditConfirmation(true);
-  });
 
   const handleGetData = useCallback(() => {
     dispatch(handleGetTransactionsData());
@@ -364,6 +326,7 @@ const Transactions = () => {
     createData(
       row?.id,
       row?.denom,
+      row?.type,
       row?.status,
       row?.keterangan,
       row?.produk_name,
@@ -378,7 +341,7 @@ const Transactions = () => {
     ),
   );
 
-  const handleRequestSort = React.useCallback(
+  const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';
@@ -391,7 +354,7 @@ const Transactions = () => {
     [sortType, sortBy, dispatch],
   );
 
-  const handleChangePage = React.useCallback(
+  const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(setTransactionsPage(newPage));
       dispatch(handleGetTransactionsData());
@@ -404,15 +367,6 @@ const Transactions = () => {
     dispatch(setTransactionsLimit(+event.target.value));
 
     dispatch(handleGetTransactionsData());
-  };
-
-  const handleDeleteData = async (id: number) => {
-    const response = await dispatch(deleteMenuData(id));
-    if (response) {
-      dispatch(handleGetTransactionsData());
-      setOpenDeleteConfirmation(false);
-      setSelectedId(null);
-    }
   };
 
   return (
@@ -470,7 +424,8 @@ const Transactions = () => {
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{currencyFormat(row.denom ?? 0)}</TableCell>
-                          <TableCell align="left">{row.status || '-'}</TableCell>
+                          <TableCell align="center">{row.type || '-'}</TableCell>
+                          <TableCell align="center">{row.status || '-'}</TableCell>
                           <TableCell align="left">{row.keterangan || '-'}</TableCell>
                           <TableCell align="left">{row.produk_name || '-'}</TableCell>
                           <TableCell align="left">{row.id_pel || '-'}</TableCell>
