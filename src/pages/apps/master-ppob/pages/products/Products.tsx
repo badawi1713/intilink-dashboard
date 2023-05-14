@@ -84,13 +84,6 @@ const productsSchema = yup.object().shape({
     .typeError('Buy price is required')
     .min(0, 'Buy price minimum is Rp0')
     .required('Buy price is required'),
-  sellPrice: yup
-    .number()
-    .transform((value) => (isNaN(value) ? undefined : value))
-    .nullable()
-    .typeError('Sell price is required')
-    .min(0, 'Sell price minimum is Rp0')
-    .required('Sell price is required'),
   upPrice: yup
     .number()
     .transform((value) => (isNaN(value) ? undefined : value))
@@ -356,7 +349,6 @@ type FormType = {
   selectedProductCategory: string;
   denom: number;
   buyPrice: number;
-  sellPrice: number;
   upPrice: number;
   id: string;
   image: any;
@@ -411,7 +403,6 @@ const Products = () => {
       selectedProductCategory: '',
       denom: 0,
       buyPrice: 0,
-      sellPrice: 0,
       upPrice: 0,
       id: '',
       image: '',
@@ -443,7 +434,6 @@ const Products = () => {
       selectedProductCategory: '',
       denom: 0,
       buyPrice: 0,
-      sellPrice: 0,
       upPrice: 0,
       id: '',
       image: '',
@@ -856,7 +846,6 @@ const Products = () => {
                                         selectedProductGroup: categoryId === 'All' ? '' : `${groupId}`,
                                         denom: row?.denom || 0,
                                         buyPrice: row?.harga_beli || 0,
-                                        sellPrice: row?.harga_jual || 0,
                                         upPrice: row?.harga_up || 0,
                                         id: row?.id || '',
                                         image: row?.image || '',
@@ -1233,23 +1222,6 @@ const Products = () => {
               </div>
 
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="sellPrice"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Sell Price</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Type sell price"
-                        helperText={errors?.sellPrice && errors.sellPrice?.message}
-                        error={!!errors?.sellPrice}
-                        type="number"
-                      />
-                    </div>
-                  )}
-                />
                 <Controller
                   control={control}
                   name="buyPrice"
