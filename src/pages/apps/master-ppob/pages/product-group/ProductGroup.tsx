@@ -98,7 +98,7 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 
 interface Data {
   id: number;
-  name: string;
+  nama: string;
   icon: string;
   product_category_name: string;
   deleted: boolean;
@@ -109,7 +109,7 @@ interface Data {
 
 function createData(
   id: number,
-  name: string,
+  nama: string,
   icon: string,
   product_category_name: string,
   deleted: boolean,
@@ -119,7 +119,7 @@ function createData(
 ): Data {
   return {
     id,
-    name,
+    nama,
     icon,
     product_category_name,
     deleted,
@@ -147,7 +147,13 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
-    id: 'name',
+    id: 'nama',
+    disablePadding: false,
+    label: 'Nama',
+    disableSort: false,
+  },
+  {
+    id: 'product_category_name',
     disablePadding: false,
     label: 'Category',
     disableSort: false,
@@ -288,7 +294,7 @@ const ProductGroup = () => {
 
   const onSubmit = handleSubmit(async (formData) => {
     const payload = {
-      product_category_id: formData.product_category_id?.id || 0,
+      product_category_id: formData.product_category_id?.id ?? 0,
       nama: formData.name,
       keterangan: formData.notes,
       id: formData.id,
@@ -334,7 +340,7 @@ const ProductGroup = () => {
   const rows = data?.map((row: Data, index) =>
     createData(
       row?.id,
-      row?.product_category_name,
+      row?.nama,
       row?.icon,
       row?.product_category_name,
       row?.deleted,
@@ -441,13 +447,13 @@ const ProductGroup = () => {
             </Button>
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <FormControl sx={{ minWidth: 220 }} size="small">
-                <InputLabel id="product-category-select">Product Category</InputLabel>
+                <InputLabel id="product-category-select">Kategori Produk</InputLabel>
                 <Select
                   size="small"
                   labelId="product-category-select-label"
                   id="product-category-select"
                   value={categoryId}
-                  label="Product Category"
+                  label="Kategori Produk"
                   onChange={handleGetProductGroupData}
                 >
                   <MenuItem value="All">
@@ -499,7 +505,8 @@ const ProductGroup = () => {
                           <TableCell align="left" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
-                          <TableCell align="left">{row.name || '-'}</TableCell>
+                          <TableCell align="left">{row.nama || '-'}</TableCell>
+                          <TableCell align="left">{row.product_category_name || '-'}</TableCell>
                           <TableCell align="left">{row.keterangan || '-'}</TableCell>
                           <TableCell align="center">
                             {!row.deleted ? (
@@ -539,7 +546,7 @@ const ProductGroup = () => {
                                           ) || null;
                                         reset({
                                           id: response?.id,
-                                          name: response?.product_category_name,
+                                          name: response?.nama,
                                           product_category_id: selectedParentProductGroup,
                                           notes: response?.keterangan,
                                         });
@@ -638,7 +645,7 @@ const ProductGroup = () => {
                   name="product_category_id"
                   render={({ field: { onChange, value } }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Product Category</label>
+                      <label className="text-sm font-semibold">Kategori Produk</label>
                       <Autocomplete
                         onChange={(event, item) => {
                           onChange(item);

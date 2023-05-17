@@ -693,13 +693,13 @@ const Products = () => {
             </Button>
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <FormControl sx={{ minWidth: 220 }} size="small">
-                <InputLabel id="product-category-select">Product Category</InputLabel>
+                <InputLabel id="product-category-select">Kategori Produk</InputLabel>
                 <Select
                   size="small"
                   labelId="product-category-select-label"
                   id="product-category-select"
                   value={categoryId}
-                  label="Product Category"
+                  label="Kategori Produk"
                   onChange={handleGetProductGroupData}
                 >
                   <MenuItem value="All">
@@ -720,7 +720,7 @@ const Products = () => {
                     labelId="product-group-select-label"
                     id="product-group-select"
                     value={groupId}
-                    label="Product Category"
+                    label="Kategori Produk"
                     onChange={handleGetProductsByGroupData}
                   >
                     <MenuItem value="All">
@@ -962,7 +962,7 @@ const Products = () => {
                       name="selectedProductCategory"
                       render={({ field }) => (
                         <div className="flex flex-col gap-3 w-full">
-                          <label className="text-sm font-semibold">Product Category</label>
+                          <label className="text-sm font-semibold">Kategori Produk</label>
                           <FormControl error={!!errors.selectedProductCategory} required fullWidth>
                             <Select
                               input={<OutlinedInput />}
@@ -1009,9 +1009,9 @@ const Products = () => {
                               {loadingGroupProductList
                                 ? 'Loading'
                                 : productCategory && productGroupNewFormList?.length === 0
-                                ? 'Pilihan Product Category tidak tersedia'
+                                ? 'Pilihan Kategori Produk tidak tersedia'
                                 : !errors?.selectedProductGroup?.message && productGroupNewFormList?.length === 0
-                                ? 'Diharuskan memilih Product Category terlebih dahulu'
+                                ? 'Diharuskan memilih Kategori Produk terlebih dahulu'
                                 : errors?.selectedProductGroup?.message}
                             </FormHelperText>
                           </FormControl>
