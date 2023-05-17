@@ -16,7 +16,7 @@ type TransactionsDetailData = {
 interface InitialTransactionsState {
   data?: any[];
   logDetailData?: null | any;
-  detailData?: null | TransactionsDetailData;
+  detailData?: null | TransactionsDetailData[];
   page?: number;
   limit?: number;
   total?: number;
@@ -62,7 +62,7 @@ const TransactionsSlice = createSlice({
       state.logDetailData = action.payload;
       state.loadingDetail = false;
     },
-    setTransactionsDetailData: (state, action: PayloadAction<null | TransactionsDetailData>) => {
+    setTransactionsDetailData: (state, action: PayloadAction<null | TransactionsDetailData[]>) => {
       state.detailData = action.payload;
       state.loadingDetail = false;
     },

@@ -17,11 +17,11 @@ const Layout = () => {
   }, [width]);
 
   return (
-    <div className="min-h-screen flex relative overflow-x-hidden">
-      <div className="overflow-auto w-0 xl:w-[300px]">
+    <div className="min-h-screen flex relative">
+      <div className="overflow-auto w-0 xl:w-[300px] shrink-0">
         <Aside setOpenAside={setOpenAside} openAside={openAside} />
       </div>
-      <div className="p-5 bg-slate-100 w-full flex flex-col gap-6 min-h-screen">
+      <div className="p-5 bg-slate-100 flex flex-col flex-1 overflow-auto gap-6">
         <Navbar setOpenAside={setOpenAside} />
         <Outlet />
       </div>

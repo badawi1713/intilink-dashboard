@@ -27,28 +27,25 @@ const handleGetTransactionsDetailData =
           const { message, code } = axiosError.response.data;
           dispatch(
             showMessage({
-              message:
-                `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
+              message: `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
               variant: 'error',
-            })
+            }),
           );
         } else {
           dispatch(
             showMessage({
               message: error.message || 'Maaf, sedang terjadi kesalahan',
               variant: 'error',
-            })
+            }),
           );
-          dispatch(
-            setTransactionsError(error.message || 'Maaf, sedang terjadi kesalahan')
-          );
+          dispatch(setTransactionsError(error.message || 'Maaf, sedang terjadi kesalahan'));
         }
       } else {
         dispatch(
           showMessage({
             message: 'Maaf, sedang terjadi kesalahan',
             variant: 'error',
-          })
+          }),
         );
       }
       return false;
@@ -57,48 +54,41 @@ const handleGetTransactionsDetailData =
     }
   };
 
-const handleGetTransactionsData =
-  (): AppThunk => async (dispatch, getState: () => RootState) => {
-    const { transactionsReducer } = getState();
-    const { page, sortBy, sortType, limit, search } = transactionsReducer;
-    dispatch(setTransactionsLoading());
-    try {
-      const response = await axios.get(
-        `/v1/api/dashboard/transaksi?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`
-      );
-      const payload = {
-        data: response.data?.data?.content || [],
-        total: +response?.data?.data?.totalElements || 0,
-      };
-      dispatch(setTransactionsData(payload));
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError<AxiosErrorType>;
-        if (axiosError.response) {
-          const { message, code } = axiosError.response.data;
-          dispatch(
-            setTransactionsError(
-              `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan'
-            )
-          );
-        } else {
-          dispatch(
-            setTransactionsError(error.message || 'Maaf, sedang terjadi kesalahan')
-          );
-        }
+const handleGetTransactionsData = (): AppThunk => async (dispatch, getState: () => RootState) => {
+  const { transactionsReducer } = getState();
+  const { page, sortBy, sortType, limit, search } = transactionsReducer;
+  dispatch(setTransactionsLoading());
+  try {
+    const response = await axios.get(
+      `/v1/api/dashboard/transaksi?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`,
+    );
+    const payload = {
+      data: response.data?.data?.content || [],
+      total: +response?.data?.data?.totalElements || 0,
+    };
+    dispatch(setTransactionsData(payload));
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<AxiosErrorType>;
+      if (axiosError.response) {
+        const { message, code } = axiosError.response.data;
+        dispatch(setTransactionsError(`${code}: ${message}` || 'Maaf, sedang terjadi kesalahan'));
       } else {
-        setTransactionsError('Maaf, sedang terjadi kesalahan');
+        dispatch(setTransactionsError(error.message || 'Maaf, sedang terjadi kesalahan'));
       }
+    } else {
+      setTransactionsError('Maaf, sedang terjadi kesalahan');
     }
-  };
+  }
+};
 
-  const handleGetTransactionsLogDetailData =
+const handleGetTransactionsLogDetailData =
   (id: string): AppThunk =>
   async (dispatch) => {
     dispatch(setTransactionsLoadingDetail());
     try {
       const response = await axios.get(`/v1/api/dashboard/transaksi/biller-log/${id}`);
-      const data = response.data?.data || null;
+      const data = response.data?.data || [];
       dispatch(setTransactionsLogDetailData(data));
       return true;
     } catch (error) {
@@ -108,28 +98,25 @@ const handleGetTransactionsData =
           const { message, code } = axiosError.response.data;
           dispatch(
             showMessage({
-              message:
-                `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
+              message: `${code}: ${message}` || 'Maaf, sedang terjadi kesalahan',
               variant: 'error',
-            })
+            }),
           );
         } else {
           dispatch(
             showMessage({
               message: error.message || 'Maaf, sedang terjadi kesalahan',
               variant: 'error',
-            })
+            }),
           );
-          dispatch(
-            setTransactionsError(error.message || 'Maaf, sedang terjadi kesalahan')
-          );
+          dispatch(setTransactionsError(error.message || 'Maaf, sedang terjadi kesalahan'));
         }
       } else {
         dispatch(
           showMessage({
             message: 'Maaf, sedang terjadi kesalahan',
             variant: 'error',
-          })
+          }),
         );
       }
       return false;
@@ -139,4 +126,3 @@ const handleGetTransactionsData =
   };
 
 export { handleGetTransactionsData, handleGetTransactionsDetailData, handleGetTransactionsLogDetailData };
-

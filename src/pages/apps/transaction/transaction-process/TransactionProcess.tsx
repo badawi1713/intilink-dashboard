@@ -17,6 +17,10 @@ import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorView, Loading } from 'src/components';
+import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
@@ -74,6 +78,36 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
     </DialogTitle>
   );
 }
+
+const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
+  ({ theme }) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    '&:not(:last-child)': {
+      borderBottom: 0,
+    },
+    '&:before': {
+      display: 'none',
+    },
+  }),
+);
+
+const AccordionSummary = styled((props: AccordionSummaryProps) => (
+  <MuiAccordionSummary expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />} {...props} />
+))(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, .05)' : 'rgba(0, 0, 0, .03)',
+  flexDirection: 'row-reverse',
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    transform: 'rotate(90deg)',
+  },
+  '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderTop: '1px solid rgba(0, 0, 0, .125)',
+}));
 
 interface Data {
   id: number;
@@ -284,6 +318,7 @@ const TransactionProcess = () => {
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
+  const [expanded, setExpanded] = useState<string | false>(false);
 
   const handleLogDetailClose = () => {
     setOpenLogDialog(false);
@@ -355,6 +390,10 @@ const TransactionProcess = () => {
     dispatch(setTransactionProcessLimit(+event.target.value));
 
     dispatch(handleGetTransactionProcessData());
+  };
+
+  const handleChangeAccordion = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+    setExpanded(newExpanded ? panel : false);
   };
 
   return (
@@ -478,22 +517,27 @@ const TransactionProcess = () => {
           Biller Log Proses Transaksi
         </BootstrapDialogTitle>
         <DialogContent dividers>
-          <section>
-            <List dense>
-              <ListItem>
-                <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Tanggal" secondary={logDetailData?.response_date || '-'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Request" secondary={logDetailData?.request || '-'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Response" secondary={<pre>{responseLogData}</pre>} />
-              </ListItem>
-            </List>
-          </section>
+          <Accordion expanded={expanded === 'panel1'} onChange={handleChangeAccordion('panel1')}>
+            <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+              <Typography>Collapsible Group Item #1</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <List dense>
+                <ListItem>
+                  <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Tanggal" secondary={logDetailData?.response_date || '-'} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Request" secondary={logDetailData?.request || '-'} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Response" secondary={<pre>{responseLogData}</pre>} />
+                </ListItem>
+              </List>
+            </AccordionDetails>
+          </Accordion>
         </DialogContent>
       </BootstrapDialog>
     </>

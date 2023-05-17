@@ -17,6 +17,7 @@ import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorView, Loading } from 'src/components';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/accordion/Accordion';
 import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
@@ -290,12 +291,10 @@ const Transactions = () => {
   } = useAppSelector((state) => state.transactionsReducer);
   const isMount = useRef<boolean>(true);
 
-  const responseLogDataJson = logDetailData?.response ? JSON.parse(logDetailData?.response) : '-';
-  const responseLogData = JSON.stringify(responseLogDataJson, null, 2);
-
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
+  const [expanded, setExpanded] = useState<string | false>(false);
 
   const handleLogDetailClose = () => {
     setOpenLogDialog(false);
@@ -367,6 +366,10 @@ const Transactions = () => {
     dispatch(setTransactionsLimit(+event.target.value));
 
     dispatch(handleGetTransactionsData());
+  };
+
+  const handleChangeAccordion = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+    setExpanded(newExpanded ? panel : false);
   };
 
   return (
@@ -488,22 +491,46 @@ const Transactions = () => {
           Biller Log Transaksi
         </BootstrapDialogTitle>
         <DialogContent dividers>
-          <section>
-            <List dense>
-              <ListItem>
-                <ListItemText primary="Biller" secondary={logDetailData?.biller_nama || '-'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Tanggal" secondary={logDetailData?.response_date || '-'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Request" secondary={logDetailData?.request || '-'} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Response" secondary={<pre>{responseLogData}</pre>} />
-              </ListItem>
-            </List>
-          </section>
+          {logDetailData?.length > 0 && typeof logDetailData === 'object' ? (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            logDetailData?.map((log: any, index: number) => {
+              const responseLogDataJson = log?.response ? JSON.parse(log?.response) : '-';
+              const responseLogData = JSON.stringify(responseLogDataJson, null, 2);
+              return (
+                <Accordion
+                  key={index}
+                  expanded={expanded === `panel${index}`}
+                  onChange={handleChangeAccordion(`panel${index}`)}
+                >
+                  <AccordionSummary aria-controls={`panel${index}-content`} id={`panel${index}-header`}>
+                    <Typography>
+                      Log {index + 1}: {log?.response_date}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails className="overflow-auto">
+                    <List dense>
+                      <ListItem>
+                        <ListItemText primary="Biller" secondary={log?.biller_nama || '-'} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Tanggal" secondary={log?.response_date || '-'} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Request" secondary={log?.request || '-'} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Response" secondary={<pre>{responseLogData}</pre>} />
+                      </ListItem>
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })
+          ) : (
+            <Typography variant="h6" textAlign="center">
+              Data Log Tidak Tersedia
+            </Typography>
+          )}
         </DialogContent>
       </BootstrapDialog>
     </>

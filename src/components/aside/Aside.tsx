@@ -1,4 +1,7 @@
-import { FC, useRef } from 'react';
+import { Add } from '@mui/icons-material';
+import { Button, Typography } from '@mui/material';
+import { FC, SyntheticEvent, useRef, useState } from 'react';
+import { Accordion, AccordionDetails, AccordionSummary } from '../accordion/Accordion';
 
 type AsideProps = {
   setOpenAside: (value: boolean) => void;
@@ -7,6 +10,12 @@ type AsideProps = {
 
 const Aside: FC<AsideProps> = ({ openAside, setOpenAside }) => {
   const asideRef = useRef(null);
+
+  const [expanded, setExpanded] = useState<string | false>(false);
+
+  const handleChange = (panel: string) => (event: SyntheticEvent, newExpanded: boolean) => {
+    setExpanded(newExpanded ? panel : false);
+  };
 
   const handleClickOutside = () => {
     setOpenAside(false);
@@ -27,13 +36,17 @@ const Aside: FC<AsideProps> = ({ openAside, setOpenAside }) => {
               className="w-32 h-16 mb-8"
             />
             <section className="flex flex-col gap-6 items-start">
-              <button onClick={() => setOpenAside(false)} className="w-auto">
-                <h2 className="font-semibold">Add Sender</h2>
-              </button>
-              <h2>Whatsapp Sender</h2>
-              <ul className="flex flex-col gap-4">
-                <li className="text-green-500 font-medium">+62 812 5388 9122</li>
-              </ul>
+              <Button startIcon={<Add />} color="success" fullWidth variant="contained" className="w-auto">
+                Add Sender
+              </Button>
+              <Accordion className="w-full" expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+                  <Typography>Whatsapp Sender</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Typography color="green">+62 812 5388 9122</Typography>
+                </AccordionDetails>
+              </Accordion>
             </section>
           </aside>
         </>
