@@ -375,6 +375,8 @@ const Products = () => {
     loadingDelete,
     loading,
     error,
+    categoryId,
+    groupId,
   } = useAppSelector((state) => state.masterProductsReducer);
   const isMount = useRef<boolean>(true);
 
@@ -387,8 +389,6 @@ const Products = () => {
   const [editForm, setEditForm] = useState<boolean>(false);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [categoryId, setCategoryId] = useState<string>('All');
-  const [groupId, setGroupId] = useState<string>('');
   const [productGroupNewFormList, setProductGroupNewFormList] = useState<any[]>([]);
   const [loadingGroupProductList, setLoadingGroupProductList] = useState<boolean>(false);
 
@@ -515,13 +515,13 @@ const Products = () => {
 
   const handleGetProductGroupData = async (event: SelectChangeEvent) => {
     const value = event.target.value;
-    setCategoryId(value);
     dispatch(
       changeMasterProductsReducer({
         groupId: '',
+        categoryId: value,
       }),
     );
-    const responseData = await dispatch(getProductsGroupListData(value === 'All' ? '' : value));
+    const responseData = await dispatch(getProductsGroupListData(value === 'Semua' ? '' : value));
     if (responseData?.length > 0 && typeof responseData === 'object') {
       dispatch(
         changeMasterProductsReducer({
@@ -529,17 +529,15 @@ const Products = () => {
           groupId: responseData[0].id,
         }),
       );
-      setGroupId(responseData[0].id || '');
     }
     dispatch(getMasterProductsData());
   };
 
   const handleGetProductsByGroupData = (event: SelectChangeEvent) => {
     const value = event.target.value;
-    setGroupId(value);
     dispatch(
       changeMasterProductsReducer({
-        groupId: value === 'All' ? '' : value,
+        groupId: value,
       }),
     );
     dispatch(getMasterProductsData());
@@ -560,17 +558,6 @@ const Products = () => {
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
-
-  useEffect(() => {
-    return () => {
-      dispatch(
-        changeMasterProductsReducer({
-          productGroupList: [],
-          groupId: '',
-        }),
-      );
-    };
-  }, []);
 
   const rows = data?.map((row, index) =>
     createData(
@@ -702,8 +689,8 @@ const Products = () => {
                   label="Kategori Produk"
                   onChange={handleGetProductGroupData}
                 >
-                  <MenuItem value="All">
-                    <em>All</em>
+                  <MenuItem value="Semua">
+                    <em>Semua</em>
                   </MenuItem>
                   {productCategoryList?.map((category) => (
                     <MenuItem key={category?.id} value={category?.id}>
@@ -723,8 +710,8 @@ const Products = () => {
                     label="Kategori Produk"
                     onChange={handleGetProductsByGroupData}
                   >
-                    <MenuItem value="All">
-                      <em>All</em>
+                    <MenuItem value="Semua">
+                      <em>Semua</em>
                     </MenuItem>
                     {productGroupList?.map((category) => (
                       <MenuItem key={category?.id} value={category?.id}>
@@ -843,7 +830,7 @@ const Products = () => {
                                         selectedAdminType: row?.admin_type_id ? `${row?.admin_type_id}` : '1',
                                         billerProductId: row?.product_biller_id || '',
                                         selectedBiller: row?.biller_id ? `${row?.biller_id}` : '',
-                                        selectedProductGroup: categoryId === 'All' ? '' : `${groupId}`,
+                                        selectedProductGroup: categoryId === 'Semua' ? '' : `${groupId}`,
                                         denom: row?.denom || 0,
                                         buyPrice: row?.harga_beli || 0,
                                         upPrice: row?.harga_up || 0,

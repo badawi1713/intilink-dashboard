@@ -1,0 +1,23 @@
+export type InitialMasterUsersState = {
+  data?: any[];
+  billerSaldo?: string;
+  page?: number;
+  limit?: number;
+  total?: number;
+  sortBy?: string;
+  sortType?: 'asc' | 'desc';
+  search?: string;
+  loadingList?: boolean;
+  loadingPost?: boolean;
+  loadingDetail?: boolean;
+  loadingDelete?: boolean;
+  loading?: boolean;
+  error?: null | string;
+};
+
+export type MasterUsersAction = {
+  type: string;
+  payload: InitialMasterUsersState;
+};
+
+export type MasterUsersDispatchType = (args: MasterUsersAction) => MasterUsersAction;

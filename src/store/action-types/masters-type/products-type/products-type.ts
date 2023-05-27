@@ -7,6 +7,7 @@ export type InitialMasterProductsState = {
   sortType?: 'asc' | 'desc';
   search?: string;
   groupId?: string;
+  categoryId?: string;
   productCategoryList?: any[];
   productGroupList?: any[];
   billerList?: any[];

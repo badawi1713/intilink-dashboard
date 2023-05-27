@@ -12,6 +12,7 @@ import SubProductGroup from './pages/apps/master-ppob/pages/product-group/pages/
 import Products from './pages/apps/master-ppob/pages/products';
 import { Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
 import { getAccessTokenAction, userLogoutAction } from './store/actions/auth-action';
+import MasterUsers from './pages/apps/master-users';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -47,6 +48,7 @@ const App: FC = () => {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="master/user" element={<MasterUsers />} />
           <Route path="master/menu" element={<MasterMenu />} />
           <Route path="master/ppob">
             <Route index element={<Navigate to="product-category" replace />} />

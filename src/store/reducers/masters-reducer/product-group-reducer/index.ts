@@ -11,7 +11,7 @@ const initialState: InitialMasterProductGroupState = {
   total: 0,
   sortBy: 'deleted',
   sortType: 'asc',
-  categoryId: '',
+  categoryId: 'Semua',
   search: '',
   productCategoryList: [],
   loadingList: true,

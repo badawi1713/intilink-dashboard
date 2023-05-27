@@ -3,18 +3,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Autocomplete,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -39,22 +28,21 @@ import EmptyTableView from 'src/components/empty-table-view';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
 import {
-  addNewProductGroupData,
-  changeMasterProductGroupReducer,
-  deleteProductGroupData,
-  editProductGroupData,
-  getMasterProductGroupData,
-  getProductGroupDetailData,
-  getProductCategoryListData,
-} from 'src/store/actions/masters-action/product-group-action';
+  addNewUsersData,
+  changeMasterUsersReducer,
+  deleteUsersData,
+  editUsersData,
+  getMasterUsersData,
+  getUsersDetailData,
+} from 'src/store/actions/masters-action/users-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 
-const productGroupSchema = yup.object().shape({
-  name: yup.string().required('Name is required'),
+// const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
+
+const productCategorySchema = yup.object().shape({
+  nama: yup.string().required('Name is required'),
   id: yup.string().required('ID is required'),
-  notes: yup.string().required('Notes is required'),
-  product_category_id: yup.object().nullable().required('Category is required'),
 });
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -99,32 +87,26 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 interface Data {
   id: number;
   nama: string;
-  icon: string;
-  product_category_name: string;
-  deleted: boolean;
-  product_category_id: number;
-  keterangan: string;
+  saldo: string;
+  status: boolean;
+  tanggal_daftar: string;
   index: number;
 }
 
 function createData(
   id: number,
   nama: string,
-  icon: string,
-  product_category_name: string,
-  deleted: boolean,
-  product_category_id: number,
-  keterangan: string,
+  saldo: string,
+  status: boolean,
+  tanggal_daftar: string,
   index: number,
 ): Data {
   return {
     id,
     nama,
-    icon,
-    product_category_name,
-    deleted,
-    product_category_id,
-    keterangan,
+    saldo,
+    status,
+    tanggal_daftar,
     index,
   };
 }
@@ -153,23 +135,24 @@ const headCells: readonly HeadCell[] = [
     disableSort: false,
   },
   {
-    id: 'product_category_name',
+    id: 'saldo',
     disablePadding: false,
-    label: 'Category',
-    disableSort: false,
+    label: 'Saldo',
+    disableSort: true,
   },
   {
-    id: 'keterangan',
+    id: 'tanggal_daftar',
     disablePadding: false,
-    label: 'Keterangan',
-    disableSort: false,
+    label: 'Tanggal Daftar',
+    disableSort: true,
+    align: 'center',
   },
   {
-    id: 'deleted',
+    id: 'status',
     disablePadding: false,
     label: 'Available',
     align: 'center',
-    disableSort: false,
+    disableSort: true,
   },
   {
     id: 'index',
@@ -226,28 +209,14 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 type FormType = {
   id: string;
-  name: string;
-  product_category_id: null | { id: number; name: string };
-  notes: string;
+  nama: string;
+  saldo: string;
 };
 
-const ProductGroup = () => {
+const MasterUsers = () => {
   const dispatch = useAppDispatch();
-  const {
-    data,
-    page,
-    sortBy,
-    sortType,
-    limit,
-    total,
-    search,
-    productCategoryList,
-    loadingPost,
-    loadingDelete,
-    loading,
-    error,
-    categoryId,
-  } = useAppSelector((state) => state.masterProductGroupReducer);
+  const { data, page, sortBy, sortType, limit, total, search, loadingPost, loadingDelete, loading, error } =
+    useAppSelector((state) => state.masterUsersReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
@@ -255,6 +224,8 @@ const ProductGroup = () => {
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
+  const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
   const [editForm, setEditForm] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -262,11 +233,10 @@ const ProductGroup = () => {
     mode: 'onChange',
     defaultValues: {
       id: '',
-      name: '',
-      notes: '',
-      product_category_id: null,
+      nama: '',
+      saldo: '',
     },
-    resolver: yupResolver(productGroupSchema),
+    resolver: yupResolver(productCategorySchema),
   });
 
   const { control, formState, handleSubmit, reset } = formMethods;
@@ -282,9 +252,8 @@ const ProductGroup = () => {
     setOpenFormDialog(false);
     reset({
       id: '',
-      name: '',
-      notes: '',
-      product_category_id: null,
+      nama: '',
+      saldo: '',
     });
   };
 
@@ -294,31 +263,30 @@ const ProductGroup = () => {
 
   const onSubmit = handleSubmit(async (formData) => {
     const payload = {
-      product_category_id: formData.product_category_id?.id ?? 0,
-      nama: formData.name,
-      keterangan: formData.notes,
       id: formData.id,
+      nama: formData.nama,
+      saldo: formData.saldo,
     };
+
     if (editForm) {
-      const response = await dispatch(editProductGroupData(formData?.id, payload));
+      const response = await dispatch(editUsersData(formData?.id, payload));
       if (typeof response === 'boolean' && response) {
         handleClose();
         setOpenEditConfirmation(false);
         setSelectedId(null);
-        dispatch(getMasterProductGroupData());
+        dispatch(getMasterUsersData());
       }
     } else {
-      const response = await dispatch(addNewProductGroupData(payload));
+      const response = await dispatch(addNewUsersData(payload));
       if (typeof response === 'boolean' && response) {
         handleClose();
-        dispatch(getMasterProductGroupData());
+        dispatch(getMasterUsersData());
       }
     }
   });
 
   const handleGetData = useCallback(() => {
-    dispatch(getMasterProductGroupData());
-    dispatch(getProductCategoryListData());
+    dispatch(getMasterUsersData());
   }, [dispatch]);
 
   useEffect(() => {
@@ -331,23 +299,14 @@ const ProductGroup = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
-        dispatch(getMasterProductGroupData());
+        dispatch(getMasterUsersData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
   const rows = data?.map((row: Data, index) =>
-    createData(
-      row?.id,
-      row?.nama,
-      row?.icon,
-      row?.product_category_name,
-      row?.deleted,
-      row?.product_category_id,
-      row?.keterangan,
-      index,
-    ),
+    createData(row?.id, row?.nama, row?.saldo, row?.status, row?.tanggal_daftar, index),
   );
 
   const handleRequestSort = useCallback(
@@ -356,12 +315,12 @@ const ProductGroup = () => {
       const toggledOrder = isAsc ? 'desc' : 'asc';
 
       dispatch(
-        changeMasterProductGroupReducer({
+        changeMasterUsersReducer({
           sortBy: newOrderBy,
           sortType: toggledOrder,
         }),
       );
-      dispatch(getMasterProductGroupData());
+      dispatch(getMasterUsersData());
     },
 
     [sortType, sortBy, dispatch],
@@ -370,47 +329,32 @@ const ProductGroup = () => {
   const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(
-        changeMasterProductGroupReducer({
+        changeMasterUsersReducer({
           page: newPage,
         }),
       );
-      dispatch(getMasterProductGroupData());
+      dispatch(getMasterUsersData());
     },
     [dispatch, page],
   );
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(
-      changeMasterProductGroupReducer({
+      changeMasterUsersReducer({
         page: 0,
         limit: +event.target.value,
       }),
     );
-    dispatch(getMasterProductGroupData());
-  };
-
-  const getProductGroupListItem = (option: { id: number; name: string }) => {
-    if (!option?.id) option = productCategoryList?.find((op) => op.id === option);
-    return option;
+    dispatch(getMasterUsersData());
   };
 
   const handleDeleteData = async (id: number) => {
-    const response = await dispatch(deleteProductGroupData(id));
+    const response = await dispatch(deleteUsersData(id));
     if (typeof response === 'boolean' && response) {
-      dispatch(getMasterProductGroupData());
+      dispatch(getMasterUsersData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
     }
-  };
-
-  const handleGetProductGroupData = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    dispatch(
-      changeMasterProductGroupReducer({
-        categoryId: value,
-      }),
-    );
-    dispatch(getMasterProductGroupData());
   };
 
   return (
@@ -423,7 +367,7 @@ const ProductGroup = () => {
             placeholder="Cari data..."
             onChange={(e: React.FormEvent<HTMLInputElement>) =>
               dispatch(
-                changeMasterProductGroupReducer({
+                changeMasterUsersReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
                 }),
@@ -436,37 +380,13 @@ const ProductGroup = () => {
         <div className="flex justify-between gap-4 items-center">
           <div>
             <Typography fontWeight={'bold'} variant="h6">
-              Master Grup Produk
+              Master User
             </Typography>
-            <Typography variant="body1">Manajemen daftar grup produk</Typography>
+            <Typography variant="body1">Manajemen daftar user</Typography>
           </div>
-          <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
-            <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
-              Tambah Data
-            </Button>
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <FormControl sx={{ minWidth: 220 }} size="small">
-                <InputLabel id="product-category-select">Kategori Produk</InputLabel>
-                <Select
-                  size="small"
-                  labelId="product-category-select-label"
-                  id="product-category-select"
-                  value={categoryId}
-                  label="Kategori Produk"
-                  onChange={handleGetProductGroupData}
-                >
-                  <MenuItem value="Semua">
-                    <em>Semua</em>
-                  </MenuItem>
-                  {productCategoryList?.map((category) => (
-                    <MenuItem key={category?.id} value={category?.id}>
-                      {category?.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-          </div>
+          <Button color="success" size="small" variant="contained" disabled onClick={handleClickOpen}>
+            Tambah Data
+          </Button>
         </div>
         <section>
           {loading ? (
@@ -476,12 +396,12 @@ const ProductGroup = () => {
               message={error || ''}
               handleRetry={() => {
                 dispatch(
-                  changeMasterProductGroupReducer({
+                  changeMasterUsersReducer({
                     page: 0,
-                    sortBy: 'deleted',
+                    sortBy: 'status',
                   }),
                 );
-                dispatch(getMasterProductGroupData());
+                dispatch(getMasterUsersData());
               }}
             />
           ) : rows?.length === 0 ? (
@@ -492,7 +412,7 @@ const ProductGroup = () => {
                 <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
-                    orderBy={sortBy || 'deleted'}
+                    orderBy={sortBy || 'status'}
                     onRequestSort={handleRequestSort}
                   />
                   <TableBody>
@@ -505,10 +425,10 @@ const ProductGroup = () => {
                             {row.id}
                           </TableCell>
                           <TableCell align="left">{row.nama || '-'}</TableCell>
-                          <TableCell align="left">{row.product_category_name || '-'}</TableCell>
-                          <TableCell align="left">{row.keterangan || '-'}</TableCell>
+                          <TableCell align="left">{row.saldo || 0}</TableCell>
+                          <TableCell align="center">{row.tanggal_daftar || '-'}</TableCell>
                           <TableCell align="center">
-                            {!row.deleted ? (
+                            {!row.status ? (
                               <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
                             ) : (
                               <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
@@ -535,19 +455,14 @@ const ProductGroup = () => {
                                 <span>
                                   <IconButton
                                     onClick={async () => {
-                                      const response: any = await dispatch(getProductGroupDetailData(row.id));
+                                      const response: any = await dispatch(getUsersDetailData(row.id));
                                       if (typeof response === 'object' && Object.keys(response).length > 0) {
                                         setSelectedId(response?.id);
                                         setEditForm(true);
-                                        const selectedParentProductGroup =
-                                          productCategoryList?.find(
-                                            (productGroup) => productGroup?.id === response?.product_category_id,
-                                          ) || null;
                                         reset({
                                           id: response?.id,
-                                          name: response?.nama,
-                                          product_category_id: selectedParentProductGroup,
-                                          notes: response?.keterangan,
+                                          nama: response?.nama || '',
+                                          saldo: response?.saldo || '',
                                         });
                                         handleClickOpen();
                                       }
@@ -583,96 +498,60 @@ const ProductGroup = () => {
       {openFormDialog && (
         <BootstrapDialog aria-labelledby="customized-dialog-title" open={openFormDialog} maxWidth="md" fullWidth>
           <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
-            {editForm ? 'Edit Data Grup Produk' : 'Data Grup Produk Baru'}
+            {editForm ? 'Edit Data User' : 'Data User Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
-            <section className="flex-col flex gap-4 w-full mb-8">
-              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="id"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">ID</label>
-                      <TextField
-                        {...field}
-                        disabled={editForm}
-                        fullWidth
-                        placeholder="Type product group id"
-                        helperText={errors?.id && errors.id?.message}
-                        error={!!errors?.id}
-                      />
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Name</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Type product group name"
-                        helperText={errors?.name && errors.name?.message}
-                        error={!!errors?.name}
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="notes"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Keterangan</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Type product group notes"
-                        helperText={errors?.notes && errors.notes?.message}
-                        error={!!errors?.notes}
-                      />
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="product_category_id"
-                  render={({ field: { onChange, value } }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Kategori Produk</label>
-                      <Autocomplete
-                        onChange={(event, item) => {
-                          onChange(item);
-                        }}
-                        id="product_category_id"
-                        value={value}
-                        isOptionEqualToValue={(option, val) => {
-                          return option?.id === getProductGroupListItem(val)?.id;
-                        }}
-                        fullWidth
-                        options={productCategoryList || []}
-                        getOptionLabel={(item) => (item.name ? item.name : '')}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={!!errors.product_category_id}
-                            helperText={errors?.product_category_id?.message}
-                            variant="outlined"
-                            placeholder="Choose product category"
-                            fullWidth
-                          />
-                        )}
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-            </section>
+            <div className="flex flex-col items-stretch gap-4 w-full">
+              <Controller
+                control={control}
+                name="id"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-3 w-full">
+                    <label className="text-sm font-semibold">ID</label>
+                    <TextField
+                      {...field}
+                      disabled={editForm}
+                      fullWidth
+                      placeholder="Category ID"
+                      helperText={errors?.id && errors.id?.message}
+                      error={!!errors?.id}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="nama"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-3 w-full">
+                    <label className="text-sm font-semibold">Name</label>
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Product category name"
+                      helperText={errors?.nama && errors.nama?.message}
+                      error={!!errors?.nama}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="saldo"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-3 w-full">
+                    <label className="text-sm font-semibold">Notes</label>
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Notes"
+                      helperText={errors?.saldo && errors.saldo?.message}
+                      error={!!errors?.saldo}
+                    />
+                  </div>
+                )}
+              />
+            </div>
           </DialogContent>
           <DialogActions>
             <Button disabled={loadingPost} color="inherit" onClick={handleClose}>
@@ -697,8 +576,8 @@ const ProductGroup = () => {
       {openDeleteConfirmation && (
         <Confirmation
           open={openDeleteConfirmation}
-          title={'Hapus data grup produk?'}
-          content={`Konfirmasi untuk menghapus data grup produk dengan id ${selectedId}.`}
+          title={'Hapus data user?'}
+          content={`Konfirmasi untuk menghapus data user dengan id ${selectedId}.`}
           cancelActionHandler={() => setOpenDeleteConfirmation(false)}
           confirmActionHandler={() => handleDeleteData(selectedId || 0)}
           loading={loadingDelete || false}
@@ -711,8 +590,8 @@ const ProductGroup = () => {
       {openEditConfirmation && (
         <Confirmation
           open={openEditConfirmation}
-          title={'Ubah data grup produk?'}
-          content={`Konfirmasi untuk mengubah data grup produk dengan id ${selectedId}.`}
+          title={'Ubah data user?'}
+          content={`Konfirmasi untuk mengubah data user dengan id ${selectedId}.`}
           cancelActionHandler={() => setOpenEditConfirmation(false)}
           confirmActionHandler={onSubmit}
           loading={loadingPost || false}
@@ -722,8 +601,35 @@ const ProductGroup = () => {
           type="primary"
         />
       )}
+      {openImagePreview && (
+        <BootstrapDialog
+          onClose={() => {
+            setSelectedImagePreview('');
+            setOpenImagePreview(false);
+          }}
+          aria-labelledby="customized-dialog-title"
+          open={openImagePreview}
+          maxWidth="sm"
+          fullWidth
+        >
+          <BootstrapDialogTitle
+            id="customized-dialog-title"
+            onClose={() => {
+              setSelectedImagePreview('');
+              setOpenImagePreview(false);
+            }}
+          >
+            {'Image Preview'}
+          </BootstrapDialogTitle>
+          <DialogContent dividers>
+            <section className="flex flex-col items-center justify-center h-[240px]">
+              <img alt="preview" className="w-full h-full p-1 object-scale-down" src={selectedImagePreview} />
+            </section>
+          </DialogContent>
+        </BootstrapDialog>
+      )}
     </>
   );
 };
 
-export default ProductGroup;
+export default MasterUsers;

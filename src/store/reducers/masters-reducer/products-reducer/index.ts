@@ -13,6 +13,7 @@ const initialState: InitialMasterProductsState = {
   sortType: 'asc',
   groupId: '',
   search: '',
+  categoryId: 'Semua',
   productCategoryList: [],
   productGroupList: [],
   billerList: [],
