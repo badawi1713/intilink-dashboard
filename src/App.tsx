@@ -13,6 +13,7 @@ import Products from './pages/apps/master-ppob/pages/products';
 import { Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
 import { getAccessTokenAction, userLogoutAction } from './store/actions/auth-action';
 import MasterUsers from './pages/apps/master-users';
+import PaymentMethods from './pages/apps/master-ppob/pages/payment-methods';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -54,6 +55,7 @@ const App: FC = () => {
             <Route index element={<Navigate to="product-category" replace />} />
             <Route path="product-category" element={<ProductCategory />} />
             <Route path="products" element={<Products />} />
+            <Route path="cara-bayar" element={<PaymentMethods />} />
             <Route path="product-group">
               <Route index element={<ProductGroup />} />
               <Route path="sub-product-group" element={<SubProductGroup />} />
