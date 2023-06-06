@@ -10,7 +10,7 @@ import ProductCategory from './pages/apps/master-ppob/pages/product-category';
 import ProductGroup from './pages/apps/master-ppob/pages/product-group';
 import SubProductGroup from './pages/apps/master-ppob/pages/product-group/pages/sub-product-group';
 import Products from './pages/apps/master-ppob/pages/products';
-import { Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
+import { AdjustSaldo, Deposit, SaldoMutation, TransactionProcess, Transactions } from './pages/apps/transaction';
 import { getAccessTokenAction, userLogoutAction } from './store/actions/auth-action';
 import MasterUsers from './pages/apps/master-users';
 import PaymentMethods from './pages/apps/master-ppob/pages/payment-methods';
@@ -68,6 +68,7 @@ const App: FC = () => {
             <Route path="transaksi" element={<Transactions />} />
             <Route path="proses-transaksi" element={<TransactionProcess />} />
             <Route path="mutasi" element={<SaldoMutation />} />
+            <Route path="adjust-saldo" element={<AdjustSaldo />} />
           </Route>
           <Route path="*" element={<Page404 />} />
         </Route>

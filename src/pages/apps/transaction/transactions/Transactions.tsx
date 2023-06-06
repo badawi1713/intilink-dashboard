@@ -25,7 +25,7 @@ import { useAppSelector } from 'src/hooks/useAppSelector';
 import {
   handleGetTransactionsData,
   handleGetTransactionsLogDetailData,
-} from 'src/store/actions/transaction-action/transactions-action';
+} from 'src/store/actions/transactions-action/transactions-action';
 import {
   setTransactionsLimit,
   setTransactionsPage,
@@ -315,6 +315,8 @@ const Transactions = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
+        dispatch(handleGetTransactionsData());
+      } else {
         dispatch(handleGetTransactionsData());
       }
     },

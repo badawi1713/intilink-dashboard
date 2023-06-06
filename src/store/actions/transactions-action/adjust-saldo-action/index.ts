@@ -1,28 +1,28 @@
 import axios, { AxiosError } from 'axios';
 import { AppThunk, RootState } from 'src/store';
 import {
-  InitialMasterUsersState,
-  MasterUsersDispatchType,
-} from '../../../action-types/masters-type/users-type/users.type';
+  InitialTransactionAdjustSaldoState,
+  TransactionAdjustSaldoDispatchType,
+} from '../../../action-types/transactions-type/adjust-saldo-type/adjust-saldo-type';
 import * as REDUCER_TYPES from '../../../types';
 import { showMessage } from 'src/store/slices/toast-message-slice';
 
-const changeMasterUsersReducer = (payload: InitialMasterUsersState) => {
-  return (dispatch: MasterUsersDispatchType) => {
+const changeTransactionAdjustSaldoReducer = (payload: InitialTransactionAdjustSaldoState) => {
+  return (dispatch: TransactionAdjustSaldoDispatchType) => {
     dispatch({
-      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
       payload,
     });
   };
 };
 
-const getMasterUsersData = () => {
-  return async (dispatch: MasterUsersDispatchType, getState: () => RootState) => {
-    const { masterUsersReducer } = getState();
-    const { page, limit, sortType, sortBy, search } = masterUsersReducer;
+const getTransactionAdjustSaldoData = () => {
+  return async (dispatch: TransactionAdjustSaldoDispatchType, getState: () => RootState) => {
+    const { transactionAdjustSaldoReducer } = getState();
+    const { page, limit, sortType, sortBy, search } = transactionAdjustSaldoReducer;
 
     dispatch({
-      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
       payload: {
         loading: true,
         error: null,
@@ -31,14 +31,14 @@ const getMasterUsersData = () => {
 
     try {
       const response = await axios.get(
-        `/v1/api/dashboard/user?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`,
+        `/v1/api/dashboard/saldo?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&filter=${search}`,
       );
 
       const total = +response?.data?.data?.totalElements || 0;
       const data = response?.data?.data?.content || [];
 
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           total,
           data,
@@ -46,14 +46,14 @@ const getMasterUsersData = () => {
       });
     } catch (error) {
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           error: `${error}`,
         },
       });
     } finally {
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           loading: false,
         },
@@ -62,20 +62,78 @@ const getMasterUsersData = () => {
   };
 };
 
-const addNewUsersData = (payload: any): AppThunk => {
+const getUserListData = (keyword: string): AppThunk => {
   return async (dispatch) => {
     dispatch({
-      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
+      payload: {
+        loadingUserSearch: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/user/list-dropdown?key=${keyword}`);
+
+      const data = response.data?.data || [];
+
+      dispatch({
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
+        payload: {
+          userList: data,
+        },
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
+        payload: {
+          loadingUserSearch: false,
+        },
+      });
+    }
+  };
+};
+
+const addNewAdjustSaldoData = (data: any): AppThunk => {
+  return async (dispatch) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
       payload: {
         loadingPost: true,
       },
     });
 
     try {
-      await axios.post(`/v1/api/dashboard/user`, payload);
+      await axios.post(`/v1/api/dashboard/saldo/manual`, data);
       dispatch(
         showMessage({
-          message: 'Berhasil menambahkan data baru!',
+          message: 'Berhasil menyimpan transaksi penyesuaian saldo!',
           variant: 'success',
         }),
       );
@@ -110,7 +168,7 @@ const addNewUsersData = (payload: any): AppThunk => {
       return false;
     } finally {
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           loadingPost: false,
         },
@@ -119,17 +177,17 @@ const addNewUsersData = (payload: any): AppThunk => {
   };
 };
 
-const getUsersDetailData = (id: number): AppThunk => {
+const getAdjustSaldoDetailData = (id: number): AppThunk => {
   return async (dispatch) => {
     dispatch({
-      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
       payload: {
         loadingDetail: true,
       },
     });
 
     try {
-      const response = await axios.get(`/v1/api/dashboard/user/${id}`);
+      const response = await axios.get(`/v1/api/dashboard/product-group/${id}`);
 
       const data = response.data?.data || {};
       return data;
@@ -163,7 +221,7 @@ const getUsersDetailData = (id: number): AppThunk => {
       return false;
     } finally {
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           loadingDetail: false,
         },
@@ -172,20 +230,20 @@ const getUsersDetailData = (id: number): AppThunk => {
   };
 };
 
-const editUsersData = (id: string, payload: any): AppThunk => {
+const editAdjustSaldoData = (data: any): AppThunk => {
   return async (dispatch) => {
     dispatch({
-      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
       payload: {
         loadingPost: true,
       },
     });
 
     try {
-      await axios.put(`/v1/api/dashboard/user`, payload);
+      await axios.put(`/v1/api/dashboard/product-group`, data);
       dispatch(
         showMessage({
-          message: `Berhasil mengubah data dengan ID: ${id}`,
+          message: `Berhasil mengubah data dengan Zonapay ID: ${data?.user_id}`,
           variant: 'success',
         }),
       );
@@ -220,7 +278,7 @@ const editUsersData = (id: string, payload: any): AppThunk => {
       return false;
     } finally {
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           loadingPost: false,
         },
@@ -229,17 +287,17 @@ const editUsersData = (id: string, payload: any): AppThunk => {
   };
 };
 
-const deleteUsersData = (id: number): AppThunk => {
+const deleteAdjustSaldoData = (id: number): AppThunk => {
   return async (dispatch) => {
     dispatch({
-      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
       payload: {
         loadingDelete: true,
       },
     });
 
     try {
-      await axios.delete(`/v1/api/dashboard/user/${id}`);
+      await axios.delete(`/v1/api/dashboard/product-group/${id}`);
       dispatch(
         showMessage({
           message: `Berhasil menghapus data dengan ID: ${id}`,
@@ -277,7 +335,7 @@ const deleteUsersData = (id: number): AppThunk => {
       return false;
     } finally {
       dispatch({
-        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        type: REDUCER_TYPES.SET_TRANSACTION_ADJUST_SALDO_REDUCER,
         payload: {
           loadingDelete: false,
         },
@@ -287,10 +345,11 @@ const deleteUsersData = (id: number): AppThunk => {
 };
 
 export {
-  addNewUsersData,
-  changeMasterUsersReducer,
-  deleteUsersData,
-  editUsersData,
-  getMasterUsersData,
-  getUsersDetailData,
+  addNewAdjustSaldoData,
+  changeTransactionAdjustSaldoReducer,
+  deleteAdjustSaldoData,
+  editAdjustSaldoData,
+  getTransactionAdjustSaldoData,
+  getAdjustSaldoDetailData,
+  getUserListData,
 };

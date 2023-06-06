@@ -554,6 +554,8 @@ const Products = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterProductsData());
+      } else {
+        dispatch(getMasterProductsData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -734,7 +736,7 @@ const Products = () => {
                 dispatch(
                   changeMasterProductsReducer({
                     page: 0,
-                    sortBy: 'deleted',
+                    sortBy: 'id',
                   }),
                 );
                 dispatch(getMasterProductsData());
@@ -839,7 +841,7 @@ const Products = () => {
                                         notes: row?.keterangan || '',
                                         commission: row?.komisi || 0,
                                         name: row?.nama || '',
-                                        status: row?.status || true,
+                                        status: row?.status,
                                       });
                                       handleClickOpen();
                                     }}

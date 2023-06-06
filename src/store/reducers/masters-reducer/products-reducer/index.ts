@@ -9,7 +9,7 @@ const initialState: InitialMasterProductsState = {
   limit: 5,
   page: 0,
   total: 0,
-  sortBy: 'deleted',
+  sortBy: 'id',
   sortType: 'asc',
   groupId: '',
   search: '',

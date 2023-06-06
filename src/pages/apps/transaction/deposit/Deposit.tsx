@@ -28,7 +28,7 @@ import {
   handleGetDepositDetailData,
   handleGetDepositLogDetailData,
   manualDepositTransaction,
-} from 'src/store/actions/transaction-action/deposit-action';
+} from 'src/store/actions/transactions-action/deposit-action';
 import {
   setDepositLimit,
   setDepositPage,
@@ -343,6 +343,8 @@ const Deposit = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(handleGetDepositData());
+      } else {
+        dispatch(handleGetDepositData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -365,7 +367,7 @@ const Deposit = () => {
     ),
   );
 
-  const handleRequestSort = React.useCallback(
+  const handleRequestSort = useCallback(
     (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
       const isAsc = sortBy === newOrderBy && sortType === 'asc';
       const toggledOrder = isAsc ? 'desc' : 'asc';

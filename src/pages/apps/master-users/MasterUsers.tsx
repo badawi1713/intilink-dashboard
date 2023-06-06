@@ -3,7 +3,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import { FormControlLabel, IconButton, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -41,8 +41,9 @@ import * as yup from 'yup';
 // const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
 
 const productCategorySchema = yup.object().shape({
-  nama: yup.string().required('Name is required'),
-  id: yup.string().required('ID is required'),
+  nama: yup.string().required('Nama harus diisi'),
+  no_telp: yup.string().required('Nomor telepon harus diisi'),
+  email: yup.string().required('Email harus diisi'),
 });
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -90,6 +91,7 @@ interface Data {
   saldo: string;
   status: boolean;
   tanggal_daftar: string;
+  zonapay_id: null | string;
   index: number;
 }
 
@@ -99,6 +101,7 @@ function createData(
   saldo: string,
   status: boolean,
   tanggal_daftar: string,
+  zonapay_id: null | string,
   index: number,
 ): Data {
   return {
@@ -107,6 +110,7 @@ function createData(
     saldo,
     status,
     tanggal_daftar,
+    zonapay_id,
     index,
   };
 }
@@ -123,10 +127,11 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
   {
-    id: 'id',
+    id: 'zonapay_id',
     disablePadding: true,
-    label: 'ID',
+    label: 'Zonapay ID',
     disableSort: false,
+    align: 'center',
   },
   {
     id: 'nama',
@@ -210,7 +215,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 type FormType = {
   id: string;
   nama: string;
-  saldo: string;
+  active: boolean;
+  no_telp: string;
+  email: string;
 };
 
 const MasterUsers = () => {
@@ -234,7 +241,9 @@ const MasterUsers = () => {
     defaultValues: {
       id: '',
       nama: '',
-      saldo: '',
+      email: '',
+      active: true,
+      no_telp: '',
     },
     resolver: yupResolver(productCategorySchema),
   });
@@ -253,7 +262,9 @@ const MasterUsers = () => {
     reset({
       id: '',
       nama: '',
-      saldo: '',
+      email: '',
+      active: true,
+      no_telp: '',
     });
   };
 
@@ -265,7 +276,9 @@ const MasterUsers = () => {
     const payload = {
       id: formData.id,
       nama: formData.nama,
-      saldo: formData.saldo,
+      active: formData.active,
+      email: formData.email,
+      no_telp: formData.no_telp,
     };
 
     if (editForm) {
@@ -300,13 +313,15 @@ const MasterUsers = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterUsersData());
+      } else {
+        dispatch(getMasterUsersData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
   const rows = data?.map((row: Data, index) =>
-    createData(row?.id, row?.nama, row?.saldo, row?.status, row?.tanggal_daftar, index),
+    createData(row?.id, row?.nama, row?.saldo, row?.status, row?.tanggal_daftar, row?.zonapay_id, index),
   );
 
   const handleRequestSort = useCallback(
@@ -421,8 +436,8 @@ const MasterUsers = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell align="left" component="th" id={labelId} scope="row">
-                            {row.id}
+                          <TableCell align="center" component="th" id={labelId} scope="row">
+                            {row.zonapay_id || '-'}
                           </TableCell>
                           <TableCell align="left">{row.nama || '-'}</TableCell>
                           <TableCell align="left">{row.saldo || 0}</TableCell>
@@ -462,7 +477,9 @@ const MasterUsers = () => {
                                         reset({
                                           id: response?.id,
                                           nama: response?.nama || '',
-                                          saldo: response?.saldo || '',
+                                          email: response?.email || '',
+                                          active: response?.active,
+                                          no_telp: response?.no_telp || '',
                                         });
                                         handleClickOpen();
                                       }
@@ -501,57 +518,100 @@ const MasterUsers = () => {
             {editForm ? 'Edit Data User' : 'Data User Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
-            <div className="flex flex-col items-stretch gap-4 w-full">
-              <Controller
-                control={control}
-                name="id"
-                render={({ field }) => (
-                  <div className="flex flex-col gap-3 w-full">
-                    <label className="text-sm font-semibold">ID</label>
-                    <TextField
-                      {...field}
-                      disabled={editForm}
-                      fullWidth
-                      placeholder="Category ID"
-                      helperText={errors?.id && errors.id?.message}
-                      error={!!errors?.id}
-                    />
-                  </div>
-                )}
-              />
-              <Controller
-                control={control}
-                name="nama"
-                render={({ field }) => (
-                  <div className="flex flex-col gap-3 w-full">
-                    <label className="text-sm font-semibold">Name</label>
-                    <TextField
-                      {...field}
-                      fullWidth
-                      placeholder="Product category name"
-                      helperText={errors?.nama && errors.nama?.message}
-                      error={!!errors?.nama}
-                    />
-                  </div>
-                )}
-              />
-              <Controller
-                control={control}
-                name="saldo"
-                render={({ field }) => (
-                  <div className="flex flex-col gap-3 w-full">
-                    <label className="text-sm font-semibold">Notes</label>
-                    <TextField
-                      {...field}
-                      fullWidth
-                      placeholder="Notes"
-                      helperText={errors?.saldo && errors.saldo?.message}
-                      error={!!errors?.saldo}
-                    />
-                  </div>
-                )}
-              />
-            </div>
+            <section className="flex-col flex gap-4 w-full mb-8">
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="id"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">ID</label>
+                      <TextField
+                        {...field}
+                        disabled={editForm}
+                        fullWidth
+                        placeholder="ID"
+                        helperText={errors?.id && errors.id?.message}
+                        error={!!errors?.id}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="nama"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Nama Lengkap</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Masukkan nama lengkap"
+                        helperText={errors?.nama && errors.nama?.message}
+                        error={!!errors?.nama}
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="no_telp"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">No. Telepon</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Masukkan nomor telepon"
+                        helperText={errors?.nama && errors.nama?.message}
+                        error={!!errors?.nama}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Email</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Masukkan alamat email"
+                        helperText={errors?.email && errors.email?.message}
+                        error={!!errors?.email}
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="active"
+                  render={({ field: { onChange, value } }) => (
+                    <div className="flex flex-col gap-3">
+                      <label className="text-sm font-semibold">Status</label>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={value || false}
+                            onChange={(e) => {
+                              onChange(e.target.checked);
+                            }}
+                            name="active"
+                          />
+                        }
+                        label={value ? 'ACTIVE' : 'DISABLE'}
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+            </section>
           </DialogContent>
           <DialogActions>
             <Button disabled={loadingPost} color="inherit" onClick={handleClose}>

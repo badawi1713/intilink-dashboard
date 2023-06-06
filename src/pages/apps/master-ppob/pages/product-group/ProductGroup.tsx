@@ -332,6 +332,8 @@ const ProductGroup = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterProductGroupData());
+      } else {
+        dispatch(getMasterProductGroupData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -478,7 +480,7 @@ const ProductGroup = () => {
                 dispatch(
                   changeMasterProductGroupReducer({
                     page: 0,
-                    sortBy: 'deleted',
+                    sortBy: 'id',
                   }),
                 );
                 dispatch(getMasterProductGroupData());

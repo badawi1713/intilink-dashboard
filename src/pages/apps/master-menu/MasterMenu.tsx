@@ -323,6 +323,8 @@ const MasterMenu = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterMenuData());
+      } else {
+        dispatch(getMasterMenuData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -435,7 +437,7 @@ const MasterMenu = () => {
                 dispatch(
                   changeMasterMenuReducer({
                     page: 0,
-                    sortBy: 'deleted',
+                    sortBy: 'id',
                   }),
                 );
                 dispatch(getMasterMenuData());

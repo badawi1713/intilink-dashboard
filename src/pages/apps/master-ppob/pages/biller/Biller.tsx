@@ -341,6 +341,8 @@ const Biller = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterBillerData());
+      } else {
+        dispatch(getMasterBillerData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -437,7 +439,7 @@ const Biller = () => {
                 dispatch(
                   changeMasterBillerReducer({
                     page: 0,
-                    sortBy: 'deleted',
+                    sortBy: 'id',
                   }),
                 );
                 dispatch(getMasterBillerData());

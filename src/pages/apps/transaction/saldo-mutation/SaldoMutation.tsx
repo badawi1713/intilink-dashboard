@@ -20,7 +20,7 @@ import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-import { handleGetSaldoMutationData } from 'src/store/actions/transaction-action/saldo-mutation-action';
+import { handleGetSaldoMutationData } from 'src/store/actions/transactions-action/saldo-mutation-action';
 import {
   setSaldoMutationLimit,
   setSaldoMutationPage,
@@ -160,7 +160,7 @@ const headCells: readonly HeadCell[] = [
   {
     id: 'user_kredit_name',
     disablePadding: false,
-    label: 'Debit',
+    label: 'Kredit',
     disableSort: false,
   },
   {
@@ -258,6 +258,8 @@ const SaldoMutation = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
+        dispatch(handleGetSaldoMutationData());
+      } else {
         dispatch(handleGetSaldoMutationData());
       }
     },

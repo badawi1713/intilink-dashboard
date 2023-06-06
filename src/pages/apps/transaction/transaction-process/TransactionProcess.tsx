@@ -28,7 +28,7 @@ import { useAppSelector } from 'src/hooks/useAppSelector';
 import {
   handleGetTransactionProcessData,
   handleGetTransactionProcessLogDetailData,
-} from 'src/store/actions/transaction-action/transaction-process-action';
+} from 'src/store/actions/transactions-action/transaction-process-action';
 import {
   setTransactionProcessLimit,
   setTransactionProcessPage,
@@ -339,6 +339,8 @@ const TransactionProcess = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
+        dispatch(handleGetTransactionProcessData());
+      } else {
         dispatch(handleGetTransactionProcessData());
       }
     },
