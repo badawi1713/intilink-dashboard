@@ -336,8 +336,6 @@ const AdjustSaldo = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getTransactionAdjustSaldoData());
-      } else {
-        dispatch(getTransactionAdjustSaldoData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -443,14 +441,23 @@ const AdjustSaldo = () => {
             className="rounded-md px-3 py-2 border-2 border-gray-600 w-full"
             type="search"
             placeholder="Cari data..."
-            onChange={(e: React.FormEvent<HTMLInputElement>) =>
+            onChange={(e: React.FormEvent<HTMLInputElement>) => {
               dispatch(
                 changeTransactionAdjustSaldoReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
                 }),
-              )
-            }
+              );
+              if ((e.target as HTMLInputElement).value === '') {
+                dispatch(
+                  changeTransactionAdjustSaldoReducer({
+                    search: '',
+                    page: 0,
+                  }),
+                );
+                dispatch(getTransactionAdjustSaldoData());
+              }
+            }}
           />
         </div>
       </section>

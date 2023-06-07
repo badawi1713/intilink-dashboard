@@ -259,8 +259,6 @@ const SaldoMutation = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(handleGetSaldoMutationData());
-      } else {
-        dispatch(handleGetSaldoMutationData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes

@@ -1,9 +1,21 @@
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Delete, Edit } from '@mui/icons-material';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { FormControlLabel, IconButton, Switch, TextField, Tooltip, Typography } from '@mui/material';
+import {
+  FormControl,
+  FormHelperText,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -25,25 +37,42 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Confirmation, ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
+import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
 import {
-  addNewUsersData,
-  changeMasterUsersReducer,
-  deleteUsersData,
-  editUsersData,
-  getMasterUsersData,
-  getUsersDetailData,
-} from 'src/store/actions/masters-action/users-action';
+  addNewSettingFeeUplineData,
+  changeMasterSettingFeeUplineReducer,
+  deleteSettingFeeUplineData,
+  editSettingFeeUplineData,
+  getMasterSettingFeeUplineData,
+  getSettingFeeUplineProductListData,
+  getSettingFeeUplineUserListData,
+} from 'src/store/actions/masters-action/setting-fee-upline-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 
-// const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
-
-const productCategorySchema = yup.object().shape({
-  nama: yup.string().required('Nama harus diisi'),
-  no_telp: yup.string().required('Nomor telepon harus diisi'),
-  email: yup.string().required('Email harus diisi'),
+const settingFeeUplineSchema = yup.object().shape({
+  upline1: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Upline 1 harus dalam format angka')
+    .min(0, 'Minimal nominal bernilai 0'),
+  upline2: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Upline 2 harus dalam format angka')
+    .min(0, 'Minimal nominal bernilai 0'),
+  upline3: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .nullable()
+    .typeError('Upline 3 harus dalam format angka')
+    .min(0, 'Minimal nominal bernilai 0'),
+  selectedSettingFeeUplineUserGroup: yup.string().required('Grup user harus dipilih'),
+  selectedSettingFeeUplineProductGroup: yup.string().required('Grup produk harus dipilih'),
 });
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -86,31 +115,43 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 }
 
 interface Data {
-  id: number;
-  nama: string;
-  saldo: string;
-  status: boolean;
-  tanggal_daftar: string;
-  zonapay_id: null | string;
+  fee_upline1: number;
+  fee_upline2: number;
+  fee_upline3: number;
+  user_group_name: string;
+  produk_group_name: string;
+  last_updated: string;
+  updated_who_name: string;
+  produk_group_id: string;
+  user_group_id: string;
+  id: string;
   index: number;
 }
 
 function createData(
-  id: number,
-  nama: string,
-  saldo: string,
-  status: boolean,
-  tanggal_daftar: string,
-  zonapay_id: null | string,
+  fee_upline1: number,
+  fee_upline2: number,
+  fee_upline3: number,
+  user_group_name: string,
+  produk_group_name: string,
+  last_updated: string,
+  updated_who_name: string,
+  produk_group_id: string,
+  user_group_id: string,
+  id: string,
   index: number,
 ): Data {
   return {
+    fee_upline1,
+    fee_upline2,
+    fee_upline3,
+    user_group_name,
+    produk_group_name,
+    last_updated,
+    updated_who_name,
+    produk_group_id,
+    user_group_id,
     id,
-    nama,
-    saldo,
-    status,
-    tanggal_daftar,
-    zonapay_id,
     index,
   };
 }
@@ -127,40 +168,58 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
   {
-    id: 'zonapay_id',
-    disablePadding: true,
-    label: 'Zonapay ID',
-    disableSort: false,
-    align: 'center',
-  },
-  {
-    id: 'nama',
-    disablePadding: false,
-    label: 'Nama',
-    disableSort: false,
-  },
-  {
-    id: 'saldo',
-    disablePadding: false,
-    label: 'Saldo',
-    disableSort: true,
-  },
-  {
-    id: 'tanggal_daftar',
-    disablePadding: false,
-    label: 'Tanggal Daftar',
-    disableSort: true,
-    align: 'center',
-  },
-  {
-    id: 'status',
-    disablePadding: false,
-    label: 'Available',
-    align: 'center',
-    disableSort: true,
-  },
-  {
     id: 'index',
+    disablePadding: true,
+    label: 'ID',
+    disableSort: false,
+    align: 'center',
+  },
+  {
+    id: 'produk_group_name',
+    disablePadding: false,
+    label: 'Grup Produk',
+    disableSort: false,
+  },
+  {
+    id: 'user_group_name',
+    disablePadding: false,
+    label: 'Grup User',
+    disableSort: true,
+  },
+  {
+    id: 'fee_upline1',
+    disablePadding: false,
+    label: 'Upline 1',
+    disableSort: false,
+  },
+  {
+    id: 'fee_upline2',
+    disablePadding: false,
+    label: 'Upline 2',
+    disableSort: false,
+  },
+  {
+    id: 'fee_upline3',
+    disablePadding: false,
+    label: 'Upline 3',
+    disableSort: false,
+  },
+  {
+    id: 'updated_who_name',
+    disablePadding: false,
+    label: 'Diubah Oleh',
+    disableSort: false,
+  },
+  {
+    id: 'last_updated',
+    disablePadding: false,
+    label: 'Terakhir Diperbarui',
+    disableSort: false,
+    align: 'center',
+  },
+
+  {
+    id: 'id',
     disablePadding: false,
     label: 'Action',
     align: 'center',
@@ -213,39 +272,56 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 type FormType = {
+  upline1: number;
+  upline2: number;
+  upline3: number;
+  selectedSettingFeeUplineUserGroup: string;
+  selectedSettingFeeUplineProductGroup: string;
   id: string;
-  nama: string;
-  active: boolean;
-  no_telp: string;
-  email: string;
 };
 
-const MasterUsers = () => {
+const SettingFeeUpline = () => {
   const dispatch = useAppDispatch();
-  const { data, page, sortBy, sortType, limit, total, search, loadingPost, loadingDelete, loading, error } =
-    useAppSelector((state) => state.masterUsersReducer);
+  const {
+    data,
+    page,
+    sortBy,
+    sortType,
+    limit,
+    total,
+    search,
+    settingFeeUplineUserList,
+    settingFeeUplineProductList,
+    loadingPost,
+    loadingDelete,
+    loading,
+    error,
+    userGroupId,
+    productGroupId,
+  } = useAppSelector((state) => state.masterSettingFeeUplineReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
+  const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
-  const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
   const [editForm, setEditForm] = useState<boolean>(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
     defaultValues: {
+      upline1: 0,
+      upline2: 0,
+      upline3: 0,
+      selectedSettingFeeUplineUserGroup: '',
+      selectedSettingFeeUplineProductGroup: '',
       id: '',
-      nama: '',
-      email: '',
-      active: true,
-      no_telp: '',
     },
-    resolver: yupResolver(productCategorySchema),
+    resolver: yupResolver(settingFeeUplineSchema),
   });
 
   const { control, formState, handleSubmit, reset } = formMethods;
@@ -260,11 +336,12 @@ const MasterUsers = () => {
     }
     setOpenFormDialog(false);
     reset({
+      upline1: 0,
+      upline2: 0,
+      upline3: 0,
+      selectedSettingFeeUplineUserGroup: '',
+      selectedSettingFeeUplineProductGroup: '',
       id: '',
-      nama: '',
-      email: '',
-      active: true,
-      no_telp: '',
     });
   };
 
@@ -272,35 +349,57 @@ const MasterUsers = () => {
     setOpenEditConfirmation(true);
   });
 
-  const onSubmit = handleSubmit(async (formData) => {
+  const onSubmit = handleSubmit(async (formData: FormType) => {
     const payload = {
-      id: formData.id,
-      nama: formData.nama,
-      active: formData.active,
-      email: formData.email,
-      no_telp: formData.no_telp,
+      upline_1: formData.upline1,
+      upline_2: formData.upline2,
+      upline_3: formData.upline3,
+      group_user_id: formData.selectedSettingFeeUplineUserGroup,
+      produk_group_id: formData.selectedSettingFeeUplineProductGroup,
     };
 
     if (editForm) {
-      const response = await dispatch(editUsersData(formData?.id, payload));
+      const response = await dispatch(editSettingFeeUplineData(formData?.id, payload));
       if (typeof response === 'boolean' && response) {
         handleClose();
         setOpenEditConfirmation(false);
         setSelectedId(null);
-        dispatch(getMasterUsersData());
+        dispatch(getMasterSettingFeeUplineData());
       }
     } else {
-      const response = await dispatch(addNewUsersData(payload));
+      const response = await dispatch(addNewSettingFeeUplineData(payload));
       if (typeof response === 'boolean' && response) {
         handleClose();
-        dispatch(getMasterUsersData());
+        dispatch(getMasterSettingFeeUplineData());
       }
     }
   });
 
   const handleGetData = useCallback(() => {
-    dispatch(getMasterUsersData());
+    dispatch(getMasterSettingFeeUplineData());
+    dispatch(getSettingFeeUplineUserListData());
+    dispatch(getSettingFeeUplineProductListData());
   }, [dispatch]);
+
+  const handleGetSettingFeeUplineUserGroupData = (event: SelectChangeEvent) => {
+    const value = event.target.value;
+    dispatch(
+      changeMasterSettingFeeUplineReducer({
+        userGroupId: value,
+      }),
+    );
+    dispatch(getMasterSettingFeeUplineData());
+  };
+
+  const handleGetSettingFeeUplineByProductGroupData = (event: SelectChangeEvent) => {
+    const value = event.target.value;
+    dispatch(
+      changeMasterSettingFeeUplineReducer({
+        productGroupId: value,
+      }),
+    );
+    dispatch(getMasterSettingFeeUplineData());
+  };
 
   useEffect(() => {
     if (isMount.current) {
@@ -312,14 +411,26 @@ const MasterUsers = () => {
   useEffect(
     () => {
       if (debouncedSearchTerm) {
-        dispatch(getMasterUsersData());
+        dispatch(getMasterSettingFeeUplineData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
   );
 
-  const rows = data?.map((row: Data, index) =>
-    createData(row?.id, row?.nama, row?.saldo, row?.status, row?.tanggal_daftar, row?.zonapay_id, index),
+  const rows = data?.map((row, index) =>
+    createData(
+      row?.fee_upline1,
+      row?.fee_upline2,
+      row?.fee_upline3,
+      row?.user_group_name,
+      row?.produk_group_name,
+      row?.last_updated,
+      row?.updated_who_name,
+      row?.produk_group_id,
+      row?.user_group_id,
+      row?.id,
+      index,
+    ),
   );
 
   const handleRequestSort = useCallback(
@@ -328,12 +439,12 @@ const MasterUsers = () => {
       const toggledOrder = isAsc ? 'desc' : 'asc';
 
       dispatch(
-        changeMasterUsersReducer({
+        changeMasterSettingFeeUplineReducer({
           sortBy: newOrderBy,
           sortType: toggledOrder,
         }),
       );
-      dispatch(getMasterUsersData());
+      dispatch(getMasterSettingFeeUplineData());
     },
 
     [sortType, sortBy, dispatch],
@@ -342,29 +453,29 @@ const MasterUsers = () => {
   const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
       dispatch(
-        changeMasterUsersReducer({
+        changeMasterSettingFeeUplineReducer({
           page: newPage,
         }),
       );
-      dispatch(getMasterUsersData());
+      dispatch(getMasterSettingFeeUplineData());
     },
     [dispatch, page],
   );
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(
-      changeMasterUsersReducer({
+      changeMasterSettingFeeUplineReducer({
         page: 0,
         limit: +event.target.value,
       }),
     );
-    dispatch(getMasterUsersData());
+    dispatch(getMasterSettingFeeUplineData());
   };
 
-  const handleDeleteData = async (id: number) => {
-    const response = await dispatch(deleteUsersData(id));
+  const handleDeleteData = async (id: string) => {
+    const response = await dispatch(deleteSettingFeeUplineData(id));
     if (typeof response === 'boolean' && response) {
-      dispatch(getMasterUsersData());
+      dispatch(getMasterSettingFeeUplineData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
     }
@@ -380,35 +491,79 @@ const MasterUsers = () => {
             placeholder="Cari data..."
             onChange={(e: React.FormEvent<HTMLInputElement>) => {
               dispatch(
-                changeMasterUsersReducer({
+                changeMasterSettingFeeUplineReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
                 }),
               );
               if ((e.target as HTMLInputElement).value === '') {
                 dispatch(
-                  changeMasterUsersReducer({
+                  changeMasterSettingFeeUplineReducer({
                     search: '',
                     page: 0,
                   }),
                 );
-                dispatch(getMasterUsersData());
+                dispatch(getMasterSettingFeeUplineData());
               }
             }}
           />
         </div>
       </section>
       <main className="flex flex-col gap-6">
-        <div className="flex justify-between gap-4 items-center">
+        <div className="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center">
           <div>
             <Typography fontWeight={'bold'} variant="h6">
-              Master User
+              Master Setting Fee Upline
             </Typography>
-            <Typography variant="body1">Manajemen daftar user</Typography>
+            <Typography variant="body1">Manajemen daftar setting fee upline</Typography>
           </div>
-          <Button color="success" size="small" variant="contained" disabled onClick={handleClickOpen}>
-            Tambah Data
-          </Button>
+          <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
+            <Button color="success" size="small" variant="contained" onClick={handleClickOpen}>
+              Tambah Data
+            </Button>
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <FormControl sx={{ minWidth: 220 }} size="small">
+                <InputLabel id="settingFeeUpline-category-select">Grup User</InputLabel>
+                <Select
+                  size="small"
+                  labelId="settingFeeUpline-category-select-label"
+                  id="settingFeeUpline-category-select"
+                  value={userGroupId}
+                  label="Grup User"
+                  onChange={handleGetSettingFeeUplineUserGroupData}
+                >
+                  <MenuItem value="Semua">
+                    <em>Semua</em>
+                  </MenuItem>
+                  {settingFeeUplineUserList?.map((category) => (
+                    <MenuItem key={category?.id} value={category?.id}>
+                      {category?.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl sx={{ minWidth: 220 }} size="small">
+                <InputLabel id="settingFeeUpline-group-select">Grup Produk</InputLabel>
+                <Select
+                  size="small"
+                  labelId="settingFeeUpline-group-select-label"
+                  id="settingFeeUpline-group-select"
+                  value={productGroupId}
+                  label="Grup Produk"
+                  onChange={handleGetSettingFeeUplineByProductGroupData}
+                >
+                  <MenuItem value="Semua">
+                    <em>Semua</em>
+                  </MenuItem>
+                  {settingFeeUplineProductList?.map((category) => (
+                    <MenuItem key={category?.id} value={category?.id}>
+                      {category?.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          </div>
         </div>
         <section>
           {loading ? (
@@ -418,12 +573,12 @@ const MasterUsers = () => {
               message={error || ''}
               handleRetry={() => {
                 dispatch(
-                  changeMasterUsersReducer({
+                  changeMasterSettingFeeUplineReducer({
                     page: 0,
-                    sortBy: 'status',
+                    sortBy: 'id',
                   }),
                 );
-                dispatch(getMasterUsersData());
+                dispatch(getMasterSettingFeeUplineData());
               }}
             />
           ) : rows?.length === 0 ? (
@@ -434,7 +589,7 @@ const MasterUsers = () => {
                 <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
                   <EnhancedTableHead
                     order={sortType || 'asc'}
-                    orderBy={sortBy || 'status'}
+                    orderBy={sortBy || 'deleted'}
                     onRequestSort={handleRequestSort}
                   />
                   <TableBody>
@@ -442,25 +597,23 @@ const MasterUsers = () => {
                       const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
-                        <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell align="center" component="th" id={labelId} scope="row">
-                            {row.zonapay_id || '-'}
+                        <TableRow hover tabIndex={-1} key={index}>
+                          <TableCell align="left" component="th" id={labelId} scope="row">
+                            {row.id || '-'}
                           </TableCell>
-                          <TableCell align="left">{row.nama || '-'}</TableCell>
-                          <TableCell align="left">{row.saldo || 0}</TableCell>
-                          <TableCell align="center">{row.tanggal_daftar || '-'}</TableCell>
-                          <TableCell align="center">
-                            {!row.status ? (
-                              <CheckCircleIcon titleAccess="Tersedia" fontSize="small" color="success" />
-                            ) : (
-                              <CancelIcon titleAccess="Dihapus" fontSize="small" color="error" />
-                            )}
-                          </TableCell>
+                          <TableCell align="left">{row.produk_group_name || '-'}</TableCell>
+                          <TableCell align="left">{row.user_group_name || '-'}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.fee_upline1 ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.fee_upline2 ?? 0)}</TableCell>
+                          <TableCell align="left">{currencyFormat(row.fee_upline3 ?? 0)}</TableCell>
+                          <TableCell align="left">{row.updated_who_name || '-'}</TableCell>
+                          <TableCell align="center">{row.last_updated || '-'}</TableCell>
                           <TableCell align="center">
                             <section className="flex items-center justify-center gap-2">
                               <Tooltip title="Hapus">
                                 <span>
                                   <IconButton
+                                    disabled={loading}
                                     onClick={() => {
                                       setSelectedId(row.id);
                                       setOpenDeleteConfirmation(true);
@@ -476,20 +629,19 @@ const MasterUsers = () => {
                               <Tooltip title="Edit">
                                 <span>
                                   <IconButton
-                                    onClick={async () => {
-                                      const response: any = await dispatch(getUsersDetailData(row.id));
-                                      if (typeof response === 'object' && Object.keys(response).length > 0) {
-                                        setSelectedId(response?.id);
-                                        setEditForm(true);
-                                        reset({
-                                          id: response?.id,
-                                          nama: response?.nama || '',
-                                          email: response?.email || '',
-                                          active: response?.active,
-                                          no_telp: response?.no_telp || '',
-                                        });
-                                        handleClickOpen();
-                                      }
+                                    disabled={loading}
+                                    onClick={() => {
+                                      setSelectedId(row?.id);
+                                      setEditForm(true);
+                                      reset({
+                                        upline1: row?.fee_upline1,
+                                        upline2: row?.fee_upline2,
+                                        upline3: row?.fee_upline3,
+                                        selectedSettingFeeUplineUserGroup: row?.user_group_id,
+                                        selectedSettingFeeUplineProductGroup: row?.produk_group_id,
+                                        id: row?.id || '',
+                                      });
+                                      handleClickOpen();
                                     }}
                                     size="small"
                                     aria-label="edit"
@@ -522,97 +674,138 @@ const MasterUsers = () => {
       {openFormDialog && (
         <BootstrapDialog aria-labelledby="customized-dialog-title" open={openFormDialog} maxWidth="md" fullWidth>
           <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
-            {editForm ? 'Edit Data User' : 'Data User Baru'}
+            {editForm ? 'Edit Data Setting Fee Upline' : 'Data Setting Fee Upline Baru'}
           </BootstrapDialogTitle>
           <DialogContent dividers>
             <section className="flex-col flex gap-4 w-full mb-8">
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
                   control={control}
-                  name="id"
+                  name="selectedSettingFeeUplineUserGroup"
                   render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">ID</label>
-                      <TextField
-                        {...field}
-                        disabled={editForm}
-                        fullWidth
-                        placeholder="ID"
-                        helperText={errors?.id && errors.id?.message}
-                        error={!!errors?.id}
-                      />
+                      <label className="text-sm font-semibold">Grup User</label>
+                      <FormControl error={!!errors.selectedSettingFeeUplineUserGroup} required fullWidth>
+                        <Select
+                          input={<OutlinedInput />}
+                          fullWidth
+                          id="user-select"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                          }}
+                        >
+                          <MenuItem disabled value="">
+                            <em>Pilih Grup User</em>
+                          </MenuItem>
+                          {settingFeeUplineUserList?.map((type) => (
+                            <MenuItem key={type?.id} value={type?.id}>
+                              {type?.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>{errors?.selectedSettingFeeUplineUserGroup?.message}</FormHelperText>
+                      </FormControl>
                     </div>
                   )}
                 />
                 <Controller
                   control={control}
-                  name="nama"
+                  name="selectedSettingFeeUplineProductGroup"
                   render={({ field }) => (
                     <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Nama Lengkap</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Masukkan nama lengkap"
-                        helperText={errors?.nama && errors.nama?.message}
-                        error={!!errors?.nama}
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-              <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-                <Controller
-                  control={control}
-                  name="no_telp"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">No. Telepon</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Masukkan nomor telepon"
-                        helperText={errors?.nama && errors.nama?.message}
-                        error={!!errors?.nama}
-                      />
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field }) => (
-                    <div className="flex flex-col gap-3 w-full">
-                      <label className="text-sm font-semibold">Email</label>
-                      <TextField
-                        {...field}
-                        fullWidth
-                        placeholder="Masukkan alamat email"
-                        helperText={errors?.email && errors.email?.message}
-                        error={!!errors?.email}
-                      />
+                      <label className="text-sm font-semibold">Grup Produk</label>
+                      <FormControl error={!!errors.selectedSettingFeeUplineProductGroup} required fullWidth>
+                        <Select
+                          input={<OutlinedInput />}
+                          fullWidth
+                          id="product-select"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                          }}
+                        >
+                          <MenuItem disabled value="">
+                            <em>Pilih Grup Produk</em>
+                          </MenuItem>
+                          {settingFeeUplineProductList?.map((type) => (
+                            <MenuItem key={type?.id} value={type?.id}>
+                              {type?.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>{errors?.selectedSettingFeeUplineProductGroup?.message}</FormHelperText>
+                      </FormControl>
                     </div>
                   )}
                 />
               </div>
+
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
                 <Controller
                   control={control}
-                  name="active"
-                  render={({ field: { onChange, value } }) => (
-                    <div className="flex flex-col gap-3">
-                      <label className="text-sm font-semibold">Status</label>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={value || false}
-                            onChange={(e) => {
-                              onChange(e.target.checked);
-                            }}
-                            name="active"
-                          />
-                        }
-                        label={value ? 'ACTIVE' : 'DISABLE'}
+                  name="upline1"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Upline 1</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Masukkan nominal upline 1"
+                        helperText={errors?.upline1 && errors.upline1?.message}
+                        error={!!errors?.upline1}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          if (value === '' || Number(value) >= 0) {
+                            field.onChange(e);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="upline2"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Upline 2</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Masukkan nominal upline 1"
+                        helperText={errors?.upline2 && errors.upline2?.message}
+                        error={!!errors?.upline2}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          if (value === '' || Number(value) >= 0) {
+                            field.onChange(e);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="upline3"
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-3 w-full">
+                      <label className="text-sm font-semibold">Upline 3</label>
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="Masukkan nominal upline 1"
+                        helperText={errors?.upline3 && errors.upline3?.message}
+                        error={!!errors?.upline3}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          if (value === '' || Number(value) >= 0) {
+                            field.onChange(e);
+                          }
+                        }}
                       />
                     </div>
                   )}
@@ -643,10 +836,10 @@ const MasterUsers = () => {
       {openDeleteConfirmation && (
         <Confirmation
           open={openDeleteConfirmation}
-          title={'Hapus data user?'}
-          content={`Konfirmasi untuk menghapus data user dengan id ${selectedId}.`}
+          title={'Hapus data?'}
+          content={`Konfirmasi untuk menghapus data dengan id ${selectedId}.`}
           cancelActionHandler={() => setOpenDeleteConfirmation(false)}
-          confirmActionHandler={() => handleDeleteData(selectedId || 0)}
+          confirmActionHandler={() => handleDeleteData(selectedId || '')}
           loading={loadingDelete || false}
           loadingText={'Menghapus'}
           confirmActionText={'Hapus'}
@@ -657,8 +850,8 @@ const MasterUsers = () => {
       {openEditConfirmation && (
         <Confirmation
           open={openEditConfirmation}
-          title={'Ubah data user?'}
-          content={`Konfirmasi untuk mengubah data user dengan id ${selectedId}.`}
+          title={'Ubah data?'}
+          content={`Konfirmasi untuk mengubah data dengan id ${selectedId}.`}
           cancelActionHandler={() => setOpenEditConfirmation(false)}
           confirmActionHandler={onSubmit}
           loading={loadingPost || false}
@@ -699,4 +892,4 @@ const MasterUsers = () => {
   );
 };
 
-export default MasterUsers;
+export default SettingFeeUpline;

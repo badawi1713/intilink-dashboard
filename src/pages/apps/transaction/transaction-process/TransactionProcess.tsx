@@ -340,8 +340,6 @@ const TransactionProcess = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(handleGetTransactionProcessData());
-      } else {
-        dispatch(handleGetTransactionProcessData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes

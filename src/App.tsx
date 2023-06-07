@@ -14,6 +14,7 @@ import { AdjustSaldo, Deposit, SaldoMutation, TransactionProcess, Transactions }
 import { getAccessTokenAction, userLogoutAction } from './store/actions/auth-action';
 import MasterUsers from './pages/apps/master-users';
 import PaymentMethods from './pages/apps/master-ppob/pages/payment-methods';
+import SettingFeeUpline from './pages/apps/master-ppob/pages/setting-fee-upline';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -61,6 +62,7 @@ const App: FC = () => {
               <Route path="sub-product-group" element={<SubProductGroup />} />
             </Route>
             <Route path="biller" element={<Biller />} />
+            <Route path="setting-fee-upline" element={<SettingFeeUpline />} />
           </Route>
           <Route path="transaction">
             <Route index element={<Navigate to="proses-transaksi" replace />} />

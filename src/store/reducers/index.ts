@@ -6,16 +6,18 @@ import masterProductsReducer from './masters-reducer/products-reducer';
 import masterBillerReducer from './masters-reducer/biller-reducer';
 import masterUsersReducer from './masters-reducer/users-reducer';
 import masterPaymentMethodsReducer from './masters-reducer/payment-methods-reducer';
+import masterSettingFeeUplineReducer from './masters-reducer/setting-fee-upline-reducer';
 
 import toastMessageReducer from '../slices/toast-message-slice';
+
 import depositReducer from '../slices/transaction-slice/deposit-slice';
 import transactionsReducer from '../slices/transaction-slice/transactions-slice';
 import transactionProcessReducer from '../slices/transaction-slice/transaction-process-slice';
 import saldoMutationReducer from '../slices/transaction-slice/saldo-mutation-slice';
-
 import transactionAdjustSaldoReducer from './transactions-reducer/adjust-saldo-reducer';
 
 const reducers = {
+  masterSettingFeeUplineReducer,
   masterPaymentMethodsReducer,
   masterUsersReducer,
   authReducer,

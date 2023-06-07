@@ -316,8 +316,6 @@ const Transactions = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(handleGetTransactionsData());
-      } else {
-        dispatch(handleGetTransactionsData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes

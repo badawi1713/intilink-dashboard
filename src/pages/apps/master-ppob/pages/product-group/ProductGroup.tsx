@@ -332,8 +332,6 @@ const ProductGroup = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterProductGroupData());
-      } else {
-        dispatch(getMasterProductGroupData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -423,14 +421,23 @@ const ProductGroup = () => {
             className="rounded-md px-3 py-2 border-2 border-gray-600 w-full"
             type="search"
             placeholder="Cari data..."
-            onChange={(e: React.FormEvent<HTMLInputElement>) =>
+            onChange={(e: React.FormEvent<HTMLInputElement>) => {
               dispatch(
                 changeMasterProductGroupReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
                 }),
-              )
-            }
+              );
+              if ((e.target as HTMLInputElement).value === '') {
+                dispatch(
+                  changeMasterProductGroupReducer({
+                    search: '',
+                    page: 0,
+                  }),
+                );
+                dispatch(getMasterProductGroupData());
+              }
+            }}
           />
         </div>
       </section>

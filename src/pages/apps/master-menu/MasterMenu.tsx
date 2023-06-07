@@ -323,8 +323,6 @@ const MasterMenu = () => {
     () => {
       if (debouncedSearchTerm) {
         dispatch(getMasterMenuData());
-      } else {
-        dispatch(getMasterMenuData());
       }
     },
     [debouncedSearchTerm], // Only call effect if debounced search term changes
@@ -404,14 +402,23 @@ const MasterMenu = () => {
             className="rounded-md px-3 py-2 border-2 border-gray-600 w-full"
             type="search"
             placeholder="Cari data..."
-            onChange={(e: React.FormEvent<HTMLInputElement>) =>
+            onChange={(e: React.FormEvent<HTMLInputElement>) => {
               dispatch(
                 changeMasterMenuReducer({
                   search: (e.target as HTMLInputElement).value,
                   page: 0,
                 }),
-              )
-            }
+              );
+              if ((e.target as HTMLInputElement).value === '') {
+                dispatch(
+                  changeMasterMenuReducer({
+                    search: '',
+                    page: 0,
+                  }),
+                );
+                dispatch(getMasterMenuData());
+              }
+            }}
           />
         </div>
       </section>
