@@ -92,6 +92,8 @@ interface Data {
   status: boolean;
   tanggal_daftar: string;
   zonapay_id: null | string;
+  poin: string;
+  group_name: string;
   index: number;
 }
 
@@ -102,6 +104,8 @@ function createData(
   status: boolean,
   tanggal_daftar: string,
   zonapay_id: null | string,
+  poin: string,
+  group_name: string,
   index: number,
 ): Data {
   return {
@@ -111,6 +115,8 @@ function createData(
     status,
     tanggal_daftar,
     zonapay_id,
+    poin,
+    group_name,
     index,
   };
 }
@@ -131,7 +137,7 @@ const headCells: readonly HeadCell[] = [
     disablePadding: true,
     label: 'Zonapay ID',
     disableSort: false,
-    align: 'center',
+    align: 'left',
   },
   {
     id: 'nama',
@@ -143,6 +149,18 @@ const headCells: readonly HeadCell[] = [
     id: 'saldo',
     disablePadding: false,
     label: 'Saldo',
+    disableSort: true,
+  },
+  {
+    id: 'poin',
+    disablePadding: false,
+    label: 'Poin',
+    disableSort: true,
+  },
+  {
+    id: 'group_name',
+    disablePadding: false,
+    label: 'Grup',
     disableSort: true,
   },
   {
@@ -319,7 +337,17 @@ const MasterUsers = () => {
   );
 
   const rows = data?.map((row: Data, index) =>
-    createData(row?.id, row?.nama, row?.saldo, row?.status, row?.tanggal_daftar, row?.zonapay_id, index),
+    createData(
+      row?.id,
+      row?.nama,
+      row?.saldo,
+      row?.status,
+      row?.tanggal_daftar,
+      row?.zonapay_id,
+      row?.poin,
+      row?.group_name,
+      index,
+    ),
   );
 
   const handleRequestSort = useCallback(
@@ -420,7 +448,7 @@ const MasterUsers = () => {
                 dispatch(
                   changeMasterUsersReducer({
                     page: 0,
-                    sortBy: 'status',
+                    sortBy: 'id',
                   }),
                 );
                 dispatch(getMasterUsersData());
@@ -443,11 +471,13 @@ const MasterUsers = () => {
 
                       return (
                         <TableRow hover tabIndex={-1} key={row.id}>
-                          <TableCell align="center" component="th" id={labelId} scope="row">
+                          <TableCell align="left" component="th" id={labelId} scope="row">
                             {row.zonapay_id || '-'}
                           </TableCell>
                           <TableCell align="left">{row.nama || '-'}</TableCell>
                           <TableCell align="left">{row.saldo || 0}</TableCell>
+                          <TableCell align="left">{row.poin || 0}</TableCell>
+                          <TableCell align="left">{row.group_name || '-'}</TableCell>
                           <TableCell align="center">{row.tanggal_daftar || '-'}</TableCell>
                           <TableCell align="center">
                             {!row.status ? (
