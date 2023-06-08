@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import moment from 'moment';
 import { AppThunk, RootState } from 'src/store';
 import { showMessage } from 'src/store/slices/toast-message-slice';
 import {
@@ -56,11 +57,19 @@ const handleGetTransactionsDetailData =
 
 const handleGetTransactionsData = (): AppThunk => async (dispatch, getState: () => RootState) => {
   const { transactionsReducer } = getState();
-  const { page, sortBy, sortType, limit, search } = transactionsReducer;
+  const { page, sortBy, sortType, limit, search, startDate, endDate, filterType } = transactionsReducer;
+
+  const formatDate = (date: Date) => {
+    return moment(date).format('YYYY-MM-DD HH:mm');
+  };
+
+  const selectedStartDate = formatDate(startDate);
+  const selectedEndDate = formatDate(endDate);
+
   dispatch(setTransactionsLoading());
   try {
     const response = await axios.get(
-      `/v1/api/dashboard/transaksi?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`,
+      `/v1/api/dashboard/transaksi?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}&type=${filterType}&startDate=${selectedStartDate}&endDate${selectedEndDate}`,
     );
     const payload = {
       data: response.data?.data?.content || [],

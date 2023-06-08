@@ -1,6 +1,6 @@
 import { History } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import { DialogContent, IconButton, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
+import { Button, DialogContent, IconButton, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -36,6 +36,7 @@ import {
   setTransactionsSortType,
 } from 'src/store/slices/transaction-slice/transactions-slice';
 import { useDebounce } from 'usehooks-ts';
+import FilterDialog from './FilterDialog';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -254,7 +255,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
               <TableSortLabel
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
+                onClick={() => createSortHandler(headCell.id)}
               >
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
@@ -295,6 +296,7 @@ const Transactions = () => {
 
   const [openLogDialog, setOpenLogDialog] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<string | false>(false);
+  const [openFilter, setOpenFilter] = useState<boolean>(false);
 
   const handleLogDetailClose = () => {
     setOpenLogDialog(false);
@@ -394,6 +396,9 @@ const Transactions = () => {
             </Typography>
             <Typography variant="body1">Manajemen daftar transaksi</Typography>
           </div>
+          <Button onClick={() => setOpenFilter(true)} color="info" variant="contained">
+            Filter
+          </Button>
         </div>
         <section>
           {loading ? (
@@ -533,6 +538,7 @@ const Transactions = () => {
           )}
         </DialogContent>
       </BootstrapDialog>
+      <FilterDialog open={openFilter} closeDialogHandler={() => setOpenFilter(false)} />
     </>
   );
 };

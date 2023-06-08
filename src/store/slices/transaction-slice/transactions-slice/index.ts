@@ -1,5 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+const TODAY = new Date();
+const DATE = new Date();
+const YESTERDAY = DATE.setDate(DATE.getDate() - 1);
+
 type TransactionsDetailData = {
   id: number;
   denom: number;
@@ -23,6 +27,9 @@ interface InitialTransactionsState {
   sortBy?: string;
   sortType?: 'asc' | 'desc';
   search?: string;
+  startDate?: any;
+  endDate?: any;
+  filterType?: string;
   loadingList?: boolean;
   loadingPost?: boolean;
   loadingDetail?: boolean;
@@ -41,6 +48,9 @@ const initialState: InitialTransactionsState = {
   sortBy: 'id',
   sortType: 'desc',
   search: '',
+  startDate: YESTERDAY,
+  endDate: TODAY,
+  filterType: 'all',
   loadingList: true,
   loadingPost: false,
   loadingDelete: false,
@@ -79,6 +89,15 @@ const TransactionsSlice = createSlice({
     setTransactionsSortBy: (state, action: PayloadAction<string>) => {
       state.sortBy = action.payload;
     },
+    setTransactionsStartDate: (state, action: PayloadAction<any>) => {
+      state.startDate = action.payload;
+    },
+    setTransactionsEndDate: (state, action: PayloadAction<any>) => {
+      state.endDate = action.payload;
+    },
+    setTransactionsFilterType: (state, action: PayloadAction<any>) => {
+      state.filterType = action.payload;
+    },
     setTransactionsLimit: (state, action: PayloadAction<number>) => {
       state.limit = action.payload;
     },
@@ -108,6 +127,9 @@ const TransactionsSlice = createSlice({
 });
 
 export const {
+  setTransactionsFilterType,
+  setTransactionsEndDate,
+  setTransactionsStartDate,
   setTransactionsResetDetailData,
   setTransactionsDisableLoadingDetail,
   setTransactionsResetState,
