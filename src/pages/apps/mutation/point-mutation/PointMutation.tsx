@@ -15,8 +15,6 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { ErrorView, Loading } from 'src/components';
 import EmptyTableView from 'src/components/empty-table-view';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
@@ -362,13 +360,7 @@ const PointMutation = () => {
                           <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
-                          <TableCell align="center">
-                            {row.afiliasi ? (
-                              <CheckCircleIcon titleAccess="Iya" fontSize="small" color="success" />
-                            ) : (
-                              <CancelIcon titleAccess="Tidak" fontSize="small" color="error" />
-                            )}
-                          </TableCell>
+                          <TableCell align="center">{row.afiliasi ?? '-'}</TableCell>
                           <TableCell align="left">{row.poin ?? 0}</TableCell>
                           <TableCell align="center">{row.debet_id || '-'}</TableCell>
                           <TableCell align="left">{row.debet_name || '-'}</TableCell>
