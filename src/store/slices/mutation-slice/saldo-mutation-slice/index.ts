@@ -48,18 +48,12 @@ const SaldoMutationSlice = createSlice({
   name: 'SaldoMutation',
   initialState,
   reducers: {
-    setSaldoMutationData: (
-      state,
-      action: PayloadAction<{ data: any[]; total: number }>
-    ) => {
+    setSaldoMutationData: (state, action: PayloadAction<{ data: any[]; total: number }>) => {
       state.data = action.payload.data;
       state.total = action.payload.total;
       state.loading = false;
     },
-    setSaldoMutationDetailData: (
-      state,
-      action: PayloadAction<null | SaldoMutationDetailData>
-    ) => {
+    setSaldoMutationDetailData: (state, action: PayloadAction<null | SaldoMutationDetailData>) => {
       state.detailData = action.payload;
       state.loadingDetail = false;
     },

@@ -13,8 +13,10 @@ import toastMessageReducer from '../slices/toast-message-slice';
 import depositReducer from '../slices/transaction-slice/deposit-slice';
 import transactionsReducer from '../slices/transaction-slice/transactions-slice';
 import transactionProcessReducer from '../slices/transaction-slice/transaction-process-slice';
-import saldoMutationReducer from '../slices/transaction-slice/saldo-mutation-slice';
 import transactionAdjustSaldoReducer from './transactions-reducer/adjust-saldo-reducer';
+
+import saldoMutationReducer from '../slices/mutation-slice/saldo-mutation-slice';
+import pointMutationReducer from '../slices/mutation-slice/point-mutation-slice';
 
 const reducers = {
   masterSettingFeeUplineReducer,
@@ -32,6 +34,7 @@ const reducers = {
   masterProductsReducer,
   masterBillerReducer,
   transactionAdjustSaldoReducer,
+  pointMutationReducer,
 };
 
 export default reducers;

@@ -20,7 +20,7 @@ import EmptyTableView from 'src/components/empty-table-view';
 import { currencyFormat } from 'src/helpers/utils/helpers';
 import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
-import { handleGetSaldoMutationData } from 'src/store/actions/transactions-action/saldo-mutation-action';
+import { handleGetSaldoMutationData } from 'src/store/actions/mutation-action/saldo-mutation-action';
 import {
   setSaldoMutationLimit,
   setSaldoMutationPage,
@@ -29,7 +29,7 @@ import {
   setSaldoMutationSearchData,
   setSaldoMutationSortBy,
   setSaldoMutationSortType,
-} from 'src/store/slices/transaction-slice/saldo-mutation-slice';
+} from 'src/store/slices/mutation-slice/saldo-mutation-slice';
 import { useDebounce } from 'usehooks-ts';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -129,51 +129,51 @@ const headCells: readonly HeadCell[] = [
     id: 'produk_name',
     disablePadding: false,
     label: 'Produk',
-    disableSort: false,
+    disableSort: true,
   },
   {
     id: 'nominal',
     disablePadding: false,
     label: 'Nominal',
-    disableSort: false,
+    disableSort: true,
   },
   {
     id: 'user_debit_id',
     disablePadding: false,
     label: 'ID Debit',
-    disableSort: false,
+    disableSort: true,
     align: 'center',
   },
   {
     id: 'user_debit_name',
     disablePadding: false,
     label: 'Debit',
-    disableSort: false,
+    disableSort: true,
   },
   {
     id: 'user_kredit_id',
     disablePadding: false,
     label: 'ID Kredit',
-    disableSort: false,
+    disableSort: true,
     align: 'center',
   },
   {
     id: 'user_kredit_name',
     disablePadding: false,
     label: 'Kredit',
-    disableSort: false,
+    disableSort: true,
   },
   {
     id: 'created_date',
     disablePadding: false,
     label: 'Created Date',
-    disableSort: false,
+    disableSort: true,
   },
   {
     id: 'keterangan',
     disablePadding: false,
     label: 'Keterangan',
-    disableSort: false,
+    disableSort: true,
   },
   // {
   //   id: 'id',
@@ -324,9 +324,9 @@ const SaldoMutation = () => {
         <div className="flex justify-between gap-4 items-center">
           <div>
             <Typography fontWeight={'bold'} variant="h6">
-              Daftar Mutasi
+              Daftar Mutasi Saldo
             </Typography>
-            <Typography variant="body1">Manajemen daftar mutasi</Typography>
+            <Typography variant="body1">Manajemen daftar mutasi saldo</Typography>
           </div>
         </div>
         <section>
