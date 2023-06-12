@@ -1,5 +1,6 @@
 export type InitialMasterUsersState = {
   data?: any[];
+  memberData?: any[];
   billerSaldo?: string;
   page?: number;
   limit?: number;

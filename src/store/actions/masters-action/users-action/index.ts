@@ -286,6 +286,65 @@ const deleteUsersData = (id: number): AppThunk => {
   };
 };
 
+const getUserMemberDetailData = (id: string): AppThunk => {
+  return async (dispatch) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      payload: {
+        loadingDetail: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/user/member?zonapayId=${id}`);
+
+      const data = response.data?.data || {};
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        payload: {
+          memberData: data,
+        },
+      });
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
+      return false;
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        payload: {
+          loadingDetail: false,
+        },
+      });
+    }
+  };
+};
+
 export {
   addNewUsersData,
   changeMasterUsersReducer,
@@ -293,4 +352,5 @@ export {
   editUsersData,
   getMasterUsersData,
   getUsersDetailData,
+  getUserMemberDetailData,
 };

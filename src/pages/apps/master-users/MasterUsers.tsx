@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Delete, Edit } from '@mui/icons-material';
+import { Delete, Edit, Person2 } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -33,10 +33,12 @@ import {
   deleteUsersData,
   editUsersData,
   getMasterUsersData,
+  getUserMemberDetailData,
   getUsersDetailData,
 } from 'src/store/actions/masters-action/users-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
+import UserMemberDetail from './components/UserMemberDetail';
 
 // const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
 
@@ -247,6 +249,7 @@ const MasterUsers = () => {
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
+  const [openUserMemberDetail, setOpenUserMemberDetail] = useState<boolean>(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
@@ -528,6 +531,24 @@ const MasterUsers = () => {
                                   </IconButton>
                                 </span>
                               </Tooltip>
+                              <Tooltip title="Member">
+                                <span>
+                                  <IconButton
+                                    onClick={async () => {
+                                      const response: any = await dispatch(
+                                        getUserMemberDetailData(row.zonapay_id || ''),
+                                      );
+                                      if (response) {
+                                        setOpenUserMemberDetail(true);
+                                      }
+                                    }}
+                                    size="small"
+                                    aria-label="edit"
+                                  >
+                                    <Person2 fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
                             </section>
                           </TableCell>
                         </TableRow>
@@ -724,6 +745,9 @@ const MasterUsers = () => {
             </section>
           </DialogContent>
         </BootstrapDialog>
+      )}
+      {openUserMemberDetail && (
+        <UserMemberDetail open={openUserMemberDetail} handleClose={() => setOpenUserMemberDetail(false)} />
       )}
     </>
   );

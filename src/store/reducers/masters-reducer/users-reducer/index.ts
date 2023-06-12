@@ -3,6 +3,7 @@ import * as REDUCER_TYPES from '../../../types';
 
 const initialState: InitialMasterUsersState = {
   data: [],
+  memberData: [],
   limit: 5,
   page: 0,
   total: 0,
