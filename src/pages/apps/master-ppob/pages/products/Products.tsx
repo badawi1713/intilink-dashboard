@@ -283,7 +283,7 @@ const headCells: readonly HeadCell[] = [
   {
     id: 'status',
     disablePadding: false,
-    label: 'Available',
+    label: 'Tersedia',
     align: 'center',
     disableSort: false,
   },

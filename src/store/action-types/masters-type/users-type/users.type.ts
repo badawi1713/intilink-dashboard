@@ -1,7 +1,9 @@
 export type InitialMasterUsersState = {
   data?: any[];
   memberData?: any[];
+  userVerificationData?: any;
   billerSaldo?: string;
+  zonapayId?: string;
   page?: number;
   limit?: number;
   total?: number;

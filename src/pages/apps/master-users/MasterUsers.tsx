@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Delete, Edit, Person2 } from '@mui/icons-material';
+import { Delete, Edit, Person2, TaskAlt } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -35,10 +35,12 @@ import {
   getMasterUsersData,
   getUserMemberDetailData,
   getUsersDetailData,
+  getUsersVerificationData,
 } from 'src/store/actions/masters-action/users-action';
 import { useDebounce } from 'usehooks-ts';
 import * as yup from 'yup';
 import UserMemberDetail from './components/UserMemberDetail';
+import UserVerificationDetail from './components/UserVerificationDetail';
 
 // const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
 
@@ -175,7 +177,7 @@ const headCells: readonly HeadCell[] = [
   {
     id: 'status',
     disablePadding: false,
-    label: 'Available',
+    label: 'Tersedia',
     align: 'center',
     disableSort: true,
   },
@@ -242,14 +244,27 @@ type FormType = {
 
 const MasterUsers = () => {
   const dispatch = useAppDispatch();
-  const { data, page, sortBy, sortType, limit, total, search, loadingPost, loadingDelete, loading, error } =
-    useAppSelector((state) => state.masterUsersReducer);
+  const {
+    data,
+    page,
+    sortBy,
+    sortType,
+    limit,
+    total,
+    search,
+    loadingPost,
+    loadingDelete,
+    loading,
+    loadingDetail,
+    error,
+  } = useAppSelector((state) => state.masterUsersReducer);
   const isMount = useRef<boolean>(true);
 
   const debouncedSearchTerm: string = useDebounce<string>(search || '', 500);
 
   const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
   const [openUserMemberDetail, setOpenUserMemberDetail] = useState<boolean>(false);
+  const [openUserVerificationDetail, setOpenUserVerificationDetail] = useState<boolean>(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState<boolean>(false);
   const [openEditConfirmation, setOpenEditConfirmation] = useState<boolean>(false);
   const [openImagePreview, setOpenImagePreview] = useState<boolean>(false);
@@ -494,6 +509,7 @@ const MasterUsers = () => {
                               <Tooltip title="Hapus">
                                 <span>
                                   <IconButton
+                                    disabled={loadingDetail}
                                     onClick={() => {
                                       setSelectedId(row.id);
                                       setOpenDeleteConfirmation(true);
@@ -509,6 +525,7 @@ const MasterUsers = () => {
                               <Tooltip title="Edit">
                                 <span>
                                   <IconButton
+                                    disabled={loadingDetail}
                                     onClick={async () => {
                                       const response: any = await dispatch(getUsersDetailData(row.id));
                                       if (typeof response === 'object' && Object.keys(response).length > 0) {
@@ -534,6 +551,8 @@ const MasterUsers = () => {
                               <Tooltip title="Member">
                                 <span>
                                   <IconButton
+                                    disabled={loadingDetail}
+                                    color="info"
                                     onClick={async () => {
                                       const response: any = await dispatch(
                                         getUserMemberDetailData(row.zonapay_id || ''),
@@ -546,6 +565,26 @@ const MasterUsers = () => {
                                     aria-label="edit"
                                   >
                                     <Person2 fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                              <Tooltip title="Verifikasi">
+                                <span>
+                                  <IconButton
+                                    disabled={loadingDetail}
+                                    color="success"
+                                    onClick={async () => {
+                                      const response: any = await dispatch(
+                                        getUsersVerificationData(row.zonapay_id || ''),
+                                      );
+                                      if (response) {
+                                        setOpenUserVerificationDetail(true);
+                                      }
+                                    }}
+                                    size="small"
+                                    aria-label="edit"
+                                  >
+                                    <TaskAlt fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
@@ -748,6 +787,12 @@ const MasterUsers = () => {
       )}
       {openUserMemberDetail && (
         <UserMemberDetail open={openUserMemberDetail} handleClose={() => setOpenUserMemberDetail(false)} />
+      )}
+      {openUserVerificationDetail && (
+        <UserVerificationDetail
+          open={openUserVerificationDetail}
+          handleClose={() => setOpenUserVerificationDetail(false)}
+        />
       )}
     </>
   );

@@ -4,6 +4,8 @@ import * as REDUCER_TYPES from '../../../types';
 const initialState: InitialMasterUsersState = {
   data: [],
   memberData: [],
+  userVerificationData: null,
+  zonapayId: '',
   limit: 5,
   page: 0,
   total: 0,

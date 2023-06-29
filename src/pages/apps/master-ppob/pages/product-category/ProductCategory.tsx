@@ -134,7 +134,7 @@ const headCells: readonly HeadCell[] = [
   {
     id: 'deleted',
     disablePadding: false,
-    label: 'Available',
+    label: 'Tersedia',
     align: 'center',
     disableSort: false,
   },

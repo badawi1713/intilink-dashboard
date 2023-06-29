@@ -286,7 +286,7 @@ const deleteUsersData = (id: number): AppThunk => {
   };
 };
 
-const getUserMemberDetailData = (id: string): AppThunk => {
+const getUserMemberDetailData = (id: any): AppThunk => {
   return async (dispatch) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
@@ -345,7 +345,126 @@ const getUserMemberDetailData = (id: string): AppThunk => {
   };
 };
 
+const getUsersVerificationData = (id: string): AppThunk => {
+  return async (dispatch) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      payload: {
+        loadingDetail: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/user/data-verifikasi?zonapayId=${id}`);
+
+      const data = response.data?.data || {};
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        payload: {
+          userVerificationData: data,
+          zonapayId: id,
+        },
+      });
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
+      return false;
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        payload: {
+          loadingDetail: false,
+        },
+      });
+    }
+  };
+};
+
+const verifyUserData = (data: { zonapayId: string; verify: boolean }): AppThunk => {
+  const { zonapayId, verify } = data;
+  return async (dispatch) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+      payload: {
+        loadingPost: true,
+      },
+    });
+
+    try {
+      await axios.put(`/v1/api/dashboard/user/verifikasi?zonapayId=${zonapayId}&verifikasi=${verify}`);
+      dispatch(
+        showMessage({
+          message: 'Berhasil memverifikasi user!',
+          variant: 'success',
+        }),
+      );
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<AxiosErrorType>;
+        if (axiosError.response) {
+          const { message } = axiosError.response.data;
+          dispatch(
+            showMessage({
+              message: `${message}` || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        } else {
+          dispatch(
+            showMessage({
+              message: error.message || 'Maaf, sedang terjadi kesalahan',
+              variant: 'error',
+            }),
+          );
+        }
+      } else {
+        dispatch(
+          showMessage({
+            message: 'Maaf, sedang terjadi kesalahan',
+            variant: 'error',
+          }),
+        );
+      }
+      return false;
+    } finally {
+      dispatch({
+        type: REDUCER_TYPES.SET_MASTER_USERS_REDUCER,
+        payload: {
+          loadingPost: false,
+        },
+      });
+    }
+  };
+};
+
 export {
+  verifyUserData,
   addNewUsersData,
   changeMasterUsersReducer,
   deleteUsersData,
@@ -353,4 +472,5 @@ export {
   getMasterUsersData,
   getUsersDetailData,
   getUserMemberDetailData,
+  getUsersVerificationData,
 };
