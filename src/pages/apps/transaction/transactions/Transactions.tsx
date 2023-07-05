@@ -434,7 +434,9 @@ const Transactions = () => {
                           <TableCell align="left">{currencyFormat(row.denom ?? 0)}</TableCell>
                           <TableCell align="center">{row.type || '-'}</TableCell>
                           <TableCell align="center">{row.status || '-'}</TableCell>
-                          <TableCell align="left">{row.keterangan || '-'}</TableCell>
+                          <TableCell width={120} align="left">
+                            {row.keterangan || '-'}
+                          </TableCell>
                           <TableCell align="left">{row.produk_name || '-'}</TableCell>
                           <TableCell align="left">{row.id_pel || '-'}</TableCell>
                           <TableCell align="left">{currencyFormat(row.harga_beli ?? 0)}</TableCell>
