@@ -1,4 +1,5 @@
 const configurations = {
+  parserPreset: "conventional-changelog-conventionalcommits",
   extends: ["@commitlint/config-conventional"],
   rules: {
     "body-leading-blank": [1, "always"],
@@ -135,4 +136,3 @@ const configurations = {
 };
 
 export default configurations;
-
