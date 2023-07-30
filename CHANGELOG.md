@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.2](https://github.com/badawi1713/intilink-dashboard/compare/v0.0.1...v0.0.2) (2023-07-30)
 
-
 ### Features
 
 - 🎸 add git cz to write git commit better ([a750929](https://github.com/badawi1713/intilink-dashboard/commit/a7509299d0c9b01dc4c44362080f2313991eec61))
