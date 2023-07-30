@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/badawi1713/intilink-dashboard/compare/v0.0.2...v0.1.0) (2023-07-30)
+
+
+### Features
+
+* ✨ add tailwind, react-router-dom, setup prettier & eslint ([2a8e6a5](https://github.com/badawi1713/intilink-dashboard/commit/2a8e6a53c8c949e97fd1a3828c107d09fc7de2a3))
+
 ### [0.0.2](https://github.com/badawi1713/intilink-dashboard/compare/v0.0.1...v0.0.2) (2023-07-30)
 
 ### Features
