@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { HiMenu } from 'react-icons/hi';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAppSelector } from 'src/hooks/useAppSelector';
@@ -19,7 +19,7 @@ type MenuType = {
     | any;
 };
 
-const Navbar: FC<{ setOpenAside: (val: boolean) => void }> = ({ setOpenAside }) => {
+const Navbar = ({ setOpenAside }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -114,7 +114,7 @@ const Navbar: FC<{ setOpenAside: (val: boolean) => void }> = ({ setOpenAside }) 
       </nav>
       <section className="p-4 xl:ml-auto flex justify-between gap-4 items-center w-full xl:w-auto">
         <button
-          onClick={() => setOpenAside((prevState: boolean) => !prevState)}
+          onClick={() => setOpenAside((prevState) => !prevState)}
           className="flex border-2 border-slate-900 w-8 h-8 rounded-md xl:hidden items-center justify-center"
         >
           <HiMenu size={20} />
