@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { FC, useRef, useState } from 'react';
 import { HiMenu } from 'react-icons/hi';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAppSelector } from 'src/hooks/useAppSelector';
@@ -19,7 +20,12 @@ type MenuType = {
     | any;
 };
 
-const Navbar = ({ setOpenAside }) => {
+interface NavbarProps {
+  setOpenAside: () => void;
+}
+
+const Navbar: FC<NavbarProps> = (props) => {
+  const { setOpenAside } = props;
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -47,31 +53,33 @@ const Navbar = ({ setOpenAside }) => {
     <header className="flex flex-col-reverse xl:flex-row items-start">
       <nav className="flex flex-col gap-5 items-start flex-1">
         <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[100%] flex-shrink md:max-w-full xl:max-w-full snap-x snap-mandatory">
-          {user?.dashboardMenu?.map((menu: MenuType) => {
-            return (
-              <NavLink
-                to={menu?.url || ''}
-                onClick={() => {
-                  setChildrenMenu(menu?.children || []);
-                  setSubChildrenMenu([]);
-                }}
-                key={menu.id}
-                className={({ isActive }: any) =>
-                  (isActive ? 'border-blue-400 border-b-2' : 'border-slate-500 border-b') +
-                  ' cursor-pointer flex items-center justify-center p-4 flex-shrink-0 snap-start'
-                }
-              >
-                {({ isActive }) => (
-                  <p className={`${isActive ? 'text-blue-400' : 'text-slate-500'} text-lg`}>{menu.title}</p>
-                )}
-              </NavLink>
-            );
-          })}
+          {typeof user?.dashboardMenu === 'object' &&
+            user?.dashboardMenu?.length > 0 &&
+            user?.dashboardMenu?.map((menu: MenuType) => {
+              return (
+                <NavLink
+                  to={menu?.url || ''}
+                  onClick={() => {
+                    setChildrenMenu(menu?.children || []);
+                    setSubChildrenMenu([]);
+                  }}
+                  key={menu.id}
+                  className={({ isActive }: any) =>
+                    (isActive ? 'border-blue-400 border-b-2' : 'border-slate-500 border-b') +
+                    ' cursor-pointer flex items-center justify-center p-4 flex-shrink-0 snap-start'
+                  }
+                >
+                  {({ isActive }) => (
+                    <p className={`${isActive ? 'text-blue-400' : 'text-slate-500'} text-lg`}>{menu.title}</p>
+                  )}
+                </NavLink>
+              );
+            })}
         </section>
         <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-2xl snap-x snap-mandatory">
           {typeof childrenMenu === 'object' &&
             childrenMenu?.length > 0 &&
-            childrenMenu?.map((menu: MenuType, index) => {
+            childrenMenu?.map((menu: MenuType) => {
               return (
                 <NavLink
                   to={menu?.url || ''}
@@ -94,7 +102,7 @@ const Navbar = ({ setOpenAside }) => {
         <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-2xl snap-x snap-mandatory">
           {typeof subChildrenMenu === 'object' &&
             subChildrenMenu?.length > 0 &&
-            subChildrenMenu?.map((menu: MenuType, index) => {
+            subChildrenMenu?.map((menu: MenuType) => {
               return (
                 <NavLink
                   to={menu?.url || ''}
@@ -114,14 +122,14 @@ const Navbar = ({ setOpenAside }) => {
       </nav>
       <section className="p-4 xl:ml-auto flex justify-between gap-4 items-center w-full xl:w-auto">
         <button
-          onClick={() => setOpenAside((prevState) => !prevState)}
+          onClick={setOpenAside}
           className="flex border-2 border-slate-900 w-8 h-8 rounded-md xl:hidden items-center justify-center"
         >
           <HiMenu size={20} />
         </button>
         <div ref={profileMenuRef} className="ml-auto relative inline-block text-left">
           <button
-            onClick={() => setShowProfileMenu((prevState) => !prevState)}
+            onClick={() => setShowProfileMenu((prevState: any) => !prevState)}
             id="menu-button"
             aria-expanded="true"
             aria-haspopup="true"
