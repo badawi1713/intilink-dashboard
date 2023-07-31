@@ -5,19 +5,14 @@ import { useAppDispatch } from 'src/hooks/useAppDispatch';
 import { useAppSelector } from 'src/hooks/useAppSelector';
 import { hideMessage } from 'src/store/slices/toast-message-slice';
 
-const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
+const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 function Toast() {
   const dispatch = useAppDispatch();
 
-  const { show, variant, message, hideDuration } = useAppSelector(
-    (state) => state.toastMessageReducer
-  );
+  const { show, variant, message, hideDuration } = useAppSelector((state) => state.toastMessageReducer);
 
   const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {

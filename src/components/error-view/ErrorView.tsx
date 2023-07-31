@@ -12,12 +12,7 @@ const ErrorView: FC<ErrorViewProps> = ({ message, handleRetry }) => {
       <Typography color={'red'} variant="body1" align="center">
         {message || 'Maaf, sedang terjadi kesalahan. Silahkan coba kembali.'}
       </Typography>
-      <Button
-        size="small"
-        color="inherit"
-        variant="outlined"
-        onClick={handleRetry}
-      >
+      <Button size="small" color="inherit" variant="outlined" onClick={handleRetry}>
         Coba Kembali
       </Button>
     </section>

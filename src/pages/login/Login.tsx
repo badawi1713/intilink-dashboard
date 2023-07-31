@@ -41,12 +41,9 @@ const Login = () => {
               loading="lazy"
               src="assets/images/img-logo.png"
             />
-            <h2 className="mb-2 mt-4 text-lg font-bold text-black">
-              Admin Login
-            </h2>
+            <h2 className="mb-2 mt-4 text-lg font-bold text-black">Admin Login</h2>
             <p className="text-center text-gray-500 text-sm">
-              Selamat datang, silakan masukkan data <br /> untuk dapat mengakses
-              akun Anda.
+              Selamat datang, silakan masukkan data <br /> untuk dapat mengakses akun Anda.
             </p>
           </header>
 
@@ -56,9 +53,7 @@ const Login = () => {
               name="id"
               render={({ field }) => (
                 <div className="flex flex-col gap-3 mb-4">
-                  <label className="text-sm font-semibold">
-                    Email/No. Telepon
-                  </label>
+                  <label className="text-sm font-semibold">Email/No. Telepon</label>
                   <input
                     {...field}
                     className="w-full rounded-md px-3 py-2 border-2 border-gray-600"
@@ -93,10 +88,7 @@ const Login = () => {
           </form>
 
           <section className="text-center p-8 md:p-0 md:mt-8">
-            <Link
-              to="/forgot-password"
-              className="text-green-600 cursor-pointer"
-            >
+            <Link to="/forgot-password" className="text-green-600 cursor-pointer">
               Lupa Password?
             </Link>
           </section>

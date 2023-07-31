@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { RootState } from 'src/store';
 import {
-    InitialMasterMenuState,
-    MasterMenuDispatchType,
+  InitialMasterMenuState,
+  MasterMenuDispatchType,
 } from '../../../action-types/masters-type/menu-action-type/menu-action.type';
 import * as REDUCER_TYPES from '../../../types';
 
@@ -16,10 +16,7 @@ const changeMasterMenuReducer = (payload: InitialMasterMenuState) => {
 };
 
 const getMasterMenuData = () => {
-  return async (
-    dispatch: MasterMenuDispatchType,
-    getState: () => RootState
-  ) => {
+  return async (dispatch: MasterMenuDispatchType, getState: () => RootState) => {
     const { masterMenuReducer } = getState();
     const { page, limit, sortType, sortBy, search } = masterMenuReducer;
 
@@ -33,7 +30,7 @@ const getMasterMenuData = () => {
 
     try {
       const response = await axios.get(
-        `/v1/api/dashboard/menu?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`
+        `/v1/api/dashboard/menu?pageNo=${page}&pageSize=${limit}&sort=${sortType}&sortBy=${sortBy}&search=${search}`,
       );
 
       const total = +response?.data?.data?.totalElements || 0;
@@ -97,12 +94,7 @@ const getMenuListData = () => {
   };
 };
 
-const addNewMenuData = (data: {
-  title: string;
-  icon: string;
-  link: string;
-  parent_id: number;
-}) => {
+const addNewMenuData = (data: { title: string; icon: string; link: string; parent_id: number }) => {
   return async (dispatch: MasterMenuDispatchType) => {
     dispatch({
       type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
@@ -130,64 +122,67 @@ const addNewMenuData = (data: {
 };
 
 const getMenuDetailData = (id: number) => {
-    return async (dispatch: MasterMenuDispatchType) => {
+  return async (dispatch: MasterMenuDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
+      payload: {
+        loadingDetail: true,
+      },
+    });
+
+    try {
+      const response = await axios.get(`/v1/api/dashboard/menu/${id}`);
+
+      const data = response.data?.data || {};
+      return data;
+    } catch (error) {
+      console.log(error);
+      return false;
+    } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
         payload: {
-          loadingDetail: true,
+          loadingDetail: false,
         },
       });
-  
-      try {
-        const response = await axios.get(`/v1/api/dashboard/menu/${id}`);
-  
-        const data = response.data?.data || {};
-          return data;
-      } catch (error) {
-          console.log(error);
-          return false
-      } finally {
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
-          payload: {
-            loadingDetail: false,
-          },
-        });
-      }
-    };
+    }
+  };
 };
-  
-const editMenuData = (id: number, data: {
+
+const editMenuData = (
+  id: number,
+  data: {
     title: string;
     icon: string;
     link: string;
     parent_id: number;
-  }) => {
-    return async (dispatch: MasterMenuDispatchType) => {
+  },
+) => {
+  return async (dispatch: MasterMenuDispatchType) => {
+    dispatch({
+      type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
+      payload: {
+        loadingPost: true,
+      },
+    });
+
+    try {
+      await axios.put(`/v1/api/dashboard/menu/${id}`, data);
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    } finally {
       dispatch({
         type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
         payload: {
-          loadingPost: true,
+          loadingPost: false,
         },
       });
-  
-      try {
-        await axios.put(`/v1/api/dashboard/menu/${id}`, data);
-  
-        return true;
-      } catch (error) {
-        console.log(error);
-        return false;
-      } finally {
-        dispatch({
-          type: REDUCER_TYPES.SET_MASTER_MENU_REDUCER,
-          payload: {
-            loadingPost: false,
-          },
-        });
-      }
-    };
+    }
   };
+};
 
 const deleteMenuData = (id: number) => {
   return async (dispatch: MasterMenuDispatchType) => {
@@ -217,6 +212,11 @@ const deleteMenuData = (id: number) => {
 };
 
 export {
-    addNewMenuData, changeMasterMenuReducer, deleteMenuData, editMenuData, getMasterMenuData, getMenuDetailData, getMenuListData
+  addNewMenuData,
+  changeMasterMenuReducer,
+  deleteMenuData,
+  editMenuData,
+  getMasterMenuData,
+  getMenuDetailData,
+  getMenuListData,
 };
-

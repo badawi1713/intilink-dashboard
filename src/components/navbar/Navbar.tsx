@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { HiMenu } from 'react-icons/hi';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAppSelector } from 'src/hooks/useAppSelector';
@@ -19,7 +19,7 @@ type MenuType = {
     | any;
 };
 
-const Navbar = ({ setOpenAside }: any) => {
+const Navbar: FC<{ setOpenAside: (val: boolean) => void }> = ({ setOpenAside }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -46,7 +46,7 @@ const Navbar = ({ setOpenAside }: any) => {
   return (
     <header className="flex flex-col-reverse xl:flex-row items-start">
       <nav className="flex flex-col gap-5 items-start flex-1">
-        <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-2xl snap-x snap-mandatory">
+        <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[100%] flex-shrink md:max-w-full xl:max-w-full snap-x snap-mandatory">
           {user?.dashboardMenu?.map((menu: MenuType) => {
             return (
               <NavLink
@@ -57,20 +57,12 @@ const Navbar = ({ setOpenAside }: any) => {
                 }}
                 key={menu.id}
                 className={({ isActive }: any) =>
-                  (isActive
-                    ? 'border-blue-400 border-b-2'
-                    : 'border-slate-500 border-b') +
+                  (isActive ? 'border-blue-400 border-b-2' : 'border-slate-500 border-b') +
                   ' cursor-pointer flex items-center justify-center p-4 flex-shrink-0 snap-start'
                 }
               >
                 {({ isActive }) => (
-                  <p
-                    className={`${
-                      isActive ? 'text-blue-400' : 'text-slate-500'
-                    } text-lg`}
-                  >
-                    {menu.title}
-                  </p>
+                  <p className={`${isActive ? 'text-blue-400' : 'text-slate-500'} text-lg`}>{menu.title}</p>
                 )}
               </NavLink>
             );
@@ -88,20 +80,12 @@ const Navbar = ({ setOpenAside }: any) => {
                   }}
                   key={menu.id}
                   className={({ isActive }: any) =>
-                    (isActive
-                      ? 'border-blue-400 border-b-2'
-                      : 'border-slate-500 border-b') +
+                    (isActive ? 'border-blue-400 border-b-2' : 'border-slate-500 border-b') +
                     ' cursor-pointer flex items-center justify-center p-4 flex-shrink-0 snap-start'
                   }
                 >
                   {({ isActive }) => (
-                    <p
-                      className={`${
-                        isActive ? 'text-blue-400' : 'text-slate-500'
-                      } text-base`}
-                    >
-                      {menu.title}
-                    </p>
+                    <p className={`${isActive ? 'text-blue-400' : 'text-slate-500'} text-base`}>{menu.title}</p>
                   )}
                 </NavLink>
               );
@@ -116,20 +100,12 @@ const Navbar = ({ setOpenAside }: any) => {
                   to={menu?.url || ''}
                   key={menu.id}
                   className={({ isActive }: any) =>
-                    (isActive
-                      ? 'border-blue-400 border-b-2'
-                      : 'border-slate-500 border-b') +
+                    (isActive ? 'border-blue-400 border-b-2' : 'border-slate-500 border-b') +
                     ' cursor-pointer flex items-center justify-center p-4 flex-shrink-0 snap-start'
                   }
                 >
                   {({ isActive }) => (
-                    <p
-                      className={`${
-                        isActive ? 'text-blue-400' : 'text-slate-500'
-                      } text-sm`}
-                    >
-                      {menu.title}
-                    </p>
+                    <p className={`${isActive ? 'text-blue-400' : 'text-slate-500'} text-sm`}>{menu.title}</p>
                   )}
                 </NavLink>
               );
@@ -143,10 +119,7 @@ const Navbar = ({ setOpenAside }: any) => {
         >
           <HiMenu size={20} />
         </button>
-        <div
-          ref={profileMenuRef}
-          className="ml-auto relative inline-block text-left"
-        >
+        <div ref={profileMenuRef} className="ml-auto relative inline-block text-left">
           <button
             onClick={() => setShowProfileMenu((prevState) => !prevState)}
             id="menu-button"
