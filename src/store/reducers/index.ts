@@ -18,7 +18,10 @@ import transactionAdjustSaldoReducer from './transactions-reducer/adjust-saldo-r
 import saldoMutationReducer from '../slices/mutation-slice/saldo-mutation-slice';
 import pointMutationReducer from '../slices/mutation-slice/point-mutation-slice';
 
+import pointExchangeProductsReducer from './point-exchange-reducer/point-exchange-products-reducer';
+
 const reducers = {
+  pointExchangeProductsReducer,
   masterSettingFeeUplineReducer,
   masterPaymentMethodsReducer,
   masterUsersReducer,

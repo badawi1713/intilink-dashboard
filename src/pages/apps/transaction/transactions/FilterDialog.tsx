@@ -53,7 +53,7 @@ type FilterDialogType = {
 function FilterDialog({ open, closeDialogHandler }: FilterDialogType) {
   const dispatch = useAppDispatch();
   const { loading, startDate, endDate, filterType } = useAppSelector((state) => state.transactionsReducer);
-  console.log(startDate);
+  // console.log(startDate);
   const formMethods = useForm({
     mode: 'onChange',
     defaultValues: useMemo(() => {

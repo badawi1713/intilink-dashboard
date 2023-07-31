@@ -1,7 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -12,7 +11,7 @@ const loginSchema = yup.object().shape({
   password: yup.string().required('Password is required'),
 });
 const Login = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.authReducer);
   const formMethods = useForm({
@@ -21,10 +20,10 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
   });
 
-  const [showPassword, setShowPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
 
-  const { control, formState, handleSubmit } = formMethods;
-  const { errors } = formState;
+  const { control, handleSubmit } = formMethods;
+  // const { errors } = formState;
 
   const onSubmit = handleSubmit((data) => {
     dispatch(loginUserAction(data));

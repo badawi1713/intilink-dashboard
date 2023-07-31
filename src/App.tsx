@@ -16,6 +16,7 @@ import MasterUsers from './pages/apps/master-users';
 import PaymentMethods from './pages/apps/master-ppob/pages/payment-methods';
 import SettingFeeUpline from './pages/apps/master-ppob/pages/setting-fee-upline';
 import { PointMutation, SaldoMutation } from './pages/apps/mutation';
+import { PointExchangeProducts } from './pages/apps/point-exchange';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -77,6 +78,10 @@ const App: FC = () => {
             <Route index element={<Navigate to="mutasi-poin" replace />} />
             <Route path="mutasi-poin" element={<PointMutation />} />
             <Route path="mutasi-saldo" element={<SaldoMutation />} />
+          </Route>
+          <Route path="tukar-poin">
+            <Route index element={<Navigate to="produk" replace />} />
+            <Route path="produk" element={<PointExchangeProducts />} />
           </Route>
           <Route path="*" element={<Page404 />} />
         </Route>

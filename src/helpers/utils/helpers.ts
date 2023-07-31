@@ -11,7 +11,7 @@ const currencyFormat = (value: number): string => {
     rupiah = number_string[number_string.length - i - 1] + rupiah;
   }
 
-  return `Rp ${rupiah}`;
+  return `Rp${rupiah}`;
 };
 
 export { currencyFormat, getCurrentYear };
