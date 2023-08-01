@@ -116,6 +116,7 @@ interface Data {
   keterangan: string;
   nama: string;
   banner: boolean;
+  status: boolean;
   index: number;
 }
 
@@ -128,6 +129,7 @@ function createData(
   keterangan: string,
   nama: string,
   banner: boolean,
+  status: boolean,
   index: number,
 ): Data {
   return {
@@ -139,6 +141,7 @@ function createData(
     keterangan,
     nama,
     banner,
+    status,
     index,
   };
 }
@@ -195,6 +198,13 @@ const headCells: readonly HeadCell[] = [
     id: 'banner',
     disablePadding: false,
     label: 'Banner',
+    align: 'center',
+    disableSort: true,
+  },
+  {
+    id: 'status',
+    disablePadding: false,
+    label: 'Status',
     align: 'center',
     disableSort: true,
   },
@@ -264,6 +274,7 @@ type FormType = {
   commission: number;
   name: string;
   banner: boolean;
+  status: boolean;
 };
 
 const Products = () => {
@@ -292,7 +303,8 @@ const Products = () => {
       image: '',
       notes: '',
       name: '',
-      banner: true,
+      banner: false,
+      status: true,
     },
     resolver: yupResolver(productsSchema),
   });
@@ -319,7 +331,8 @@ const Products = () => {
       notes: '',
       commission: 0,
       name: '',
-      banner: true,
+      banner: false,
+      status: true,
     });
   };
 
@@ -336,6 +349,7 @@ const Products = () => {
     form.append('keterangan', formData.notes);
     form.append('name', formData.name);
     form.append('banner', `${formData.banner}`);
+    form.append('status', `${formData.status}`);
     form.append('id', formData.id);
     if (editForm) {
       form.append('status', '1');
@@ -414,6 +428,7 @@ const Products = () => {
       row?.keterangan,
       row?.nama,
       row?.banner,
+      row?.status,
       index,
     ),
   );
@@ -581,6 +596,13 @@ const Products = () => {
                             )}
                           </TableCell>
                           <TableCell align="center">
+                            {row.status ? (
+                              <CheckCircleIcon titleAccess="Aktif" fontSize="small" color="success" />
+                            ) : (
+                              <CancelIcon titleAccess="Tidak Aktif" fontSize="small" color="error" />
+                            )}
+                          </TableCell>
+                          <TableCell align="center">
                             <section className="flex items-center justify-center gap-2">
                               <Tooltip title="Hapus">
                                 <span>
@@ -613,7 +635,8 @@ const Products = () => {
                                         image: row?.image || '',
                                         notes: row?.keterangan || '',
                                         name: row?.nama || '',
-                                        banner: row?.banner,
+                                        banner: !!row?.banner,
+                                        status: !!row?.status,
                                       });
                                       handleClickOpen();
                                     }}
@@ -790,7 +813,7 @@ const Products = () => {
                         {...field}
                         fullWidth
                         multiline
-                        rows={2}
+                        rows={4}
                         placeholder="Masukkan deskripsi produk"
                         helperText={errors?.notes && errors.notes?.message}
                         error={!!errors?.notes}
@@ -815,6 +838,27 @@ const Products = () => {
                               onChange(e.target.checked);
                             }}
                             name="banner"
+                          />
+                        }
+                        label={value ? 'ACTIVE' : 'DISABLE'}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field: { onChange, value } }) => (
+                    <div className="flex flex-col gap-3">
+                      <label className="text-sm font-semibold">Status</label>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={value || false}
+                            onChange={(e) => {
+                              onChange(e.target.checked);
+                            }}
+                            name="status"
                           />
                         }
                         label={value ? 'ACTIVE' : 'DISABLE'}
