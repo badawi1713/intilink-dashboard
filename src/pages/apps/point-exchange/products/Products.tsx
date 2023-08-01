@@ -349,7 +349,7 @@ const Products = () => {
     form.append('keterangan', formData.notes);
     form.append('name', formData.name);
     form.append('banner', `${formData.banner}`);
-    form.append('status', `${formData.status}`);
+    form.append('status', `${formData.status ? 1 : 0}`);
     form.append('id', formData.id);
 
     if (formData?.image && formData?.image instanceof Blob) {
