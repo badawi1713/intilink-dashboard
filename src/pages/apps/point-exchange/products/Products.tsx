@@ -351,9 +351,7 @@ const Products = () => {
     form.append('banner', `${formData.banner}`);
     form.append('status', `${formData.status}`);
     form.append('id', formData.id);
-    if (editForm) {
-      form.append('status', '1');
-    }
+
     if (formData?.image && formData?.image instanceof Blob) {
       if (formData?.image?.size > 1048576) {
         dispatch(
