@@ -18,14 +18,24 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+  },
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["./src/*"]
   },
   "include": [
     "src",
     ".eslintrc.cjs",
     "tailwind.config.js",
     "vite.config.ts",
-    "commitlint.config.js"
+    "commitlint.config.js",
+    "changelog.config.cjs"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

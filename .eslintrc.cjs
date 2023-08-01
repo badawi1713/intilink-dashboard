@@ -48,6 +48,10 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
+    'react/jsx-props-no-spreading': 0,
+    'import/extensions': 0,
+    'import/prefer-default-export': 0,
+    'react/require-default-props': 0,
   },
   ignorePatterns: ['*.config.js'],
 };
