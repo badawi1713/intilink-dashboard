@@ -1,23 +1,14 @@
-import { FC, memo, useState } from 'react';
+import { Box, FormControlLabel, ListItem, ListItemText, Switch, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useAppSelector } from 'src/hooks/useAppSelector';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  FormControlLabel,
-  Switch,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { useAppDispatch } from 'src/hooks/useAppDispatch';
-import { verifyUserData } from 'src/store/actions/masters-action/users-action';
+import { FC, memo, useState } from 'react';
 import { Confirmation } from 'src/components';
+import { useAppDispatch } from 'src/hooks/useAppDispatch';
+import { useAppSelector } from 'src/hooks/useAppSelector';
+import { verifyUserData } from 'src/store/actions/masters-action/users-action';
 
 type UserVerificationDetailProps = {
   open: boolean;
@@ -43,128 +34,199 @@ const UserVerificationDetail: FC<UserVerificationDetailProps> = ({ open, handleC
   };
 
   return (
-    <Dialog fullWidth={true} maxWidth={'md'} open={open} onClose={handleClose}>
+    <Dialog fullWidth={true} maxWidth={'xl'} open={open} onClose={handleClose}>
       <DialogTitle>Verifikasi User</DialogTitle>
       <DialogContent dividers>
-        <section className="flex-col flex gap-4 w-full mb-8">
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Nama Lengkap</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.nama_ktp || '-'} />
-            </div>
-
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Jenis Kelamin</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.jenis_kelamin || '-'} />
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">No. Whatsapp</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.no_wa || '-'} />
-            </div>
-
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Email</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.email || '-'} />
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">No. Identitas (KTP)</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.no_ktp || '-'} />
-            </div>
-
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Nama Ibu</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.nama_ibu || '-'} />
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Provinsi</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.provinsi || '-'} />
-            </div>
-
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Kota/Kabupaten</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.kota_kab || '-'} />
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Kecamatan</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.kecamatan || '-'} />
-            </div>
-
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Kelurahan</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.kelurahan || '-'} />
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Alamat</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.alamat_ktp || '-'} />
-            </div>
-
-            <div className="flex flex-col gap-3 w-full">
-              <label className="text-sm font-semibold">Kode Pos</label>
-              <TextField fullWidth placeholder="-" value={userVerificationData?.kode_pos || '-'} />
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3 w-full">
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                  <Typography variant="body2" fontWeight={600}>
-                    Foto Identitas (KTP)
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <img
-                    src={`${userVerificationData?.foto_ktp}?w=164&h=164&fit=crop&auto=format`}
-                    srcSet={`${userVerificationData?.foto_ktp}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                    alt={`${userVerificationData?.nama_ktp}_ktp`}
-                    loading="lazy"
-                  />
-                </AccordionDetails>
-              </Accordion>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
-                  <Typography variant="body2" fontWeight={600}>
-                    Foto Selfie dengan KTP
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <img
+        <section className="flex flex-col lg:flex-row w-full mb-8">
+          <div className="flex flex-row items-stretch">
+            <ListItem className="p-0">
+              <ListItemText
+                primary="Foto Selfie dengan KTP"
+                secondary={
+                  <Box
+                    component="img"
+                    sx={{
+                      height: 225,
+                      width: 200,
+                      mt: 1,
+                    }}
                     src={`${userVerificationData?.foto_selfie}?w=164&h=164&fit=crop&auto=format`}
                     srcSet={`${userVerificationData?.foto_selfie}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                     alt={`${userVerificationData?.nama_ktp}_ktp`}
                     loading="lazy"
                   />
-                </AccordionDetails>
-              </Accordion>
-            </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
-            <div className="flex flex-col gap-3">
-              <label className="text-sm font-semibold">Verifikasi Akun</label>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={verify || false}
-                    onChange={(e) => {
-                      setVerify(e.target.checked);
+                }
+              />
+            </ListItem>
+            <ListItem className="p-0">
+              <ListItemText
+                primary="Foto Identitas (KTP)"
+                secondary={
+                  <Box
+                    component="img"
+                    sx={{
+                      height: 170,
+                      width: 300,
+                      mt: 1,
                     }}
-                    name="verify"
+                    src={`${userVerificationData?.foto_ktp}?w=164&h=164&fit=crop&auto=format`}
+                    srcSet={`${userVerificationData?.foto_ktp}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                    alt={`${userVerificationData?.nama_ktp}_ktp`}
+                    loading="lazy"
                   />
                 }
-                label={verify ? 'Aktif' : 'Non-Aktif'}
               />
-            </div>
+            </ListItem>
           </div>
+          <section className="flex flex-col flex-1">
+            <div className="flex flex-col md:flex-row items-start md:items-stretch">
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Nama Lengkap"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.nama_ktp || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Jenis Kelamin"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.jenis_kelamin || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="No. Identitas (KTP)"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.no_ktp || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Nama Ibu"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.nama_ibu || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </div>
+            <div className="flex flex-col md:flex-row items-start md:items-stretch">
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Provinsi"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.provinsi || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Kota/Kabupaten"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.kota_kab || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Kecamatan"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.kecamatan || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Kelurahan"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.kelurahan || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </div>
+            <div className="flex flex-col md:flex-row items-start md:items-stretch">
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="No. Whatsapp"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.no_wa || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Email"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.email || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Alamat"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.alamat_ktp || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Kode POS"
+                  secondary={
+                    <Typography fontWeight={500} variant="body2" color="text.primary">
+                      {userVerificationData?.kode_pos || '-'}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </div>
+            <div className="flex flex-col md:flex-row items-start md:items-stretch">
+              <ListItem className="p-0">
+                <ListItemText
+                  primary="Verifikasi Akun"
+                  secondary={
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={verify || false}
+                          onChange={(e) => {
+                            setVerify(e.target.checked);
+                          }}
+                          name="verify"
+                        />
+                      }
+                      label={verify ? 'Aktif' : 'Non-Aktif'}
+                    />
+                  }
+                />
+              </ListItem>
+            </div>
+          </section>
         </section>
       </DialogContent>
       <DialogActions>
