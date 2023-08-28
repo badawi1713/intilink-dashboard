@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Delete, Edit, ImageSearchOutlined, BrokenImage } from '@mui/icons-material';
+import { BrokenImage, Delete, Edit, ImageSearchOutlined } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -37,7 +37,6 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
-import axios from 'axios';
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Confirmation, ErrorView, Loading } from 'src/components';
@@ -54,6 +53,7 @@ import {
   getProductsBillerListFormData,
   getProductsCategoryListData,
   getProductsGroupListData,
+  getProductsGroupListFormData,
 } from 'src/store/actions/masters-action/products-action';
 import { showMessage } from 'src/store/slices/toast-message-slice';
 import { useDebounce } from 'usehooks-ts';
@@ -154,6 +154,8 @@ interface Data {
   status: boolean;
   product_biller_id: string;
   index: number;
+  category_id: string;
+  group_id: string;
 }
 
 function createData(
@@ -174,6 +176,8 @@ function createData(
   status: boolean,
   product_biller_id: string,
   index: number,
+  category_id: string,
+  group_id: string,
 ): Data {
   return {
     admin_nominal,
@@ -193,6 +197,8 @@ function createData(
     status,
     product_biller_id,
     index,
+    category_id,
+    group_id,
   };
 }
 
@@ -377,6 +383,8 @@ const Products = () => {
     error,
     categoryId,
     groupId,
+    productGroupFormList,
+    loadingList,
   } = useAppSelector((state) => state.masterProductsReducer);
   const isMount = useRef<boolean>(true);
 
@@ -389,8 +397,6 @@ const Products = () => {
   const [editForm, setEditForm] = useState<boolean>(false);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [productGroupNewFormList, setProductGroupNewFormList] = useState<any[]>([]);
-  const [loadingGroupProductList, setLoadingGroupProductList] = useState<boolean>(false);
 
   const formMethods = useForm<FormType>({
     mode: 'onChange',
@@ -442,6 +448,11 @@ const Products = () => {
       name: '',
       status: true,
     });
+    dispatch(
+      changeMasterProductsReducer({
+        productGroupFormList: [],
+      }),
+    );
   };
 
   const handleEditConfirmation = handleSubmit(() => {
@@ -578,6 +589,8 @@ const Products = () => {
       row?.status,
       row?.produk_biller_id,
       index,
+      row?.category_id,
+      row?.group_id,
     ),
   );
 
@@ -626,21 +639,6 @@ const Products = () => {
       dispatch(getMasterProductsData());
       setOpenDeleteConfirmation(false);
       setSelectedId(null);
-    }
-  };
-
-  const handleGetProductsGroupList = async (id: string) => {
-    setLoadingGroupProductList(true);
-    try {
-      const response = await axios.get(`/v1/api/dashboard/product/list-group/${id}`);
-
-      const responseData = response.data || [];
-
-      setProductGroupNewFormList(responseData);
-    } catch (e) {
-      setProductGroupNewFormList([]);
-    } finally {
-      setLoadingGroupProductList(false);
     }
   };
 
@@ -831,26 +829,31 @@ const Products = () => {
                                 <span>
                                   <IconButton
                                     disabled={loading}
-                                    onClick={() => {
+                                    onClick={async () => {
                                       setSelectedId(row?.id);
-                                      setEditForm(true);
-                                      reset({
-                                        adminNominal: row?.admin_nominal || 0,
-                                        selectedAdminType: row?.admin_type_id ? `${row?.admin_type_id}` : '1',
-                                        billerProductId: row?.product_biller_id || '',
-                                        selectedBiller: row?.biller_id ? `${row?.biller_id}` : '',
-                                        selectedProductGroup: categoryId === 'Semua' ? '' : `${groupId}`,
-                                        denom: row?.denom || 0,
-                                        buyPrice: row?.harga_beli || 0,
-                                        upPrice: row?.harga_up || 0,
-                                        id: row?.id || '',
-                                        image: row?.image || '',
-                                        notes: row?.keterangan || '',
-                                        commission: row?.komisi || 0,
-                                        name: row?.nama || '',
-                                        status: row?.status,
-                                      });
-                                      handleClickOpen();
+                                      const response = await dispatch(
+                                        getProductsGroupListFormData(row?.category_id || ''),
+                                      );
+                                      if (response) {
+                                        setEditForm(true);
+                                        reset({
+                                          adminNominal: row?.admin_nominal || 0,
+                                          selectedAdminType: row?.admin_type_id ? `${row?.admin_type_id}` : '1',
+                                          billerProductId: row?.product_biller_id || '',
+                                          selectedBiller: row?.biller_id ? `${row?.biller_id}` : '',
+                                          selectedProductGroup: row?.group_id || '',
+                                          denom: row?.denom || 0,
+                                          buyPrice: row?.harga_beli || 0,
+                                          upPrice: row?.harga_up || 0,
+                                          id: row?.id || '',
+                                          image: row?.image || '',
+                                          notes: row?.keterangan || '',
+                                          commission: row?.komisi || 0,
+                                          name: row?.nama || '',
+                                          status: row?.status,
+                                        });
+                                        handleClickOpen();
+                                      }
                                     }}
                                     size="small"
                                     aria-label="edit"
@@ -967,7 +970,7 @@ const Products = () => {
                               {...field}
                               onChange={(e) => {
                                 field.onChange(e);
-                                handleGetProductsGroupList(e.target.value);
+                                dispatch(getProductsGroupListFormData(e.target.value));
                                 setValue('selectedProductGroup', '');
                               }}
                             >
@@ -993,20 +996,20 @@ const Products = () => {
                           <FormControl error={!!errors.selectedProductGroup} required fullWidth>
                             <Select input={<OutlinedInput />} fullWidth id="product-group-select" {...field}>
                               <MenuItem disabled value="">
-                                <em>{loadingGroupProductList ? 'Loading' : 'Choose product group'}</em>
+                                <em>{loadingList ? 'Loading' : 'Choose product group'}</em>
                               </MenuItem>
-                              {productGroupNewFormList?.map((type) => (
+                              {productGroupFormList?.map((type) => (
                                 <MenuItem key={type?.id} value={type?.id}>
                                   {type?.name}
                                 </MenuItem>
                               ))}
                             </Select>
                             <FormHelperText>
-                              {loadingGroupProductList
+                              {loadingList
                                 ? 'Loading'
-                                : productCategory && productGroupNewFormList?.length === 0
+                                : productCategory && productGroupFormList?.length === 0
                                 ? 'Pilihan Kategori Produk tidak tersedia'
-                                : !errors?.selectedProductGroup?.message && productGroupNewFormList?.length === 0
+                                : !errors?.selectedProductGroup?.message && productGroupFormList?.length === 0
                                 ? 'Diharuskan memilih Kategori Produk terlebih dahulu'
                                 : errors?.selectedProductGroup?.message}
                             </FormHelperText>
@@ -1030,7 +1033,7 @@ const Products = () => {
                             {...field}
                             placeholder="Choose product group"
                           >
-                            {productGroupList?.map((type) => (
+                            {productGroupFormList?.map((type) => (
                               <MenuItem key={type?.id} value={type?.id}>
                                 {type?.name}
                               </MenuItem>
