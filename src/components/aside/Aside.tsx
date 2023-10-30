@@ -3,6 +3,8 @@ import { Button, Chip, Typography } from '@mui/material';
 import { FC, SyntheticEvent, useRef, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from '../accordion/Accordion';
 
+const MODE = import.meta.env.VITE_MODE;
+
 type AsideProps = {
   setOpenAside: (value: boolean) => void;
   openAside: boolean;
@@ -36,7 +38,7 @@ const Aside: FC<AsideProps> = ({ openAside, setOpenAside }) => {
               className="w-32 h-16 mb-8"
             />
             <section className="flex flex-col gap-6 items-start">
-              <Chip label="Development" color="info" size="small" variant="filled" />
+              {MODE !== 'PROD' && <Chip label="Development" color="info" size="small" variant="filled" />}
               <Button startIcon={<Add />} color="success" fullWidth variant="contained" className="w-auto">
                 Add Sender
               </Button>
