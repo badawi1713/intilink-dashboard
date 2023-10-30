@@ -7,6 +7,7 @@ import masterBillerReducer from './masters-reducer/biller-reducer';
 import masterUsersReducer from './masters-reducer/users-reducer';
 import masterPaymentMethodsReducer from './masters-reducer/payment-methods-reducer';
 import masterSettingFeeUplineReducer from './masters-reducer/setting-fee-upline-reducer';
+import banksReducer from './masters-reducer/banks-reducer';
 
 import toastMessageReducer from '../slices/toast-message-slice';
 
@@ -21,6 +22,7 @@ import pointMutationReducer from '../slices/mutation-slice/point-mutation-slice'
 import pointExchangeProductsReducer from './point-exchange-reducer/point-exchange-products-reducer';
 
 const reducers = {
+  banksReducer,
   pointExchangeProductsReducer,
   masterSettingFeeUplineReducer,
   masterPaymentMethodsReducer,
