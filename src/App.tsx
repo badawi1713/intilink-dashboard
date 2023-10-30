@@ -17,6 +17,7 @@ import PaymentMethods from './pages/apps/master-ppob/pages/payment-methods';
 import SettingFeeUpline from './pages/apps/master-ppob/pages/setting-fee-upline';
 import { PointMutation, SaldoMutation } from './pages/apps/mutation';
 import { PointExchangeProducts } from './pages/apps/point-exchange';
+import MasterBank from './pages/apps/master-ppob/pages/master-bank';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -57,6 +58,7 @@ const App: FC = () => {
           <Route path="master/ppob">
             <Route index element={<Navigate to="product-category" replace />} />
             <Route path="product-category" element={<ProductCategory />} />
+            <Route path="tf-bank" element={<MasterBank />} />
             <Route path="products" element={<Products />} />
             <Route path="cara-bayar" element={<PaymentMethods />} />
             <Route path="product-group">
