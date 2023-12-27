@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { yupResolver } from '@hookform/resolvers/yup';
 import { BrokenImage, Delete, Edit, ImageSearchOutlined } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -118,6 +116,7 @@ interface Data {
   banner: boolean;
   status: boolean;
   index: number;
+  saldo: boolean;
 }
 
 function createData(
@@ -130,6 +129,7 @@ function createData(
   nama: string,
   banner: boolean,
   status: boolean,
+  saldo: boolean,
   index: number,
 ): Data {
   return {
@@ -142,6 +142,7 @@ function createData(
     nama,
     banner,
     status,
+    saldo,
     index,
   };
 }
@@ -168,6 +169,13 @@ const headCells: readonly HeadCell[] = [
     disablePadding: false,
     label: 'Product',
     disableSort: false,
+  },
+  {
+    id: 'saldo',
+    disablePadding: false,
+    label: 'Saldo',
+    align: 'center',
+    disableSort: true,
   },
   {
     id: 'image',
@@ -274,6 +282,7 @@ type FormType = {
   commission: number;
   name: string;
   banner: boolean;
+  saldo: boolean;
   status: boolean;
 };
 
@@ -305,6 +314,7 @@ const Products = () => {
       name: '',
       banner: false,
       status: true,
+      saldo: false,
     },
     resolver: yupResolver(productsSchema),
   });
@@ -333,6 +343,7 @@ const Products = () => {
       name: '',
       banner: false,
       status: true,
+      saldo: false,
     });
   };
 
@@ -351,6 +362,7 @@ const Products = () => {
     form.append('banner', `${formData.banner}`);
     form.append('status', `${formData.status ? 1 : 0}`);
     form.append('id', formData.id);
+    form.append('saldo', `${formData.saldo}`);
 
     if (formData?.image && formData?.image instanceof Blob) {
       if (formData?.image?.size > 1048576) {
@@ -427,6 +439,7 @@ const Products = () => {
       row?.nama,
       row?.banner,
       row?.status,
+      row?.saldo,
       index,
     ),
   );
@@ -561,13 +574,20 @@ const Products = () => {
                           </TableCell>
                           <TableCell align="left">{row.nama || '-'}</TableCell>
                           <TableCell align="center">
+                            {row.saldo ? (
+                              <CheckCircleIcon titleAccess="Aktif" fontSize="small" color="success" />
+                            ) : (
+                              <CancelIcon titleAccess="Tidak Aktif" fontSize="small" color="error" />
+                            )}
+                          </TableCell>
+                          <TableCell align="center">
                             <Tooltip title={row?.image ? 'Preview' : 'No Image'}>
                               <span>
                                 <IconButton
                                   disabled={!row?.image}
                                   onClick={() => {
                                     setOpenImagePreview(true);
-                                    setSelectedImagePreview(`${import.meta.env.VITE_IMAGE_URL + row.image}`);
+                                    setSelectedImagePreview(`${import.meta.env.VITE_IMAGE_URL}${row.image}`);
                                   }}
                                   size="small"
                                   aria-label="preview"
@@ -635,6 +655,7 @@ const Products = () => {
                                         name: row?.nama || '',
                                         banner: !!row?.banner,
                                         status: !!row?.status,
+                                        saldo: !!row?.saldo,
                                       });
                                       handleClickOpen();
                                     }}
@@ -772,7 +793,7 @@ const Products = () => {
                           <a
                             href={
                               typeof productImage === 'string'
-                                ? `${import.meta.env.VITE_IMAGE_URL + productImage}`
+                                ? `${import.meta.env.VITE_IMAGE_URL}${productImage}`
                                 : productImage
                                 ? URL.createObjectURL(productImage)
                                 : ''
@@ -784,7 +805,7 @@ const Products = () => {
                             <img
                               src={
                                 typeof productImage === 'string'
-                                  ? `${import.meta.env.VITE_IMAGE_URL + productImage}`
+                                  ? `${import.meta.env.VITE_IMAGE_URL}${productImage}`
                                   : productImage
                                   ? URL.createObjectURL(productImage)
                                   : ''
@@ -822,6 +843,27 @@ const Products = () => {
               </div>
 
               <div className="flex flex-col lg:flex-row items-stretch gap-4 w-full">
+                <Controller
+                  control={control}
+                  name="saldo"
+                  render={({ field: { onChange, value } }) => (
+                    <div className="flex flex-col gap-3">
+                      <label className="text-sm font-semibold">Saldo</label>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={value || false}
+                            onChange={(e) => {
+                              onChange(e.target.checked);
+                            }}
+                            name="saldo"
+                          />
+                        }
+                        label={value ? 'PRODUK SALDO' : 'PRODUK NON-SALDO'}
+                      />
+                    </div>
+                  )}
+                />
                 <Controller
                   control={control}
                   name="banner"
