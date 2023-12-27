@@ -3,30 +3,28 @@ import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { useAppSelector } from '../../hooks/useAppSelector';
 import { loginUserAction } from '../../store/actions/auth-action';
 
 const loginSchema = yup.object().shape({
-  id: yup.string().required('Email is required'),
-  password: yup.string().required('Password is required'),
+  id: yup.string().required('Diharuskan untuk mengisi email/no. telepon'),
+  password: yup.string().required('Diharuskan untuk mengisi password'),
 });
 const Login = () => {
-  // const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.authReducer);
   const formMethods = useForm({
     mode: 'onChange',
     defaultValues: { id: '', password: '' },
     resolver: yupResolver(loginSchema),
   });
 
-  // const [showPassword, setShowPassword] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+  } = formMethods;
 
-  const { control, handleSubmit } = formMethods;
-  // const { errors } = formState;
-
-  const onSubmit = handleSubmit((data) => {
-    dispatch(loginUserAction(data));
+  const onSubmit = handleSubmit(async (data) => {
+    await dispatch(loginUserAction(data));
   });
 
   return (
@@ -58,6 +56,7 @@ const Login = () => {
                     className="w-full rounded-md px-3 py-2 border-2 border-gray-600"
                     placeholder="Email/No. Telepon"
                   />
+                  {errors?.id && <p className="text-red-600 text-sm">{errors?.id?.message}</p>}
                 </div>
               )}
             />
@@ -73,16 +72,17 @@ const Login = () => {
                     placeholder="Password"
                     type="password"
                   />
+                  {errors?.password && <p className="text-red-600 text-sm">{errors?.password?.message}</p>}
                 </div>
               )}
             />
 
             <button
-              disabled={loading}
+              disabled={isSubmitting}
               type="submit"
-              className="w-full bg-green-600 border-2 border-green-600 px-3 py-2 rounded-md text-white text-center text-sm font-semibold"
+              className="w-full bg-green-600 border-2 border-green-600 disabled:bg-gray-600 disabled:border-gray-600 px-3 py-2 rounded-md text-white text-center text-sm font-semibold"
             >
-              Login
+              {isSubmitting ? 'Memproses' : 'Login'}
             </button>
           </form>
 
