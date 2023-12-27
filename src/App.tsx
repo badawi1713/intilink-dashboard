@@ -21,7 +21,7 @@ import MasterBank from './pages/apps/master-ppob/pages/master-bank';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
-  const { loading, user, preload } = useAppSelector((state) => state.authReducer);
+  const { user, preload } = useAppSelector((state) => state.authReducer);
   const navigate = useNavigate();
   const isMounted = useRef<boolean>(true);
 
@@ -44,7 +44,7 @@ const App: FC = () => {
       }),
   );
 
-  if (loading || preload) {
+  if (preload) {
     return <SplashScreen />;
   }
 

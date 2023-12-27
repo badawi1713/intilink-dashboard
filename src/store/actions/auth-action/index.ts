@@ -27,9 +27,8 @@ const loginUserAction =
       },
     });
     try {
-      const response = await axios.post(MODE === 'PROD' ? '/v1/api/dashboard/auth' : '/v1/api/authenticate', payload);
-      const jwt = (await response.data.data.jwt) || '';
-      axios.defaults.headers.common.Authorization = `Bearer ${jwt}`;
+      const response = await axios.post(MODE === 'PROD' ? '/v1/api/dashboard/auth' : '/v1/api/dashboard/auth', payload);
+      const jwt = response.data.data.jwt || '';
       updateAccessToken(jwt);
       dispatch({
         type: REDUCER_TYPES.SET_AUTH_REDUCER,
