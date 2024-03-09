@@ -79,6 +79,7 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
 
 interface Data {
   id: number;
+  user_id: string;
   denom: number;
   type: string;
   status: string;
@@ -96,6 +97,7 @@ interface Data {
 
 function createData(
   id: number,
+  user_id: string,
   denom: number,
   type: string,
   status: string,
@@ -112,6 +114,7 @@ function createData(
 ): Data {
   return {
     id,
+    user_id,
     denom,
     type,
     status,
@@ -144,6 +147,12 @@ const headCells: readonly HeadCell[] = [
     disablePadding: true,
     label: 'ID',
     align: 'center',
+    disableSort: false,
+  },
+  {
+    id: 'user_id',
+    disablePadding: false,
+    label: 'User',
     disableSort: false,
   },
   {
@@ -255,7 +264,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
               <TableSortLabel
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={() => createSortHandler(headCell.id)}
+                onClick={createSortHandler(headCell.id)}
               >
                 {headCell.label}
                 {!headCell.disableSort && orderBy === headCell.id ? (
@@ -326,6 +335,7 @@ const Transactions = () => {
   const rows = data?.map((row: Data, index) =>
     createData(
       row?.id,
+      row?.user_id,
       row?.denom,
       row?.type,
       row?.status,
@@ -431,6 +441,7 @@ const Transactions = () => {
                           <TableCell align="center" component="th" id={labelId} scope="row">
                             {row.id}
                           </TableCell>
+                          <TableCell align="left">{row.user_id || '-'}</TableCell>
                           <TableCell align="left">{currencyFormat(row.denom ?? 0)}</TableCell>
                           <TableCell align="center">{row.type || '-'}</TableCell>
                           <TableCell align="center">{row.status || '-'}</TableCell>
