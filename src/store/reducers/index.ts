@@ -21,6 +21,8 @@ import pointMutationReducer from '../slices/mutation-slice/point-mutation-slice'
 
 import pointExchangeProductsReducer from './point-exchange-reducer/point-exchange-products-reducer';
 
+import bannerReducer from './masters-reducer/banner-reducer';
+
 const reducers = {
   banksReducer,
   pointExchangeProductsReducer,
@@ -40,6 +42,7 @@ const reducers = {
   masterBillerReducer,
   transactionAdjustSaldoReducer,
   pointMutationReducer,
+  bannerReducer,
 };
 
 export default reducers;
