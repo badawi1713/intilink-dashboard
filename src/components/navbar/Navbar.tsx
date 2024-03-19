@@ -76,7 +76,7 @@ const Navbar: FC<NavbarProps> = (props) => {
               );
             })}
         </section>
-        <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-2xl snap-x snap-mandatory">
+        <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-5xl snap-x snap-mandatory">
           {typeof childrenMenu === 'object' &&
             childrenMenu?.length > 0 &&
             childrenMenu?.map((menu: MenuType) => {
@@ -99,7 +99,7 @@ const Navbar: FC<NavbarProps> = (props) => {
               );
             })}
         </section>
-        <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-2xl snap-x snap-mandatory">
+        <section className="flex overflow-hidden hover:overflow-auto w-full max-w-[70%] flex-shrink md:max-w-full xl:max-w-5xl snap-x snap-mandatory">
           {typeof subChildrenMenu === 'object' &&
             subChildrenMenu?.length > 0 &&
             subChildrenMenu?.map((menu: MenuType) => {
